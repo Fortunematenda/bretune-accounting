@@ -1,0 +1,1539 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ENUMS
+enum UserRole {
+  ADMIN
+  MANAGER
+  ACCOUNTANT
+}
+
+enum ClientType {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum ClientTaxType {
+  NONE
+  VAT_REGISTERED
+  VAT_EXEMPT
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum SupplierStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  VOIDED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CREDIT_CARD
+  DEBIT_CARD
+  CHECK
+  ONLINE
+  CREDIT_NOTE
+}
+
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  BI_WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum TaxType {
+  PERCENTAGE
+  FIXED
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum JobRunStatus {
+  SUCCESS
+  FAILED
+}
+
+enum DocumentType {
+  INVOICE
+  STATEMENT
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ON_HOLD
+  CANCELLED
+}
+
+enum BillStatus {
+  DRAFT
+  OPEN
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+ enum LedgerAccountType {
+   ASSET
+   LIABILITY
+   EQUITY
+   INCOME
+   EXPENSE
+ }
+
+ enum JournalEntryStatus {
+   DRAFT
+   PENDING_APPROVAL
+   POSTED
+   REVERSED
+ }
+
+enum JournalSourceType {
+  INVOICE
+  PAYMENT
+  BILL
+  SUPPLIER_PAYMENT
+  EXPENSE
+  LOAN
+  LOAN_REPAYMENT
+  MANUAL
+}
+
+enum TaskType {
+  GENERAL
+  FINANCE
+  CLIENT
+  PROJECT
+  SUPPORT
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskActivityAction {
+  CREATED
+  UPDATED
+  STATUS_CHANGED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+  ASSIGNED
+  DELETED
+}
+
+enum TaskNotificationType {
+  REMINDER
+  OVERDUE
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+// RBAC
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isSystem    Boolean  @default(false)
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+  users           User[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  description String?
+  module      String
+  createdAt   DateTime @default(now())
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// MODELS
+model Company {
+  id                 String             @id @default(cuid())
+  name               String             @unique
+  trialEndsAt        DateTime?
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  baseCurrencyCode   String             @default("ZAR")
+  stripeCustomerId   String?            // Stripe customer ID for billing
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  users              User[]
+  subscriptions      CompanySubscription[]
+  entities           AccountingEntity[]
+
+  @@map("companies")
+}
+
+model AccountingEntity {
+  id          String   @id @default(cuid())
+  companyId   String
+  code        String
+  name        String
+  baseCurrencyCode String @default("ZAR")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, code])
+  @@map("accounting_entities")
+}
+
+model Currency {
+  code   String @id
+  name   String
+  symbol String?
+  decimals Int  @default(2)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ratesFrom ExchangeRate[] @relation("FromCurrency")
+  ratesTo   ExchangeRate[] @relation("ToCurrency")
+
+  @@map("currencies")
+}
+
+model ExchangeRate {
+  id            String   @id @default(cuid())
+  fromCurrencyCode String
+  toCurrencyCode   String
+  rate          Decimal  @db.Decimal(18, 8)
+  asOfDate      DateTime
+  source        String?  // e.g. "MANUAL", "API"
+  createdAt     DateTime @default(now())
+
+  fromCurrency Currency @relation("FromCurrency", fields: [fromCurrencyCode], references: [code], onDelete: Cascade)
+  toCurrency   Currency @relation("ToCurrency", fields: [toCurrencyCode], references: [code], onDelete: Cascade)
+
+  @@unique([fromCurrencyCode, toCurrencyCode, asOfDate])
+  @@index([fromCurrencyCode, toCurrencyCode])
+  @@map("exchange_rates")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  action     String   // CREATED, UPDATED, DELETED, APPROVED, etc.
+  userId     String?
+  changedAt  DateTime @default(now())
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?
+  userAgent  String?
+
+  @@index([entityType, entityId])
+  @@index([changedAt])
+  @@map("audit_logs")
+}
+
+model SubscriptionPlan {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  price       Decimal  @db.Decimal(10, 2)
+  billingCycle String  @default("monthly")
+  featuresJson Json?
+  isActive    Boolean  @default(true)
+  stripePriceId String?  // Stripe Price ID for checkout
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  companySubscriptions CompanySubscription[]
+
+  @@map("subscription_plans")
+}
+
+model CompanySubscription {
+  id                   String             @id @default(cuid())
+  companyId            String
+  planId               String?
+  status               SubscriptionStatus @default(TRIAL)
+  trialEndsAt          DateTime?
+  subscriptionEndsAt   DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  company Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plan    SubscriptionPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@unique([companyId])
+  @@index([companyId])
+  @@index([status])
+  @@map("company_subscriptions")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  userNumber Int     @unique @default(autoincrement())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  companyName String?
+  companyId String?
+  role      UserRole @default(ACCOUNTANT)
+  roleId    String?
+  isActive  Boolean  @default(true)
+  refreshToken String?
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  roleRef Role? @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  // Relations
+  createdInvoices Invoice[]
+  createdQuotes   Quote[]
+  createdPayments Payment[]
+  createdRecurringInvoices RecurringInvoice[]
+  passwordResets  PasswordReset[]
+  createdBills Bill[]
+  supplierPayments SupplierPayment[]
+  expenses    Expense[]
+  createdTasks Task[]
+  assignedTasks Task[] @relation("TaskAssignedToUser")
+  taskActivities TaskActivity[]
+  taskNotifications TaskNotification[]
+  journalEntries JournalEntry[]
+  approvedJournalEntries JournalEntry[] @relation("JournalEntryApprovedBy")
+  businessBankAccounts BusinessBankAccount[]
+  loans Loan[]
+
+  @@index([roleId])
+  @@index([companyId])
+  @@map("users")
+}
+
+model Employee {
+  id            String   @id @default(cuid())
+  employeeNumber Int     @unique @default(autoincrement())
+  email         String?  @unique
+  firstName     String
+  lastName      String
+  phone         String?
+  title         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  assignedTasks Task[] @relation("TaskAssignedToEmployee")
+  payRunLines   PayRunLine[]
+
+  @@index([isActive])
+  @@index([email])
+  @@map("employees")
+}
+
+model Client {
+  id          String        @id @default(cuid())
+  clientSeq   Int           @unique @default(autoincrement())
+  type        ClientType    @default(COMPANY)
+  companyName String?
+  contactName String
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  state       String?
+  country     String?
+  postalCode  String?
+  taxType     ClientTaxType @default(NONE)
+  taxNumber   String?
+  status      ClientStatus  @default(ACTIVE)
+  paymentTermsDays Int      @default(30)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Financial fields
+  openingBalance  Decimal @default(0.00) @db.Decimal(10, 2)
+  creditBalance   Decimal @default(0.00) @db.Decimal(10, 2)
+  balance         Decimal @default(0.00) @db.Decimal(10, 2)
+  creditLimit     Decimal @default(0.00) @db.Decimal(10, 2)
+  totalInvoiced   Decimal @default(0.00) @db.Decimal(10, 2)
+  totalPaid       Decimal @default(0.00) @db.Decimal(10, 2)
+
+  // Multi-tenant: accounting firm that owns this client record
+  ownerCompanyName String?
+
+  // Relations
+  invoices          Invoice[]
+  quotes            Quote[]
+  payments          Payment[]
+  recurringInvoices RecurringInvoice[]
+  emailOutbox        EmailOutbox[]
+  projects          Project[]
+  bills             Bill[]
+  tasks             Task[]
+  documents         CustomerDocument[]
+  loans             Loan[]
+
+  @@index([email])
+  @@index([status])
+  @@index([ownerCompanyName])
+
+  @@map("customers")
+}
+
+model CustomerDocument {
+  id             String   @id @default(cuid())
+  clientId        String
+  originalName    String
+  description     String?
+  mimeType        String
+  size            Int
+  storageKey      String
+  uploadedByUserId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([createdAt])
+  @@map("customer_documents")
+}
+
+model Supplier {
+  id            String         @id @default(cuid())
+  supplierSeq   Int            @unique @default(autoincrement())
+  supplierName  String
+  companyName   String?
+  contactPerson String?
+  email         String?        @unique
+  phone         String?        @unique
+  address       String?
+  taxNumber     String?
+  paymentTermsDays Int         @default(30)
+  status        SupplierStatus @default(ACTIVE)
+  notes         String?
+  totalBilled   Decimal        @default(0.00) @db.Decimal(12, 2)
+  totalPaid     Decimal        @default(0.00) @db.Decimal(12, 2)
+  outstandingBalance Decimal   @default(0.00) @db.Decimal(12, 2)
+  creditBalance Decimal        @default(0.00) @db.Decimal(12, 2)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Multi-tenant: accounting firm that owns this supplier
+  ownerCompanyName String?
+
+  // Relations
+  bills             Bill[]
+  supplierPayments   SupplierPayment[]
+  expenses          Expense[]
+
+  @@index([supplierName])
+  @@index([status])
+  @@index([email])
+  @@index([ownerCompanyName])
+  @@map("suppliers")
+}
+
+enum ExpenseStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REIMBURSED
+}
+
+model ExpenseCategory {
+  id             String   @id @default(cuid())
+  name           String
+  defaultTaxRate Decimal  @default(0.00) @db.Decimal(5, 4)
+  ledgerAccount  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  expenses Expense[]
+
+  @@index([name])
+  @@map("expense_categories")
+}
+
+model Expense {
+  id             String         @id @default(cuid())
+  expenseSeq     Int            @unique @default(autoincrement())
+  expenseDate    DateTime       @default(now())
+  description    String?
+  amount         Decimal        @db.Decimal(10, 2)
+  taxRate        Decimal        @default(0.00) @db.Decimal(5, 4)
+  taxAmount      Decimal        @default(0.00) @db.Decimal(10, 2)
+  totalAmount    Decimal        @db.Decimal(10, 2)
+  status         ExpenseStatus  @default(DRAFT)
+  paymentMethod  String?
+  notes          String?
+  supplierId     String?
+  categoryId     String?
+  userId         String
+  journalEntryId String?       @unique
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  supplier      Supplier?        @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  category      ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  user          User             @relation(fields: [userId], references: [id])
+  journalEntry  JournalEntry?    @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+
+  @@index([expenseDate])
+  @@index([status])
+  @@index([supplierId])
+  @@index([categoryId])
+  @@index([userId])
+  @@index([journalEntryId])
+  @@map("expenses")
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  projectNumber Int           @unique @default(autoincrement())
+  name          String
+  description   String?
+  status        ProjectStatus @default(ACTIVE)
+  startDate     DateTime?
+  endDate       DateTime?
+  clientId      String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  tasks  Task[]
+
+  @@index([clientId])
+  @@index([status])
+  @@map("projects")
+}
+
+model Bill {
+  id          String     @id @default(cuid())
+  billNumber  Int        @unique @default(autoincrement())
+  reference   String?
+  vendorName  String
+  description String?
+  billDate    DateTime   @default(now())
+  dueDate     DateTime?
+  status      BillStatus @default(UNPAID)
+  totalAmount Decimal    @db.Decimal(10, 2)
+  amountPaid  Decimal    @default(0.00) @db.Decimal(10, 2)
+  balanceDue  Decimal    @default(0.00) @db.Decimal(10, 2)
+  paidDate    DateTime?
+  journalEntryId String?  @unique
+  clientId    String?
+  supplierId  String?
+  userId      String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  supplier Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  user   User    @relation(fields: [userId], references: [id])
+  journalEntry JournalEntry? @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+  tasks  Task[]
+  allocations SupplierPaymentAllocation[]
+
+  @@index([clientId])
+  @@index([supplierId])
+  @@index([userId])
+  @@index([status])
+  @@index([billDate])
+  @@index([journalEntryId])
+  @@map("bills")
+}
+
+model SupplierPayment {
+  id              String        @id @default(cuid())
+  paymentNumber   String        @unique
+  supplierId      String
+  userId          String
+  amount          Decimal       @db.Decimal(10, 2)
+  unallocatedAmount Decimal     @default(0.00) @db.Decimal(10, 2)
+  status          PaymentStatus @default(PENDING)
+  method          PaymentMethod
+  reference       String?
+  notes           String?
+  paymentDate     DateTime      @default(now())
+  processedAt     DateTime?
+  voidedAt        DateTime?
+  voidReason      String?
+  journalEntryId  String?       @unique
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  journalEntry JournalEntry? @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+  allocations SupplierPaymentAllocation[]
+
+  @@index([supplierId])
+  @@index([paymentDate])
+  @@index([journalEntryId])
+  @@map("supplier_payments")
+}
+
+model SupplierPaymentAllocation {
+  id        String   @id @default(cuid())
+  paymentId String
+  billId    String
+  amount    Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  payment SupplierPayment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  bill    Bill            @relation(fields: [billId], references: [id], onDelete: Cascade)
+
+  @@unique([paymentId, billId])
+  @@index([paymentId])
+  @@index([billId])
+  @@map("supplier_payment_allocations")
+}
+
+ model LedgerAccount {
+   id        String            @id @default(cuid())
+   code      String            @unique
+   name      String
+   type      LedgerAccountType
+   isSystem  Boolean           @default(true)
+   isActive  Boolean           @default(true)
+   createdAt DateTime          @default(now())
+   updatedAt DateTime          @updatedAt
+
+   lines JournalLine[]
+
+   @@index([type])
+   @@index([isActive])
+   @@map("ledger_accounts")
+ }
+
+ model JournalEntry {
+   id              String            @id @default(cuid())
+   entryNumber     String            @unique
+   date            DateTime          @default(now())
+   memo            String?
+   sourceType      JournalSourceType?
+   sourceId        String?
+   status          JournalEntryStatus @default(POSTED)
+   reversedAt      DateTime?
+   reversedEntryId String?           @unique
+   createdByUserId String
+   approvedByUserId String?
+   approvedAt     DateTime?
+   createdAt       DateTime          @default(now())
+   updatedAt       DateTime          @updatedAt
+
+   reversedEntry JournalEntry? @relation("JournalEntryReversal", fields: [reversedEntryId], references: [id], onDelete: SetNull)
+   originalEntry JournalEntry? @relation("JournalEntryReversal")
+   createdBy     User         @relation(fields: [createdByUserId], references: [id])
+   approvedBy    User?        @relation("JournalEntryApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+   lines         JournalLine[]
+   bill          Bill?
+   supplierPayment SupplierPayment?
+   invoice       Invoice?
+   payment       Payment?
+   expense       Expense?
+   loan          Loan?
+   loanRepayment LoanRepayment?
+
+   @@index([date])
+   @@index([sourceType, sourceId])
+   @@index([status])
+   @@index([createdByUserId])
+   @@map("journal_entries")
+ }
+
+ model JournalLine {
+   id                   String       @id @default(cuid())
+   entryId              String
+   accountId            String
+   debit                Decimal      @default(0.00) @db.Decimal(12, 2)
+   credit               Decimal      @default(0.00) @db.Decimal(12, 2)
+   foreignAmount        Decimal?     @db.Decimal(12, 2)
+   foreignCurrencyCode  String?
+   memo                 String?
+   createdAt            DateTime     @default(now())
+
+   entry   JournalEntry  @relation(fields: [entryId], references: [id], onDelete: Cascade)
+   account LedgerAccount @relation(fields: [accountId], references: [id])
+   reconciliationMatches BankReconciliationMatch[]
+
+   @@index([entryId])
+   @@index([accountId])
+   @@map("journal_lines")
+ }
+
+ enum BankReconciliationStatus {
+   DRAFT
+   COMPLETED
+ }
+
+ model BankReconciliation {
+   id              String                   @id @default(cuid())
+   accountCode     String                   // Ledger account code (e.g. 1000 for Bank)
+   bankAccountId   String?                  // Optional link to BusinessBankAccount
+   statementDate   DateTime
+   openingBalance  Decimal                 @db.Decimal(12, 2)
+   closingBalance  Decimal                 @db.Decimal(12, 2)
+   status          BankReconciliationStatus @default(DRAFT)
+   closedAt        DateTime?
+   closedByUserId  String?
+   createdByUserId String
+   createdAt       DateTime                @default(now())
+   updatedAt       DateTime                @updatedAt
+
+   bankAccount   BusinessBankAccount? @relation(fields: [bankAccountId], references: [id], onDelete: SetNull)
+   statementLines BankStatementLine[]
+   matches       BankReconciliationMatch[]
+
+   @@index([bankAccountId])
+   @@index([accountCode])
+   @@index([statementDate])
+   @@index([status])
+   @@map("bank_reconciliations")
+ }
+
+ model BankStatementLine {
+   id               String    @id @default(cuid())
+   reconciliationId String
+   lineDate         DateTime
+   description      String?
+   reference        String?
+   amount           Decimal   @db.Decimal(12, 2)  // + deposit, - withdrawal
+   createdAt        DateTime @default(now())
+
+   reconciliation BankReconciliation @relation(fields: [reconciliationId], references: [id], onDelete: Cascade)
+   matches       BankReconciliationMatch[]
+
+   @@index([reconciliationId])
+   @@map("bank_statement_lines")
+ }
+
+ model BankReconciliationMatch {
+   id               String   @id @default(cuid())
+   reconciliationId String
+   statementLineId  String
+   journalLineId    String
+   createdAt        DateTime @default(now())
+
+   reconciliation BankReconciliation @relation(fields: [reconciliationId], references: [id], onDelete: Cascade)
+   statementLine  BankStatementLine @relation(fields: [statementLineId], references: [id], onDelete: Cascade)
+   journalLine    JournalLine       @relation(fields: [journalLineId], references: [id], onDelete: Cascade)
+
+  @@unique([reconciliationId, statementLineId, journalLineId])
+  @@index([reconciliationId])
+  @@index([journalLineId])
+  @@map("bank_reconciliation_matches")
+ }
+
+ model BusinessBankAccount {
+   id                String   @id @default(cuid())
+   bankName          String   // e.g. "First National Bank"
+   accountName       String   // e.g. "Business Operating"
+   accountNumber     String?  // Last 4 digits or masked
+   accountHolder     String?
+   branchCode        String?
+   currency          String   @default("ZAR")
+   openingBalance    Decimal  @default(0) @db.Decimal(15, 2)
+   ledgerAccountCode String   @default("1000") // Links to LedgerAccount (Bank)
+   isActive          Boolean  @default(true)
+   ownerCompanyName  String?
+   createdByUserId   String
+   createdAt         DateTime @default(now())
+   updatedAt         DateTime @updatedAt
+
+   createdBy      User              @relation(fields: [createdByUserId], references: [id])
+   reconciliations BankReconciliation[]
+   transactions   BankTransaction[]
+
+   @@index([ownerCompanyName])
+   @@index([ledgerAccountCode])
+   @@map("business_bank_accounts")
+ }
+
+ model BankTransaction {
+   id              String    @id @default(cuid())
+   bankAccountId   String
+   transactionDate DateTime
+   description     String?
+   reference       String?
+   debit           Decimal?  @db.Decimal(15, 2)
+   credit          Decimal?  @db.Decimal(15, 2)
+   amount          Decimal   @db.Decimal(15, 2)  // signed: + deposit, - withdrawal
+   balance         Decimal?  @db.Decimal(15, 2)
+   hash            String   // md5(date + amount + description) for duplicate prevention
+   isReconciled    Boolean   @default(false)
+   matchedType     String?   // invoice, bill, expense, journal, transfer
+   matchedId       String?
+   ownerCompanyName String?
+   createdAt       DateTime  @default(now())
+   updatedAt       DateTime  @updatedAt
+
+   bankAccount BusinessBankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+
+   @@unique([bankAccountId, hash])
+   @@index([bankAccountId])
+   @@index([transactionDate])
+   @@index([isReconciled])
+   @@index([ownerCompanyName])
+   @@map("bank_transactions")
+ }
+
+ enum AccountingPeriodStatus {
+   OPEN
+   CLOSED
+ }
+
+ model AccountingPeriod {
+   id        String                 @id @default(cuid())
+   startDate DateTime
+   endDate   DateTime
+   status    AccountingPeriodStatus @default(OPEN)
+   closedAt  DateTime?
+   closedByUserId String?
+   name      String?                // e.g. "January 2025"
+   createdAt DateTime              @default(now())
+   updatedAt DateTime              @updatedAt
+
+   @@unique([startDate, endDate])
+   @@index([status])
+   @@map("accounting_periods")
+ }
+
+ enum RecurringJournalFrequency {
+   MONTHLY
+   QUARTERLY
+   YEARLY
+ }
+
+ model RecurringJournalEntry {
+   id          String                    @id @default(cuid())
+   name        String
+   memo        String?
+   frequency   RecurringJournalFrequency
+   nextRunDate DateTime
+   linesJson   Json                      // [{ accountCode, debit, credit }]
+   isActive    Boolean                   @default(true)
+   lastRunAt   DateTime?
+   createdByUserId String
+   createdAt   DateTime                 @default(now())
+   updatedAt   DateTime                 @updatedAt
+
+   @@index([isActive, nextRunDate])
+   @@map("recurring_journal_entries")
+ }
+
+model Product {
+  id             String   @id @default(cuid())
+  name           String
+  type           String   @default("PRODUCT")
+  description    String?
+  sku            String?  @unique
+  price          Decimal  @db.Decimal(10, 2)
+  cost           Decimal? @db.Decimal(10, 2)
+  taxRate        Decimal  @default(0.00) @db.Decimal(5, 4)
+  isRecurring    Boolean  @default(false)
+  recurringFrequency RecurringFrequency?
+  trackInventory Boolean  @default(false)
+  quantityOnHand Decimal  @default(0) @db.Decimal(12, 4)
+  reorderLevel   Decimal? @db.Decimal(12, 4)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Multi-tenant: accounting firm that owns this product
+  ownerCompanyName String?
+
+  // Relations
+  quoteItems       QuoteItem[]
+  invoiceItems     InvoiceItem[]
+  recurringInvoiceItems RecurringInvoiceItem[]
+  inventoryMovements   InventoryMovement[]
+
+  @@index([isActive])
+  @@index([isRecurring])
+  @@index([ownerCompanyName])
+
+  @@map("products")
+}
+
+enum InventoryMovementType {
+  PURCHASE
+  SALE
+  ADJUSTMENT
+  RETURN
+  TRANSFER
+}
+
+model InventoryMovement {
+  id         String               @id @default(cuid())
+  productId  String
+  type       InventoryMovementType
+  quantity   Decimal              @db.Decimal(12, 4)  // + in, - out
+  unitCost   Decimal?             @db.Decimal(10, 2)
+  reference  String?              // invoice id, bill id, etc.
+  referenceType String?            // INVOICE, BILL, ADJUSTMENT
+  notes      String?
+  createdAt  DateTime             @default(now())
+  userId     String?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("inventory_movements")
+}
+
+enum DepreciationMethod {
+  STRAIGHT_LINE
+  DECLINING_BALANCE
+}
+
+model FixedAsset {
+  id                String             @id @default(cuid())
+  name              String
+  description       String?
+  assetCode         String?
+  purchaseDate      DateTime
+  cost              Decimal            @db.Decimal(12, 2)
+  residualValue     Decimal            @default(0) @db.Decimal(12, 2)
+  usefulLifeYears   Int
+  depreciationMethod DepreciationMethod @default(STRAIGHT_LINE)
+  accumulatedDepreciation Decimal       @default(0) @db.Decimal(12, 2)
+  status            String             @default("ACTIVE")  // ACTIVE, DISPOSED
+  disposedAt        DateTime?
+  disposedAmount    Decimal?           @db.Decimal(12, 2)
+  journalEntryId    String?            @unique
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  depreciationRuns DepreciationRun[]
+
+  @@index([status])
+  @@map("fixed_assets")
+}
+
+model DepreciationRun {
+  id          String   @id @default(cuid())
+  assetId     String
+  runDate     DateTime
+  amount      Decimal  @db.Decimal(12, 2)
+  journalEntryId String?
+  createdAt   DateTime @default(now())
+
+  asset FixedAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId])
+  @@index([runDate])
+  @@map("depreciation_runs")
+}
+
+enum LoanStatus {
+  ACTIVE
+  PARTIALLY_REPAID
+  REPAID
+  WRITTEN_OFF
+}
+
+enum PayRunStatus {
+  DRAFT
+  PROCESSED
+  PAID
+  CANCELLED
+}
+
+model PayRun {
+  id          String        @id @default(cuid())
+  payPeriodStart DateTime
+  payPeriodEnd   DateTime
+  status      PayRunStatus  @default(DRAFT)
+  totalGross  Decimal       @default(0) @db.Decimal(12, 2)
+  totalNet    Decimal       @default(0) @db.Decimal(12, 2)
+  journalEntryId String?
+  processedAt DateTime?
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  lines PayRunLine[]
+
+  @@index([status])
+  @@index([payPeriodStart])
+  @@map("pay_runs")
+}
+
+model PayRunLine {
+  id        String   @id @default(cuid())
+  payRunId  String
+  employeeId String
+  grossPay  Decimal  @db.Decimal(12, 2)
+  deductions Decimal @default(0) @db.Decimal(12, 2)
+  netPay    Decimal  @db.Decimal(12, 2)
+  notes     String?
+
+  payRun   PayRun   @relation(fields: [payRunId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([payRunId])
+  @@index([employeeId])
+  @@map("pay_run_lines")
+}
+
+model Quote {
+  id           String       @id @default(cuid())
+  quoteSeq     Int          @unique @default(autoincrement())
+  quoteNumber  String       @unique
+  clientId     String
+  userId       String
+  status       QuoteStatus  @default(DRAFT)
+  issueDate    DateTime     @default(now())
+  expiryDate   DateTime
+  notes        String?
+  subtotal     Decimal      @db.Decimal(10, 2)
+  taxAmount    Decimal      @default(0.00) @db.Decimal(10, 2)
+  totalAmount  Decimal      @db.Decimal(10, 2)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relations
+  client   Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user     User        @relation(fields: [userId], references: [id])
+  items    QuoteItem[]
+  invoice  Invoice?    @relation("QuoteToInvoice")
+
+  @@index([clientId])
+  @@index([status])
+
+  @@map("quotes")
+}
+
+model QuoteItem {
+  id          String  @id @default(cuid())
+  quoteId     String
+  productId   String?
+  description String
+  quantity    Decimal @db.Decimal(10, 2)
+  unitPrice   Decimal @db.Decimal(10, 2)
+  discount    Decimal @default(0.00) @db.Decimal(5, 2)
+  taxRate     Decimal @default(0.00) @db.Decimal(5, 4)
+  total       Decimal @db.Decimal(10, 2)
+
+  // Relations
+  quote   Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+
+  @@map("quote_items")
+}
+
+model Invoice {
+  id            String         @id @default(cuid())
+  invoiceSeq    Int            @unique @default(autoincrement())
+  invoiceNumber String         @unique
+  clientId      String
+  userId        String
+  quoteId       String?        @unique
+  recurringInvoiceId String?
+  status        InvoiceStatus  @default(DRAFT)
+  issueDate     DateTime       @default(now())
+  dueDate       DateTime
+  paidDate      DateTime?
+  notes         String?
+  subtotal      Decimal        @db.Decimal(10, 2)
+  taxAmount     Decimal        @default(0.00) @db.Decimal(10, 2)
+  totalAmount   Decimal        @db.Decimal(10, 2)
+  amountPaid    Decimal        @default(0.00) @db.Decimal(10, 2)
+  balanceDue    Decimal        @db.Decimal(10, 2)
+  journalEntryId String?       @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Relations
+  client            Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  journalEntry      JournalEntry? @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+  user              User          @relation(fields: [userId], references: [id])
+  quote             Quote?        @relation("QuoteToInvoice", fields: [quoteId], references: [id])
+  items             InvoiceItem[]
+  payments          Payment[]
+  allocations       PaymentAllocation[]
+  recurringInvoice  RecurringInvoice? @relation(fields: [recurringInvoiceId], references: [id])
+  recurringRuns      RecurringInvoiceRun[]
+  emailOutbox        EmailOutbox[]
+  tasks             Task[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([journalEntryId])
+
+  @@map("invoices")
+}
+
+model TaskRecurrence {
+  id            String             @id @default(cuid())
+  frequency     RecurringFrequency
+  intervalValue Int                @default(1)
+  startDate     DateTime
+  endDate       DateTime?
+  lastGenerated DateTime?
+  nextRunDate   DateTime
+  isActive      Boolean            @default(true)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  tasks Task[]
+
+  @@index([isActive])
+  @@index([isActive, nextRunDate])
+  @@map("task_recurrences")
+}
+
+model Task {
+  id                String       @id @default(cuid())
+  taskSeq           Int          @unique @default(autoincrement())
+  title             String
+  description       String?
+  type              TaskType     @default(GENERAL)
+  priority          TaskPriority @default(MEDIUM)
+  status            TaskStatus   @default(PENDING)
+  dueDate           DateTime?
+  reminderEnabled   Boolean      @default(false)
+  reminderAt        DateTime?
+
+  isTemplate        Boolean      @default(false)
+  generatedFromTaskId String?
+
+  assignedUserId     String?
+  assignedEmployeeId String?
+
+  clientId  String?
+  address   String?
+  invoiceId String?
+  billId    String?
+  projectId String?
+
+  recurrenceId String?
+
+  createdByUserId String
+  completedAt     DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  createdByUser User @relation(fields: [createdByUserId], references: [id])
+  assignedUser  User? @relation("TaskAssignedToUser", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  assignedEmployee Employee? @relation("TaskAssignedToEmployee", fields: [assignedEmployeeId], references: [id], onDelete: SetNull)
+
+  generatedFromTask Task? @relation("TaskGeneratedFrom", fields: [generatedFromTaskId], references: [id], onDelete: SetNull)
+  generatedTasks    Task[] @relation("TaskGeneratedFrom")
+
+  client  Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  invoice Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  bill    Bill?    @relation(fields: [billId], references: [id], onDelete: SetNull)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  recurrence TaskRecurrence? @relation(fields: [recurrenceId], references: [id], onDelete: SetNull)
+
+  activities TaskActivity[]
+  notifications TaskNotification[]
+
+  @@index([status])
+  @@index([priority])
+  @@index([type])
+  @@index([dueDate])
+  @@index([isTemplate])
+  @@index([generatedFromTaskId])
+  @@index([assignedUserId])
+  @@index([assignedEmployeeId])
+  @@index([clientId])
+  @@index([invoiceId])
+  @@index([billId])
+  @@index([projectId])
+  @@index([recurrenceId])
+  @@index([createdByUserId])
+  @@map("tasks")
+}
+
+model TaskActivity {
+  id          String             @id @default(cuid())
+  taskId      String
+  actorUserId String?
+  action      TaskActivityAction
+  fromStatus  TaskStatus?
+  toStatus    TaskStatus?
+  meta        Json?
+  createdAt   DateTime @default(now())
+
+  task  Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  actor User? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([taskId, createdAt])
+  @@index([actorUserId])
+  @@index([action])
+  @@map("task_activities")
+}
+
+model TaskNotification {
+  id          String               @id @default(cuid())
+  taskId      String
+  userId      String
+  type        TaskNotificationType @default(REMINDER)
+  scheduledAt DateTime
+  sentAt      DateTime?
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([taskId])
+  @@index([type, scheduledAt])
+  @@index([sentAt])
+  @@map("task_notifications")
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  productId   String?
+  description String
+  quantity    Decimal @db.Decimal(10, 2)
+  unitPrice   Decimal @db.Decimal(10, 2)
+  discount    Decimal @default(0.00) @db.Decimal(5, 2)
+  taxRate     Decimal @default(0.00) @db.Decimal(5, 4)
+  total       Decimal @db.Decimal(10, 2)
+
+  // Relations
+  invoice Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+
+  @@map("invoice_items")
+}
+
+model RecurringInvoice {
+  id              String              @id @default(cuid())
+  clientId        String
+  userId          String
+  templateName    String
+  frequency       RecurringFrequency
+  intervalValue   Int                 @default(1)
+  startDate       DateTime
+  endDate         DateTime?
+  lastGenerated   DateTime?
+  nextRunDate     DateTime
+  isActive        Boolean             @default(true)
+  subtotal        Decimal             @db.Decimal(10, 2)
+  taxAmount       Decimal             @default(0.00) @db.Decimal(10, 2)
+  totalAmount     Decimal             @db.Decimal(10, 2)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  // Relations
+  client   Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id])
+  invoices Invoice[]
+  items    RecurringInvoiceItem[]
+  runs     RecurringInvoiceRun[]
+
+  @@index([clientId])
+  @@index([isActive, nextRunDate])
+
+  @@map("recurring_invoices")
+}
+
+model RecurringInvoiceItem {
+  id                String  @id @default(cuid())
+  recurringInvoiceId String
+  productId         String?
+  description       String
+  quantity          Decimal @db.Decimal(10, 2)
+  unitPrice         Decimal @db.Decimal(10, 2)
+  discount          Decimal @default(0.00) @db.Decimal(10, 2)
+  taxRate           Decimal @default(0.00) @db.Decimal(5, 4)
+  total             Decimal @db.Decimal(10, 2)
+
+  recurringInvoice  RecurringInvoice @relation(fields: [recurringInvoiceId], references: [id], onDelete: Cascade)
+  product           Product? @relation(fields: [productId], references: [id])
+
+  @@index([recurringInvoiceId])
+  @@map("recurring_invoice_items")
+}
+
+model RecurringInvoiceRun {
+  id               String       @id @default(cuid())
+  recurringInvoiceId String
+  runAt            DateTime     @default(now())
+  status           JobRunStatus
+  attempt          Int          @default(1)
+  invoiceId        String?
+  error            String?
+
+  recurringInvoice  RecurringInvoice @relation(fields: [recurringInvoiceId], references: [id], onDelete: Cascade)
+  invoice           Invoice? @relation(fields: [invoiceId], references: [id])
+
+  @@index([recurringInvoiceId, runAt])
+  @@map("recurring_invoice_runs")
+}
+
+model EmailOutbox {
+  id          String      @id @default(cuid())
+  documentType DocumentType @default(INVOICE)
+  invoiceId   String?
+  clientId    String?
+  statementFrom DateTime?
+  statementTo   DateTime?
+  to          String
+  subject     String
+  body        String
+  status      EmailStatus @default(PENDING)
+  attempts    Int         @default(0)
+  lastError   String?
+  nextAttemptAt DateTime  @default(now())
+  sentAt      DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  invoice     Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextAttemptAt])
+  @@index([invoiceId])
+  @@index([clientId])
+  @@map("email_outbox")
+}
+
+model JobLock {
+  name      String   @id
+  lockedAt  DateTime @default(now())
+  lockedBy  String?
+  ttlMs     Int
+
+  @@map("job_locks")
+}
+
+model DocumentCounter {
+  key       String  @id
+  value     Int     @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@map("document_counters")
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("password_resets")
+}
+
+model CompanySettings {
+  id                  String   @id @default(cuid())
+  businessEmail       String?
+  businessPhone       String?
+  addressLine         String?
+  city                String?
+  country             String?
+  tagline             String?  // e.g. "BEST INTERNET. BEST SERVICE."
+  bankName            String?
+  accountName         String?
+  accountNumber       String?
+  branchCode          String?
+  accountType         String?
+  displayCurrencyCode  String?  // User-selected currency for dashboard/display (e.g. ZAR, EUR)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("company_settings")
+}
+
+model Payment {
+  id            String         @id @default(cuid())
+  paymentNumber String         @unique
+  invoiceId     String?
+  clientId      String
+  userId        String
+  amount        Decimal        @db.Decimal(10, 2)
+  unallocatedAmount Decimal     @default(0.00) @db.Decimal(10, 2)
+  status        PaymentStatus  @default(PENDING)
+  method        PaymentMethod
+  transactionId String?
+  notes         String?
+  paymentDate   DateTime       @default(now())
+  processedAt   DateTime?
+  voidedAt      DateTime?
+  voidReason    String?
+  journalEntryId String?  @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Relations
+  invoice Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  client  Client  @relation(fields: [clientId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  journalEntry JournalEntry? @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+  allocations PaymentAllocation[]
+
+  @@index([clientId])
+  @@index([invoiceId])
+  @@index([paymentDate])
+  @@index([journalEntryId])
+
+  @@map("payments")
+}
+
+model PaymentAllocation {
+  id        String   @id @default(cuid())
+  paymentId String
+  invoiceId String
+  amount    Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId])
+  @@index([invoiceId])
+  @@map("payment_allocations")
+}
+
+model Loan {
+  id                 String     @id @default(cuid())
+  borrowerName       String
+  borrowerContact    String?
+  amount             Decimal    @db.Decimal(10, 2)
+  outstandingBalance Decimal    @db.Decimal(10, 2)
+  loanDate           DateTime
+  dueDate            DateTime?
+  interestRate       Decimal?   @db.Decimal(5, 2)
+  purpose            String?
+  status             LoanStatus @default(ACTIVE)
+  notes              String?
+  ownerCompanyName   String?
+  createdById        String
+  customerId         String?
+  journalEntryId     String?    @unique
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  createdBy    User           @relation(fields: [createdById], references: [id])
+  customer     Client?        @relation(fields: [customerId], references: [id])
+  journalEntry JournalEntry?  @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+  repayments   LoanRepayment[]
+
+  @@index([ownerCompanyName])
+  @@index([createdById])
+  @@index([customerId])
+  @@index([journalEntryId])
+  @@map("loans")
+}
+
+model LoanRepayment {
+  id          String   @id @default(cuid())
+  loanId         String
+  amount         Decimal  @db.Decimal(10, 2)
+  paymentDate    DateTime
+  notes          String?
+  journalEntryId String?  @unique
+  createdAt      DateTime @default(now())
+
+  loan         Loan          @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  journalEntry JournalEntry? @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+
+  @@index([loanId])
+  @@index([journalEntryId])
+  @@map("loan_repayments")
+}

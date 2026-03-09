@@ -1,0 +1,51 @@
+---
+description: List pages must use ListTable with ID column first
+globs: frontend/src/pages/**/*.jsx
+alwaysApply: false
+---
+
+# List Pages Convention
+
+All pages that display a list/table of records **must** use the `ListTable` component from `@/components/common/ListTable`. This enforces:
+
+1. **ID column first** – Database ID (`row.id`) always appears as the first data column
+2. **Consistent styling** – Shared table layout, loading, and empty states
+
+## Usage
+
+```jsx
+import ListTable from "../components/common/ListTable";
+
+<ListTable
+  data={data?.data ?? []}
+  loading={loading}
+  page={page}
+  limit={data?.meta?.limit ?? 20}
+  emptyMessage="No items."
+  columns={[
+    { key: "name", label: "Name", render: (row) => row.name },
+    { key: "status", label: "Status", render: (row) => <Badge>{row.status}</Badge> },
+    { key: "actions", label: "Actions", align: "right", render: (row) => <Button>Edit</Button> },
+  ]}
+/>
+```
+
+## Optional: Selectable Rows
+
+```jsx
+<ListTable
+  data={...}
+  selectable
+  selectedIds={selectedIds}
+  onSelect={toggleSelect}
+  onSelectAll={toggleSelectAll}
+  allSelected={allSelected}
+  getCheckboxLabel={(row) => `Select ${row.name}`}
+  columns={[...]}
+/>
+```
+
+## Don't
+
+- Manually build table markup with `<table>`, `<thead>`, `<tbody>` for list data
+- Add an ID column as a custom column in `columns` – it is added automatically

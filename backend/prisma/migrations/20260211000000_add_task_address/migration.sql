@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE IF EXISTS "tasks" ADD COLUMN IF NOT EXISTS "address" TEXT;
