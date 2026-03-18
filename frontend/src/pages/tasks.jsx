@@ -5,8 +5,16 @@ import { addDismissedTask } from "../lib/notification-dismissed";
 import Button from "../components/ui/button";
 import Dialog from "../components/ui/dialog";
 import Input from "../components/ui/input";
+import { Card, CardContent } from "../components/ui/card";
 import Pagination from "../components/common/Pagination";
+import ListPageToolbar from "../components/common/ListPageToolbar";
+import PageHeader from "../components/common/PageHeader";
+import EmptyState from "../components/common/EmptyState";
 import ActionsMenu from "../components/common/ActionsMenu";
+import ColumnPickerDialog from "../components/common/ColumnPickerDialog";
+import SortableTableHeader from "../components/common/SortableTableHeader";
+import { usePersistentColumns } from "../utils/usePersistentColumns";
+import { useColumnSort } from "../utils/useColumnSort";
 import { CheckCircle2, Plus, Search, ClipboardList } from "lucide-react";
 
 function Badge({ tone = "slate", children }) {
@@ -513,6 +521,33 @@ export default function TasksPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create");
   const [editingId, setEditingId] = useState(null);
+  const [columnsOpen, setColumnsOpen] = useState(false);
+
+  const requiredColumnKeys = new Set(["task"]);
+  const columnDefs = [
+    { key: "task", label: "Task" },
+    { key: "due", label: "Due" },
+    { key: "priority", label: "Priority" },
+    { key: "status", label: "Status" },
+  ];
+  const columnOrder = columnDefs.map((c) => c.key);
+  const defaultVisibleColumns = ["task", "due", "priority", "status"];
+
+  const [visibleColumns, setVisibleColumns, resetVisibleColumns] = usePersistentColumns({
+    storageKey: "ba_tasks_visible_columns",
+    columnOrder,
+    defaultVisibleColumns,
+    requiredKeys: Array.from(requiredColumnKeys),
+  });
+
+  const sortColumnDefs = columnDefs.map((c) => ({
+    ...c,
+    getValue:
+      c.key === "task" ? (r) => r?.title || ""
+      : c.key === "due" ? (r) => r?.dueDate || ""
+      : undefined,
+  }));
+  const { sortKey, sortDir, toggleSort, sortRows } = useColumnSort(sortColumnDefs);
 
   const editParam = searchParams.get("edit");
 
@@ -641,7 +676,7 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-screen">
       <TaskModal
         open={modalOpen}
         onOpenChange={(v) => {
@@ -657,235 +692,159 @@ export default function TasksPage() {
         onSaved={load}
       />
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-xl font-semibold text-slate-900">Tasks</h1>
-              <p className="mt-1 text-sm text-slate-500">Track work, deadlines, and follow-ups.</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative flex-1 sm:flex-initial sm:w-64">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  value={q}
-                  onChange={(e) => updateParam("q", e.target.value)}
-                  placeholder="Search title, description…"
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-                />
+      <PageHeader
+        title="Tasks"
+        subtitle="Track work, deadlines, and follow-ups"
+        icon={<ClipboardList className="h-5 w-5 text-violet-600" />}
+        actions={
+          <>
+            <select value={status} onChange={(e) => updateParam("status", e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-600">
+              <option value="">All status</option>
+              <option value="PENDING">Pending</option>
+              <option value="IN_PROGRESS">In progress</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+            <select value={priority} onChange={(e) => updateParam("priority", e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-600">
+              <option value="">All priority</option>
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+              <option value="CRITICAL">Critical</option>
+            </select>
+            <select value={type} onChange={(e) => updateParam("type", e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-600">
+              <option value="">All types</option>
+              <option value="GENERAL">General</option>
+              <option value="FINANCE">Finance</option>
+              <option value="CLIENT">Client</option>
+              <option value="PROJECT">Project</option>
+              <option value="SUPPORT">Support</option>
+            </select>
+            <Button onClick={openCreate} className="h-9 shrink-0">
+              <Plus className="h-4 w-4 mr-1.5" />
+              New Task
+            </Button>
+          </>
+        }
+      />
+
+      <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="p-4">
+            {error ? (
+              <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+                {error}
               </div>
-              <select
-                value={status}
-                onChange={(e) => updateParam("status", e.target.value)}
-                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-              >
-                <option value="">All status</option>
-                <option value="PENDING">Pending</option>
-                <option value="IN_PROGRESS">In progress</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="CANCELLED">Cancelled</option>
-              </select>
-              <select
-                value={priority}
-                onChange={(e) => updateParam("priority", e.target.value)}
-                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-              >
-                <option value="">All priority</option>
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
-                <option value="CRITICAL">Critical</option>
-              </select>
-              <select
-                value={type}
-                onChange={(e) => updateParam("type", e.target.value)}
-                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-              >
-                <option value="">All types</option>
-                <option value="GENERAL">General</option>
-                <option value="FINANCE">Finance</option>
-                <option value="CLIENT">Client</option>
-                <option value="PROJECT">Project</option>
-                <option value="SUPPORT">Support</option>
-              </select>
-              <select
-                value={overdue}
-                onChange={(e) => updateParam("overdue", e.target.value)}
-                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-              >
-                <option value="">All</option>
-                <option value="true">Overdue only</option>
-                <option value="false">Not overdue</option>
-              </select>
-              <Button onClick={openCreate} className="h-9 bg-violet-600 hover:bg-violet-700">
-                <Plus className="h-4 w-4 mr-2" />
-                New Task
-              </Button>
-            </div>
-          </div>
-        </div>
+            ) : null}
 
-        <div className="p-4 sm:p-6">
-          {error ? (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          ) : null}
-
-          <div className="overflow-hidden rounded-xl border border-slate-200">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Task
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Due
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Priority
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={5} className="px-4 py-12 text-center text-sm text-slate-500">
-                        Loading…
-                      </td>
-                    </tr>
-                  ) : emptyState ? (
-                    <tr>
-                      <td colSpan={5} className="px-4 py-12 text-center">
-                        <div className="flex flex-col items-center gap-3">
-                          <div className="rounded-full bg-slate-100 p-4">
-                            <ClipboardList className="h-8 w-8 text-slate-400" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-slate-700">{emptyState.title}</p>
-                            <p className="text-sm text-slate-500">{emptyState.subtitle}</p>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    tasks.map((t) => {
-                      const isOverdue = t.dueDate && new Date(t.dueDate) < new Date() && (t.status === "PENDING" || t.status === "IN_PROGRESS");
-                      const assignee = t.assignedEmployee
-                        ? `${t.assignedEmployee.firstName} ${t.assignedEmployee.lastName}`
-                        : t.assignedUser
-                          ? `${t.assignedUser.firstName} ${t.assignedUser.lastName}`
-                          : null;
-                      const creator = t.createdByUser
-                        ? `${t.createdByUser.firstName || ""} ${t.createdByUser.lastName || ""}`.trim() ||
-                          t.createdByUser.email ||
-                          null
-                        : null;
-
-                      return (
-                        <tr
-                          key={t.id}
-                          className="hover:bg-slate-50/50 transition-colors cursor-pointer"
-                          onClick={() => openEdit(t.id)}
-                        >
-                          <td className="px-4 py-3">
-                            <div className="flex items-start gap-3">
-                              <button
-                                type="button"
-                                className="mt-0.5 text-slate-400 hover:text-green-600"
-                                title={t.status === "COMPLETED" ? "Completed" : "Mark complete"}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  quickComplete(t);
-                                }}
-                                disabled={t.status === "COMPLETED"}
-                              >
-                                <CheckCircle2 className={`h-5 w-5 ${t.status === "COMPLETED" ? "text-green-600" : ""}`} />
-                              </button>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    className="text-left font-medium text-slate-900 hover:underline"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openEdit(t.id);
-                                    }}
-                                  >
-                                    {t.title}
-                                  </button>
-                                  {t.isTemplate ? <Badge tone="violet">Template</Badge> : null}
-                                  {isOverdue ? <Badge tone="red">Overdue</Badge> : null}
-                                </div>
-                                <div className="mt-0.5 text-xs text-slate-500 truncate max-w-[520px]">
-                                  {assignee ? `Assigned to ${assignee}` : "Unassigned"}
-                                  {creator ? ` • Created by ${creator}` : ""}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-sm text-slate-700">{formatDate(t.dueDate)}</td>
-                          <td className="px-4 py-3">
-                            <Badge tone={priorityTone(t.priority)}>{t.priority}</Badge>
-                          </td>
-                          <td className="px-4 py-3">
-                            <Badge tone={statusTone(t.status)}>{t.status}</Badge>
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <div
-                              onClick={(e) => {
-                                e.stopPropagation();
-                              }}
-                            >
-                              <ActionsMenu
-                                ariaLabel="Task actions"
-                                items={[
-                                  {
-                                    key: "edit",
-                                    label: "Edit",
-                                    onSelect: () => openEdit(t.id),
-                                  },
-                                  {
-                                    key: "complete",
-                                    label: "Mark complete",
-                                    disabled: t.status === "COMPLETED",
-                                    onSelect: () => quickComplete(t),
-                                  },
-                                  {
-                                    key: "delete",
-                                    label: "Delete",
-                                    tone: "danger",
-                                    onSelect: () => handleDelete(t),
-                                  },
-                                ]}
-                              />
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            <Pagination
-              page={meta.page}
-              limit={meta.limit}
-              total={meta.total}
-              onPageChange={setPage}
+            <ListPageToolbar
+              searchValue={q}
+              onSearchChange={(v) => updateParam("q", v)}
+              searchPlaceholder="Search tasks\u2026"
+              onColumnsClick={() => setColumnsOpen(true)}
             />
           </div>
-        </div>
-      </div>
+
+          <div className="overflow-auto">
+            <table className="min-w-max w-full text-[13px]">
+              <thead className="text-left bg-slate-50/80">
+                <tr className="border-y border-slate-200/80">
+                  {visibleColumns.includes("task") ? <SortableTableHeader label="Task" columnKey="task" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} /> : null}
+                  {visibleColumns.includes("due") ? <SortableTableHeader label="Due" columnKey="due" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="hidden sm:table-cell" /> : null}
+                  {visibleColumns.includes("priority") ? <SortableTableHeader label="Priority" columnKey="priority" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="hidden sm:table-cell" /> : null}
+                  {visibleColumns.includes("status") ? <SortableTableHeader label="Status" columnKey="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="hidden sm:table-cell" /> : null}
+                  <th className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-xs font-medium text-slate-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortRows(tasks).map((t) => {
+                  const isOverdue = t.dueDate && new Date(t.dueDate) < new Date() && (t.status === "PENDING" || t.status === "IN_PROGRESS");
+                  const assignee = t.assignedEmployee
+                    ? `${t.assignedEmployee.firstName} ${t.assignedEmployee.lastName}`
+                    : t.assignedUser
+                      ? `${t.assignedUser.firstName} ${t.assignedUser.lastName}`
+                      : null;
+                  const creator = t.createdByUser
+                    ? `${t.createdByUser.firstName || ""} ${t.createdByUser.lastName || ""}`.trim() || t.createdByUser.email || null
+                    : null;
+
+                  return (
+                    <tr key={t.id} className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => openEdit(t.id)}>
+                      {visibleColumns.includes("task") ? (
+                        <td className="py-2.5 px-3 min-w-[280px]">
+                          <div className="flex items-start gap-2">
+                            <button type="button" className="mt-0.5 text-slate-400 hover:text-green-600" title={t.status === "COMPLETED" ? "Completed" : "Mark complete"} onClick={(e) => { e.stopPropagation(); quickComplete(t); }} disabled={t.status === "COMPLETED"}>
+                              <CheckCircle2 className={`h-4 w-4 ${t.status === "COMPLETED" ? "text-green-600" : ""}`} />
+                            </button>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-slate-900 leading-5">{t.title}</span>
+                                {t.isTemplate ? <Badge tone="violet">Template</Badge> : null}
+                                {isOverdue ? <Badge tone="red">Overdue</Badge> : null}
+                              </div>
+                              <div className="text-xs text-slate-400 truncate max-w-[400px] mt-0.5">
+                                {assignee ? `Assigned to ${assignee}` : "Unassigned"}
+                                {creator ? ` \u2022 Created by ${creator}` : ""}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      ) : null}
+                      {visibleColumns.includes("due") ? <td className="hidden sm:table-cell py-2.5 px-3 text-slate-500 whitespace-nowrap">{formatDate(t.dueDate)}</td> : null}
+                      {visibleColumns.includes("priority") ? <td className="hidden sm:table-cell py-2.5 px-3"><Badge tone={priorityTone(t.priority)}>{t.priority}</Badge></td> : null}
+                      {visibleColumns.includes("status") ? <td className="hidden sm:table-cell py-2.5 px-3"><Badge tone={statusTone(t.status)}>{t.status}</Badge></td> : null}
+                      <td className="hidden sm:table-cell py-2.5 px-3 text-right" onClick={(e) => e.stopPropagation()}>
+                        <ActionsMenu
+                          ariaLabel="Task actions"
+                          items={[
+                            { key: "edit", label: "Edit", onSelect: () => openEdit(t.id) },
+                            { key: "complete", label: "Mark complete", disabled: t.status === "COMPLETED", onSelect: () => quickComplete(t) },
+                            { key: "delete", label: "Delete", tone: "danger", onSelect: () => handleDelete(t) },
+                          ]}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {!loading && tasks.length === 0 ? (
+              <EmptyState
+                icon={ClipboardList}
+                title={q || status || priority || type || overdue ? "No matching tasks" : "No tasks yet"}
+                description={q || status || priority || type || overdue ? "Try adjusting your filters" : "Create tasks to stay on top of client work and deadlines"}
+                action={
+                  !(q || status || priority || type || overdue) ? (
+                    <Button onClick={openCreate} className="h-9">
+                      <Plus className="h-4 w-4 mr-1.5" />
+                      New Task
+                    </Button>
+                  ) : null
+                }
+              />
+            ) : null}
+
+            {meta?.total > 0 ? (
+              <Pagination page={meta.page} limit={meta.limit} total={meta.total} onPageChange={setPage} />
+            ) : null}
+          </div>
+        </CardContent>
+      </Card>
+
+      <ColumnPickerDialog
+        open={columnsOpen}
+        onOpenChange={setColumnsOpen}
+        columnDefs={columnDefs}
+        visibleColumns={visibleColumns}
+        requiredColumnKeys={requiredColumnKeys}
+        onToggle={(key) => {
+          setVisibleColumns((prev) =>
+            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+          );
+        }}
+        onReset={resetVisibleColumns}
+      />
     </div>
   );
 }

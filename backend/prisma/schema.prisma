@@ -456,6 +456,7 @@ model Client {
   tasks             Task[]
   documents         CustomerDocument[]
   loans             Loan[]
+  clientNetworkLinks ClientNetworkLink[]
 
   @@index([email])
   @@index([status])
@@ -1536,4 +1537,243 @@ model LoanRepayment {
   @@index([loanId])
   @@index([journalEntryId])
   @@map("loan_repayments")
+}
+
+// ─── AI Automation ───────────────────────────────────────────────
+
+enum AutomationRuleAction {
+  CATEGORIZE
+  MATCH_INVOICE
+  MATCH_BILL
+  TAG
+  NOTIFY
+}
+
+enum AISuggestionType {
+  CATEGORIZE_TRANSACTION
+  MATCH_INVOICE
+  MATCH_BILL
+  DUPLICATE_INVOICE
+  DUPLICATE_BILL
+  DUPLICATE_EXPENSE
+  EXPENSE_SUGGESTION
+}
+
+enum AISuggestionStatus {
+  PENDING
+  ACCEPTED
+  DISMISSED
+}
+
+model AutomationRule {
+  id          String               @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean              @default(true)
+  priority    Int                  @default(0)
+  action      AutomationRuleAction
+  conditionsJson Json              // { field, operator, value }[]
+  actionParamsJson Json?           // { categoryId, ledgerAccountCode, tag, ... }
+  timesApplied Int                 @default(0)
+  lastAppliedAt DateTime?
+  createdByUserId String
+  ownerCompanyName String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@index([isActive, priority])
+  @@index([action])
+  @@index([ownerCompanyName])
+  @@map("automation_rules")
+}
+
+model AISuggestion {
+  id             String             @id @default(cuid())
+  type           AISuggestionType
+  status         AISuggestionStatus @default(PENDING)
+  confidence     Decimal            @db.Decimal(5, 4)  // 0.0000 – 1.0000
+  sourceEntityType String           // bankTransaction, invoice, bill, expense
+  sourceEntityId   String
+  targetEntityType String?          // invoice, bill, expenseCategory, ledgerAccount
+  targetEntityId   String?
+  reasoning      String?            // human-readable explanation
+  metaJson       Json?              // extra context (amounts, scores, etc.)
+  resolvedAt     DateTime?
+  resolvedByUserId String?
+  ownerCompanyName String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([type, status])
+  @@index([sourceEntityType, sourceEntityId])
+  @@index([ownerCompanyName])
+  @@index([createdAt])
+  @@map("ai_suggestions")
+}
+
+// ─── ISP Network Management ─────────────────────────────────────
+
+enum NetworkDeviceType {
+  ROUTER
+  SWITCH
+  ACCESS_POINT
+  OLT
+  ONT
+  RADIO
+  SERVER
+  OTHER
+}
+
+enum NetworkDeviceStatus {
+  ONLINE
+  OFFLINE
+  DEGRADED
+  MAINTENANCE
+}
+
+enum ClientServiceStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+  TERMINATED
+}
+
+enum NetworkAlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model NetworkDevice {
+  id              String              @id @default(cuid())
+  name            String
+  type            NetworkDeviceType
+  status          NetworkDeviceStatus @default(OFFLINE)
+  ipAddress       String?
+  macAddress      String?
+  location        String?
+  model           String?
+  serialNumber    String?
+  firmwareVersion String?
+  parentDeviceId  String?
+  snmpCommunity   String?
+  managementUrl   String?
+  uptimeSeconds   Int?
+  cpuPercent      Decimal?            @db.Decimal(5, 2)
+  memoryPercent   Decimal?            @db.Decimal(5, 2)
+  lastSeenAt      DateTime?
+  notes           String?
+  ownerCompanyName String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  parentDevice    NetworkDevice?      @relation("DeviceHierarchy", fields: [parentDeviceId], references: [id], onDelete: SetNull)
+  childDevices    NetworkDevice[]     @relation("DeviceHierarchy")
+  interfaces      NetworkInterface[]
+  clientLinks     ClientNetworkLink[]
+  alerts          NetworkAlert[]
+
+  @@index([type])
+  @@index([status])
+  @@index([ipAddress])
+  @@index([parentDeviceId])
+  @@index([ownerCompanyName])
+  @@map("network_devices")
+}
+
+model NetworkInterface {
+  id              String   @id @default(cuid())
+  deviceId        String
+  name            String   // e.g. "ether1", "wlan0", "ge-0/0/1"
+  ifIndex         Int?
+  speed           String?  // e.g. "1Gbps", "10Gbps"
+  macAddress      String?
+  ipAddress       String?
+  isUp            Boolean  @default(false)
+  rxBytes         BigInt   @default(0)
+  txBytes         BigInt   @default(0)
+  rxErrors        Int      @default(0)
+  txErrors        Int      @default(0)
+  lastPolledAt    DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  device NetworkDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId])
+  @@map("network_interfaces")
+}
+
+model ServicePlan {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  downloadSpeed   String   // e.g. "50Mbps"
+  uploadSpeed     String   // e.g. "25Mbps"
+  monthlyPrice    Decimal  @db.Decimal(10, 2)
+  dataCapGb       Int?     // null = unlimited
+  isActive        Boolean  @default(true)
+  ownerCompanyName String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  clientLinks     ClientNetworkLink[]
+
+  @@index([isActive])
+  @@index([ownerCompanyName])
+  @@map("service_plans")
+}
+
+model ClientNetworkLink {
+  id              String             @id @default(cuid())
+  clientId        String
+  deviceId        String?
+  servicePlanId   String?
+  serviceStatus   ClientServiceStatus @default(PENDING)
+  ipAddress       String?
+  macAddress      String?
+  pppoeUsername   String?
+  installationDate DateTime?
+  suspendedAt     DateTime?
+  suspendReason   String?
+  terminatedAt    DateTime?
+  billingDay      Int                @default(1)    // day of month for auto-billing
+  autoBilling     Boolean            @default(true)
+  lastBilledAt    DateTime?
+  nextBillDate    DateTime?
+  notes           String?
+  ownerCompanyName String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  client      Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  device      NetworkDevice?  @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  servicePlan ServicePlan?    @relation(fields: [servicePlanId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([deviceId])
+  @@index([servicePlanId])
+  @@index([serviceStatus])
+  @@index([ownerCompanyName])
+  @@map("client_network_links")
+}
+
+model NetworkAlert {
+  id              String                @id @default(cuid())
+  deviceId        String
+  severity        NetworkAlertSeverity
+  message         String
+  isResolved      Boolean               @default(false)
+  resolvedAt      DateTime?
+  resolvedByUserId String?
+  ownerCompanyName String?
+  createdAt       DateTime              @default(now())
+
+  device NetworkDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId])
+  @@index([severity, isResolved])
+  @@index([ownerCompanyName])
+  @@index([createdAt])
+  @@map("network_alerts")
 }

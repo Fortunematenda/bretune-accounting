@@ -8,6 +8,12 @@ import PageHeader from "../components/common/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import Pagination from "../components/common/Pagination";
 import { Download, Package, Plus, Upload } from "lucide-react";
+import EmptyState from "../components/common/EmptyState";
+import StatusBadge from "../components/common/StatusBadge";
+import ColumnPickerDialog from "../components/common/ColumnPickerDialog";
+import SortableTableHeader from "../components/common/SortableTableHeader";
+import { usePersistentColumns } from "../utils/usePersistentColumns";
+import { useColumnSort } from "../utils/useColumnSort";
 import { csvToObjects, downloadTextFile, objectsToCsv } from "../lib/csv";
 import { formatRecordDisplayId } from "../lib/utils";
 import ActionsMenu from "../components/common/ActionsMenu";
@@ -29,6 +35,36 @@ export default function ProductsPage() {
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [success, setSuccess] = useState(null);
+  const [columnsOpen, setColumnsOpen] = useState(false);
+
+  const requiredColumnKeys = new Set(["id", "name"]);
+  const columnDefs = [
+    { key: "id", label: "ID" },
+    { key: "name", label: "Name" },
+    { key: "sku", label: "SKU" },
+    { key: "price", label: "Price" },
+    { key: "tax", label: "Tax" },
+    { key: "type", label: "Type" },
+    { key: "status", label: "Status" },
+  ];
+  const columnOrder = columnDefs.map((c) => c.key);
+  const defaultVisibleColumns = ["id", "name", "sku", "price", "tax", "type", "status"];
+
+  const [visibleColumns, setVisibleColumns, resetVisibleColumns] = usePersistentColumns({
+    storageKey: "ba_products_visible_columns",
+    columnOrder,
+    defaultVisibleColumns,
+    requiredKeys: Array.from(requiredColumnKeys),
+  });
+
+  const sortColumnDefs = columnDefs.map((c) => ({
+    ...c,
+    getValue:
+      c.key === "price" ? (r) => Number(r?.price) || 0
+      : c.key === "tax" ? (r) => Number(r?.taxRate) || 0
+      : undefined,
+  }));
+  const { sortKey, sortDir, toggleSort, sortRows } = useColumnSort(sortColumnDefs);
 
 
   const load = useCallback(() => {
@@ -252,217 +288,188 @@ export default function ProductsPage() {
       <PageHeader
         title="Items"
         subtitle="Products and services you can add to invoices"
-        icon={<Package className="h-6 w-6 text-violet-600" />}
+        icon={<Package className="h-5 w-5 text-violet-600" />}
         actions={
           <>
             <select
-                  value={type}
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    const nextParams = new URLSearchParams(searchParams);
-                    if (next !== "") nextParams.set("type", next);
-                    else nextParams.delete("type");
-                    nextParams.delete("page");
-                    setSearchParams(nextParams, { replace: true });
-                  }}
-                  className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-                >
-                  <option value="">All types</option>
-                  <option value="PRODUCT">Products</option>
-                  <option value="SERVICE">Services</option>
-                </select>
+              value={type}
+              onChange={(e) => {
+                const next = e.target.value;
+                const nextParams = new URLSearchParams(searchParams);
+                if (next !== "") nextParams.set("type", next);
+                else nextParams.delete("type");
+                nextParams.delete("page");
+                setSearchParams(nextParams, { replace: true });
+              }}
+              className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-600"
+            >
+              <option value="">All types</option>
+              <option value="PRODUCT">Products</option>
+              <option value="SERVICE">Services</option>
+            </select>
             <select
-                  value={isActive}
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    const nextParams = new URLSearchParams(searchParams);
-                    if (next !== "") nextParams.set("isActive", next);
-                    else nextParams.delete("isActive");
-                    nextParams.delete("page");
-                    setSearchParams(nextParams, { replace: true });
-                  }}
-                  className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
-                >
-                  <option value="">All status</option>
-                  <option value="true">Active only</option>
-                  <option value="false">Inactive only</option>
-                </select>
+              value={isActive}
+              onChange={(e) => {
+                const next = e.target.value;
+                const nextParams = new URLSearchParams(searchParams);
+                if (next !== "") nextParams.set("isActive", next);
+                else nextParams.delete("isActive");
+                nextParams.delete("page");
+                setSearchParams(nextParams, { replace: true });
+              }}
+              className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-600"
+            >
+              <option value="">All status</option>
+              <option value="true">Active only</option>
+              <option value="false">Inactive only</option>
+            </select>
             <Button onClick={openCreate} className="h-9 shrink-0">
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-1.5" />
               Add Item
             </Button>
           </>
         }
       />
 
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Item List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <input
-            ref={importInputRef}
-            type="file"
-            accept=".csv,text/csv"
-            className="hidden"
-            onChange={(e) => importProductsCsv(e.target.files?.[0] || null)}
-          />
-          <ListPageToolbar
-            actionsItems={[
-              { key: "import", label: importing ? "Importing…" : "Import CSV", onSelect: () => importInputRef.current?.click(), disabled: importing },
-              { key: "export", label: exporting ? "Exporting…" : "Export CSV", onSelect: exportProductsCsv, disabled: exporting },
-            ]}
-            searchValue={q}
-            onSearchChange={(next) => {
-              const nextParams = new URLSearchParams(searchParams);
-              if (next) nextParams.set("q", next);
-              else nextParams.delete("q");
-              nextParams.delete("page");
-              setSearchParams(nextParams, { replace: true });
-            }}
-            searchPlaceholder="Search by name, SKU, description…"
-            limit={limit}
-            onLimitChange={setLimit}
-          />
-          {success && (
-            <div className="mt-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-              {success}
-            </div>
-          )}
-          {error && (
-            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      ID
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Name
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      SKU
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Price
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Tax
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Type
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={8} className="px-4 py-12 text-center text-sm text-slate-500">
-                        Loading…
-                      </td>
-                    </tr>
-                  ) : products.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="px-4 py-12 text-center">
-                        <div className="flex flex-col items-center gap-3">
-                          <div className="rounded-full bg-slate-100 p-4">
-                            <Package className="h-8 w-8 text-slate-400" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-slate-700">No items yet</p>
-                            <p className="text-sm text-slate-500">Add items to use in invoices</p>
-                          </div>
-                          <Button onClick={openCreate} className="bg-violet-600 hover:bg-violet-700">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Item
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    products.map((p, index) => {
-                      const displayId = formatRecordDisplayId(p, { page, limit, index });
-                      const typeLabel = String(p?.type || "PRODUCT").toUpperCase() === "SERVICE" ? "Service" : "Product";
-                      return (
-                      <tr
-                        key={p.id}
-                        className="hover:bg-slate-50/50 transition-colors cursor-pointer"
-                        onClick={() => navigate(`/items/${p.id}`)}
-                      >
-                        <td className="px-4 py-3 font-mono text-sm text-violet-600 font-medium" title={p.id}>{displayId}</td>
-                        <td className="px-4 py-3">
-                          <div>
-                            <div className="font-medium text-slate-900">{p.name}</div>
-                            {p.description && (
-                              <div className="text-xs text-slate-500 truncate max-w-[200px]">
-                                {p.description}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-600 font-mono">
-                          {p.sku || "—"}
-                        </td>
-                        <td className="px-4 py-3 text-right font-medium tabular-nums">
-                          <Money value={p.price || 0} />
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-600">
-                          {p.taxRate != null ? `${(Number(p.taxRate) * 100).toFixed(1)}%` : "—"}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm text-slate-700">{typeLabel}</span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              p.isActive ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-600"
-                            }`}
-                          >
-                            {p.isActive ? "Active" : "Inactive"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-end">
-                            <ActionsMenu
-                              ariaLabel="Item actions"
-                              items={[
-                                { key: "open", label: "Open", onSelect: () => navigate(`/items/${p.id}`) },
-                                { key: "edit", label: "Edit", onSelect: () => openEdit(p) },
-                                { key: "delete", label: "Delete", tone: "danger", onSelect: () => handleDelete(p) },
-                              ]}
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    );})
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {data?.meta && products.length > 0 && (
-              <Pagination
-                page={data.meta.page}
-                limit={data.meta.limit}
-                total={data.meta.total}
-                onPageChange={setPage}
-              />
+      <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="p-4">
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={(e) => importProductsCsv(e.target.files?.[0] || null)}
+            />
+            <ListPageToolbar
+              actionsItems={[
+                { key: "import", label: importing ? "Importing…" : "Import CSV", onSelect: () => importInputRef.current?.click(), disabled: importing },
+                { key: "export", label: exporting ? "Exporting…" : "Export CSV", onSelect: exportProductsCsv, disabled: exporting },
+              ]}
+              searchValue={q}
+              onSearchChange={(next) => {
+                const nextParams = new URLSearchParams(searchParams);
+                if (next) nextParams.set("q", next);
+                else nextParams.delete("q");
+                nextParams.delete("page");
+                setSearchParams(nextParams, { replace: true });
+              }}
+              searchPlaceholder="Search items…"
+              limit={limit}
+              onLimitChange={setLimit}
+              onColumnsClick={() => setColumnsOpen(true)}
+            />
+            {success && (
+              <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-800">
+                {success}
+              </div>
+            )}
+            {error && (
+              <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+                {error}
+              </div>
             )}
           </div>
+
+          <div className="overflow-auto">
+            <table className="min-w-max w-full text-[13px]">
+              <thead className="text-left bg-slate-50/80">
+                <tr className="border-y border-slate-200/80">
+                  {visibleColumns.includes("id") ? <SortableTableHeader label="ID" columnKey="id" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} /> : null}
+                  {visibleColumns.includes("name") ? <SortableTableHeader label="Name" columnKey="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} /> : null}
+                  {visibleColumns.includes("sku") ? <SortableTableHeader label="SKU" columnKey="sku" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="hidden sm:table-cell" /> : null}
+                  {visibleColumns.includes("price") ? <SortableTableHeader label="Price" columnKey="price" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} align="right" className="hidden sm:table-cell" /> : null}
+                  {visibleColumns.includes("tax") ? <SortableTableHeader label="Tax" columnKey="tax" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="hidden sm:table-cell" /> : null}
+                  {visibleColumns.includes("type") ? <SortableTableHeader label="Type" columnKey="type" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="hidden sm:table-cell" /> : null}
+                  {visibleColumns.includes("status") ? <SortableTableHeader label="Status" columnKey="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="hidden sm:table-cell" /> : null}
+                  <th className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-xs font-medium text-slate-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortRows(products).map((p, index) => {
+                  const displayId = formatRecordDisplayId(p, { page, limit, index });
+                  const typeLabel = String(p?.type || "PRODUCT").toUpperCase() === "SERVICE" ? "Service" : "Product";
+                  return (
+                    <tr
+                      key={p.id}
+                      className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/items/${p.id}`)}
+                    >
+                      {visibleColumns.includes("id") ? <td className="py-2.5 px-3 font-mono text-xs text-slate-500 font-medium whitespace-nowrap" title={p.id}>{displayId}</td> : null}
+                      {visibleColumns.includes("name") ? (
+                        <td className="py-2.5 px-3 min-w-[240px]">
+                          <div className="font-medium text-slate-900 leading-5">{p.name}</div>
+                          {p.description && <div className="text-xs text-slate-400 truncate max-w-[200px] mt-0.5">{p.description}</div>}
+                        </td>
+                      ) : null}
+                      {visibleColumns.includes("sku") ? <td className="hidden sm:table-cell py-2.5 px-3 text-slate-600 font-mono text-xs">{p.sku || "—"}</td> : null}
+                      {visibleColumns.includes("price") ? <td className="hidden sm:table-cell py-2.5 px-3 text-right font-medium tabular-nums text-slate-800"><Money value={p.price || 0} /></td> : null}
+                      {visibleColumns.includes("tax") ? <td className="hidden sm:table-cell py-2.5 px-3 text-slate-600">{p.taxRate != null ? `${(Number(p.taxRate) * 100).toFixed(1)}%` : "—"}</td> : null}
+                      {visibleColumns.includes("type") ? (
+                        <td className="hidden sm:table-cell py-2.5 px-3">
+                          <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">{typeLabel}</span>
+                        </td>
+                      ) : null}
+                      {visibleColumns.includes("status") ? (
+                        <td className="hidden sm:table-cell py-2.5 px-3">
+                          <StatusBadge status={p.isActive ? "ACTIVE" : "INACTIVE"} size="sm" />
+                        </td>
+                      ) : null}
+                      <td className="hidden sm:table-cell py-2.5 px-3 text-right" onClick={(e) => e.stopPropagation()}>
+                        <ActionsMenu
+                          ariaLabel="Item actions"
+                          items={[
+                            { key: "open", label: "Open", onSelect: () => navigate(`/items/${p.id}`) },
+                            { key: "edit", label: "Edit", onSelect: () => openEdit(p) },
+                            { key: "delete", label: "Delete", tone: "danger", onSelect: () => handleDelete(p) },
+                          ]}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {data && products.length === 0 ? (
+              <EmptyState
+                icon={Package}
+                title="No items yet"
+                description="Add items to use in invoices"
+                action={
+                  <Button onClick={openCreate} className="h-9">
+                    <Plus className="h-4 w-4 mr-1.5" />
+                    Add Item
+                  </Button>
+                }
+              />
+            ) : null}
+          </div>
+
+          {data?.meta && products.length > 0 && (
+            <Pagination
+              page={data.meta.page}
+              limit={data.meta.limit}
+              total={data.meta.total}
+              onPageChange={setPage}
+            />
+          )}
         </CardContent>
       </Card>
+
+      <ColumnPickerDialog
+        open={columnsOpen}
+        onOpenChange={setColumnsOpen}
+        columnDefs={columnDefs}
+        visibleColumns={visibleColumns}
+        requiredColumnKeys={requiredColumnKeys}
+        onToggle={(key) => {
+          setVisibleColumns((prev) =>
+            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+          );
+        }}
+        onReset={resetVisibleColumns}
+      />
     </div>
   );
 }

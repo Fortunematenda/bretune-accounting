@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { useAuth } from "../features/auth/auth-context";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Shield, Settings, LogOut, ChevronRight } from "lucide-react";
 import Button from "../components/ui/button";
 
@@ -34,6 +34,7 @@ function resolveDisplayName(user) {
 
 export default function AccountPage() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const displayName = resolveDisplayName(user) || user?.email || "Account";
   const email = user?.email || "—";
   const role = user?.role || user?.roleName;
@@ -159,7 +160,7 @@ export default function AccountPage() {
       <div className="flex justify-end">
         <Button
           variant="outline"
-          onClick={logout}
+          onClick={() => { logout(); navigate("/"); }}
           className="gap-2 border-slate-200 text-slate-600 hover:border-red-200 hover:bg-red-50 hover:text-red-700 dark:border-slate-700 dark:text-slate-400 dark:hover:border-red-900/50 dark:hover:bg-red-900/20 dark:hover:text-red-400"
         >
           <LogOut className="h-4 w-4" />

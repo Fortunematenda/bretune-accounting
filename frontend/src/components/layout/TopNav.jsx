@@ -185,7 +185,7 @@ export default function TopNav({
   }
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/75 border-b border-violet-100 px-4 sm:px-5 lg:px-6 flex items-center justify-between">
+    <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 border-b border-slate-200/60 px-4 sm:px-5 lg:px-6 flex items-center justify-between">
       <div className="flex items-center gap-3 min-w-0">
         <Button
           type="button"
@@ -337,6 +337,7 @@ export default function TopNav({
                 onClick={() => {
                   setOpen(false);
                   onLogout?.();
+                  navigate("/");
                 }}
               >
                 Logout

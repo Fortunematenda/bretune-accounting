@@ -16,6 +16,8 @@ import {
   PieChart,
   Pie,
   Cell,
+  AreaChart,
+  Area,
 } from "recharts";
 import {
   BarChart3,
@@ -23,18 +25,49 @@ import {
   Landmark,
   TrendingUp,
   Wallet,
+  Calendar,
+  Clock,
+  BookOpen,
+  Scale,
+  DollarSign,
+  RefreshCw,
+  Download,
+  ChevronRight,
 } from "lucide-react";
+import { cn } from "../lib/utils";
 
-const REPORT_TYPES = [
-  { key: "aging", label: "AR Aging", icon: BarChart3 },
-  { key: "outstanding", label: "Outstanding Invoices", icon: FileText },
-  { key: "revenue-accrual", label: "Monthly Revenue (Accrual)", icon: TrendingUp },
-  { key: "revenue-cash", label: "Monthly Revenue (Cash)", icon: Wallet },
-  { key: "loans", label: "Loans", icon: Landmark },
-  { key: "trial-balance", label: "Trial Balance", icon: FileText },
-  { key: "balance-sheet", label: "Balance Sheet", icon: Wallet },
-  { key: "profit-loss", label: "Profit & Loss", icon: TrendingUp },
+const REPORT_CATEGORIES = [
+  {
+    label: "Receivables",
+    reports: [
+      { key: "aging", label: "AR Aging", icon: Clock, description: "Aging analysis by customer" },
+      { key: "outstanding", label: "Outstanding Invoices", icon: FileText, description: "Unpaid invoice details" },
+    ],
+  },
+  {
+    label: "Revenue",
+    reports: [
+      { key: "revenue-accrual", label: "Revenue (Accrual)", icon: TrendingUp, description: "Monthly invoiced revenue" },
+      { key: "revenue-cash", label: "Revenue (Cash)", icon: DollarSign, description: "Monthly cash collected" },
+    ],
+  },
+  {
+    label: "Financial Statements",
+    reports: [
+      { key: "trial-balance", label: "Trial Balance", icon: Scale, description: "Account debits & credits" },
+      { key: "balance-sheet", label: "Balance Sheet", icon: BookOpen, description: "Assets, liabilities & equity" },
+      { key: "profit-loss", label: "Profit & Loss", icon: TrendingUp, description: "Income vs expenses" },
+    ],
+  },
+  {
+    label: "Lending",
+    reports: [
+      { key: "loans", label: "Loans Report", icon: Landmark, description: "Outstanding & repaid loans" },
+    ],
+  },
 ];
+
+const ALL_REPORTS = REPORT_CATEGORIES.flatMap((c) => c.reports);
 
 function formatMonth(iso) {
   if (!iso) return "—";
@@ -343,89 +376,159 @@ export default function ReportsPage() {
         .filter((d) => d.value > 0)
     : [];
 
+  const activeReportMeta = ALL_REPORTS.find((r) => r.key === activeReport) || ALL_REPORTS[0];
+  const ActiveIcon = activeReportMeta?.icon || BarChart3;
+
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-xl font-semibold text-slate-900">Reports</h1>
-              <p className="mt-1 text-sm text-slate-500">
-                Financial reports, aging analysis, and revenue summaries
-              </p>
+    <div className="space-y-6 min-h-screen">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-600/20">
+            <BarChart3 className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Reports</h1>
+            <p className="text-sm text-slate-500">Financial reports & analytics</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {(activeReport === "revenue-accrual" || activeReport === "revenue-cash" || activeReport === "profit-loss") && (
+            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5">
+              <Calendar className="h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="date"
+                value={dateStart}
+                onChange={(e) => setDateStart(e.target.value)}
+                className="h-7 border-0 bg-transparent px-1 text-sm text-slate-700 focus:outline-none"
+                placeholder="From"
+              />
+              <span className="text-slate-300">–</span>
+              <input
+                type="date"
+                value={dateEnd}
+                onChange={(e) => setDateEnd(e.target.value)}
+                className="h-7 border-0 bg-transparent px-1 text-sm text-slate-700 focus:outline-none"
+                placeholder="To"
+              />
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {(activeReport === "revenue-accrual" || activeReport === "revenue-cash" || activeReport === "profit-loss") && (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={dateStart}
-                    onChange={(e) => setDateStart(e.target.value)}
-                    className="h-9 rounded-lg border border-slate-200 px-3 text-sm"
-                    placeholder="From"
-                  />
-                  <span className="text-slate-400">–</span>
-                  <input
-                    type="date"
-                    value={dateEnd}
-                    onChange={(e) => setDateEnd(e.target.value)}
-                    className="h-9 rounded-lg border border-slate-200 px-3 text-sm"
-                    placeholder="To"
-                  />
-                </div>
-              )}
-              {(activeReport === "trial-balance" || activeReport === "balance-sheet") && (
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-slate-500">As of</label>
-                  <input
-                    type="date"
-                    value={accountingAsOf}
-                    onChange={(e) => setAccountingAsOf(e.target.value)}
-                    className="h-9 rounded-lg border border-slate-200 px-3 text-sm"
-                    title="As of date"
-                  />
-                </div>
-              )}
-              {activeReport === "aging" && (
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-slate-500">As of</label>
-                  <input
-                    type="date"
-                    value={agingAsOf}
-                    onChange={(e) => setAgingAsOf(e.target.value)}
-                    className="h-9 rounded-lg border border-slate-200 px-3 text-sm"
-                    title="As of date"
-                  />
-                </div>
-              )}
+          )}
+          {(activeReport === "trial-balance" || activeReport === "balance-sheet") && (
+            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5">
+              <Calendar className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-xs text-slate-500">As of</span>
+              <input
+                type="date"
+                value={accountingAsOf}
+                onChange={(e) => setAccountingAsOf(e.target.value)}
+                className="h-7 border-0 bg-transparent px-1 text-sm text-slate-700 focus:outline-none"
+              />
             </div>
+          )}
+          {activeReport === "aging" && (
+            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5">
+              <Calendar className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-xs text-slate-500">As of</span>
+              <input
+                type="date"
+                value={agingAsOf}
+                onChange={(e) => setAgingAsOf(e.target.value)}
+                className="h-7 border-0 bg-transparent px-1 text-sm text-slate-700 focus:outline-none"
+              />
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={refresh}
+            className="h-9 w-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+            title="Refresh"
+          >
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
+        {/* Sidebar navigation */}
+        <div className="hidden lg:block">
+          <div className="sticky top-4 space-y-1">
+            {REPORT_CATEGORIES.map((cat) => (
+              <div key={cat.label}>
+                <div className="px-3 pt-4 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  {cat.label}
+                </div>
+                {cat.reports.map((r) => {
+                  const Icon = r.icon;
+                  const isActive = activeReport === r.key;
+                  return (
+                    <button
+                      key={r.key}
+                      type="button"
+                      onClick={() => setActiveReport(r.key)}
+                      className={cn(
+                        "w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all group",
+                        isActive
+                          ? "bg-violet-50 text-violet-700 shadow-sm"
+                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      )}
+                    >
+                      <div className={cn(
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+                        isActive ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
+                      )}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className={cn("text-sm font-medium truncate", isActive && "text-violet-700")}>{r.label}</div>
+                        <div className="text-[11px] text-slate-400 truncate">{r.description}</div>
+                      </div>
+                      {isActive && <ChevronRight className="h-4 w-4 text-violet-400 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="flex border-b border-slate-100 overflow-x-auto">
-          {REPORT_TYPES.map((r) => {
+        {/* Mobile tabs (visible on small screens) */}
+        <div className="lg:hidden flex overflow-x-auto gap-1.5 pb-1">
+          {ALL_REPORTS.map((r) => {
             const Icon = r.icon;
             return (
               <button
                 key={r.key}
                 type="button"
                 onClick={() => setActiveReport(r.key)}
-                className={`flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+                className={cn(
+                  "flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-colors shrink-0",
                   activeReport === r.key
-                    ? "border-violet-600 text-violet-600"
-                    : "border-transparent text-slate-500 hover:border-slate-200 hover:text-slate-700"
-                }`}
+                    ? "bg-violet-600 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3.5 w-3.5" />
                 {r.label}
               </button>
             );
           })}
         </div>
 
-        <div className="p-4 sm:p-6">
+        {/* Report content */}
+        <div className="min-w-0">
+          {/* Active report header */}
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+              <ActiveIcon className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">{activeReportMeta?.label}</h2>
+              <p className="text-xs text-slate-500">{activeReportMeta?.description}</p>
+            </div>
+          </div>
+
           {error && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}

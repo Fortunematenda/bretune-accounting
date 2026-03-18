@@ -155,107 +155,90 @@ export default function QuoteForm({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <div className="lg:col-span-8 space-y-6">
-        <div className="rounded-xl border border-violet-100 bg-white p-5 shadow-sm">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-sm font-semibold text-slate-900">Quote details</div>
-              <div className="mt-1 text-xs text-slate-500">
-                {isEdit && initialQuote?.quoteNumber
-                  ? `Quote ${initialQuote.quoteNumber}`
-                  : "Quote number is assigned when saved"}
-              </div>
-            </div>
+    <div className="space-y-6">
+      <div className="rounded-xl border border-violet-100 bg-white p-5 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Customer</label>
+            <select
+              className="h-11 w-full rounded-lg border border-violet-200 bg-white px-3 text-sm focus:border-violet-400 focus:ring-2 focus:ring-violet-200 disabled:opacity-60"
+              value={values.clientId}
+              onChange={(e) => setValues((p) => ({ ...p, clientId: e.target.value }))}
+              disabled={isClientLocked}
+              required
+            >
+              <option value="">Select customer</option>
+              {(clients || []).map((c) => (
+                <option key={c.id} value={c.id}>
+                  {(c.companyName || c.contactName) || c.email}
+                </option>
+              ))}
+            </select>
+            {isClientLocked ? (
+              <div className="text-xs text-slate-500">Customer is preset for this quote</div>
+            ) : null}
           </div>
 
-          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Customer</label>
-              <select
-                className="h-11 w-full rounded-lg border border-violet-200 bg-white px-3 text-sm focus:border-violet-400 focus:ring-2 focus:ring-violet-200 disabled:opacity-60"
-                value={values.clientId}
-                onChange={(e) => setValues((p) => ({ ...p, clientId: e.target.value }))}
-                disabled={isClientLocked}
-                required
-              >
-                <option value="">Select customer</option>
-                {(clients || []).map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {(c.companyName || c.contactName) || c.email}
-                  </option>
-                ))}
-              </select>
-              {isClientLocked ? (
-                <div className="text-xs text-slate-500">Customer is preset for this quote</div>
-              ) : null}
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Expiry date</label>
-              <Input
-                type="date"
-                value={values.expiryDate}
-                onChange={(e) => setValues((p) => ({ ...p, expiryDate: e.target.value }))}
-                required
-                className="h-11 border-violet-200 focus:border-violet-400"
-              />
-              <div className="text-xs text-slate-500">Quote valid until this date</div>
-            </div>
-
-            <div className="md:col-span-2 space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Notes</label>
-              <Input
-                value={values.notes}
-                onChange={(e) => setValues((p) => ({ ...p, notes: e.target.value }))}
-                placeholder="Optional notes for the quote"
-                className="border-violet-200 focus:border-violet-400"
-              />
-            </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Expiry date</label>
+            <Input
+              type="date"
+              value={values.expiryDate}
+              onChange={(e) => setValues((p) => ({ ...p, expiryDate: e.target.value }))}
+              required
+              className="h-11 border-violet-200 focus:border-violet-400"
+            />
+            <div className="text-xs text-slate-500">Quote valid until this date</div>
           </div>
-        </div>
 
-        <QuoteLineItems
-          items={values.items}
-          setItems={(fn) =>
-            setValues((p) => ({
-              ...p,
-              items: typeof fn === "function" ? fn(p.items) : fn,
-            }))
-          }
-          products={products}
-          vatEnabled={vatEnabled}
-          errors={{}}
-          onAddProduct={(rowIndex) => {
-            setAddProductRowIndex(rowIndex);
-            setAddProductOpen(true);
-          }}
-        />
-
-        <AddProductModal
-          open={addProductOpen}
-          onOpenChange={setAddProductOpen}
-          onCreated={handleProductCreated}
-        />
-
-        {serverError ? <div className="text-sm text-red-600 rounded-lg bg-red-50 p-3">{serverError}</div> : null}
-
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <Button
-            type="button"
-            disabled={!canSubmit || loading}
-            onClick={handleSubmit}
-            className="bg-violet-600 hover:bg-violet-700 text-white px-6"
-          >
-            {loading ? "Saving…" : submitLabel}
-          </Button>
+          <div className="md:col-span-2 space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Notes</label>
+            <Input
+              value={values.notes}
+              onChange={(e) => setValues((p) => ({ ...p, notes: e.target.value }))}
+              placeholder="Optional notes for the quote"
+              className="border-violet-200 focus:border-violet-400"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="lg:col-span-4">
-        <div className="sticky top-4">
-          <QuoteSummary items={summaryItems} />
-        </div>
+      <QuoteLineItems
+        items={values.items}
+        setItems={(fn) =>
+          setValues((p) => ({
+            ...p,
+            items: typeof fn === "function" ? fn(p.items) : fn,
+          }))
+        }
+        products={products}
+        vatEnabled={vatEnabled}
+        errors={{}}
+        onAddProduct={(rowIndex) => {
+          setAddProductRowIndex(rowIndex);
+          setAddProductOpen(true);
+        }}
+      />
+
+      <QuoteSummary items={summaryItems} />
+
+      <AddProductModal
+        open={addProductOpen}
+        onOpenChange={setAddProductOpen}
+        onCreated={handleProductCreated}
+      />
+
+      {serverError ? <div className="text-sm text-red-600 rounded-lg bg-red-50 p-3">{serverError}</div> : null}
+
+      <div className="flex items-center justify-end gap-3 pt-2">
+        <Button
+          type="button"
+          disabled={!canSubmit || loading}
+          onClick={handleSubmit}
+          className="bg-violet-600 hover:bg-violet-700 text-white px-6"
+        >
+          {loading ? "Saving…" : submitLabel}
+        </Button>
       </div>
     </div>
   );

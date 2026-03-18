@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, MoreHorizontal, Palette, Plus, Search } from "lucide-react";
+import { ChevronDown, Columns3, Filter, MoreHorizontal, Plus, Search } from "lucide-react";
 import Input from "../ui/input";
 import Button from "../ui/button";
 import Select from "../ui/select";
@@ -45,7 +45,7 @@ function ActionsDropdown({ items, children }) {
       <div
         ref={menuRef}
         role="menu"
-        className="fixed z-[9999] w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+        className="fixed z-[9999] w-48 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg py-1"
         style={{ top: pos.top, left: pos.left }}
       >
         {resolved.map((it) => (
@@ -54,8 +54,8 @@ function ActionsDropdown({ items, children }) {
             type="button"
             role="menuitem"
             className={cn(
-              "w-full px-3 py-2 text-left text-sm hover:bg-slate-50 focus:outline-none",
-              it.tone === "danger" ? "text-red-700" : "text-slate-700",
+              "w-full px-3 py-2 text-left text-[13px] hover:bg-slate-50 focus:outline-none transition-colors",
+              it.tone === "danger" ? "text-red-600" : "text-slate-700",
               it.disabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={it.disabled}
@@ -78,7 +78,7 @@ function ActionsDropdown({ items, children }) {
         ref={btnRef}
         type="button"
         onClick={toggle}
-        className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -137,7 +137,7 @@ export default function ListPageToolbar({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-2.5",
+        "flex flex-wrap items-center gap-2.5 rounded-lg bg-white border border-slate-200/80 px-3 py-2",
         className
       )}
     >
@@ -197,15 +197,15 @@ export default function ListPageToolbar({
         </div>
       ) : null}
 
-      {/* Palette (columns) button */}
+      {/* Columns button */}
       {showColumns ? (
         <Button
           variant="outline"
-          className="h-9 w-9 shrink-0 rounded-lg border border-slate-300 bg-slate-700 p-0 text-white hover:bg-slate-600"
+          className="h-9 shrink-0 rounded-lg border border-slate-200 bg-white px-2.5 text-slate-500 hover:text-slate-700 hover:bg-slate-50 hover:border-slate-300"
           onClick={onColumnsClick}
           aria-label="Columns"
         >
-          <Palette className="h-4 w-4" />
+          <Columns3 className="h-4 w-4" />
         </Button>
       ) : null}
 

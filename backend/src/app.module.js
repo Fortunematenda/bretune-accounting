@@ -39,6 +39,8 @@ const { FixedAssetsModule } = require('./modules/fixed-assets/fixed-assets.modul
 const { PayrollModule } = require('./modules/payroll/payroll.module');
 const { HealthModule } = require('./modules/health/health.module');
 const { LoansModule } = require('./modules/loans/loans.module');
+const { AIModule } = require('./modules/ai/ai.module');
+const { ISPModule } = require('./modules/isp/isp.module');
 
 @Module({
   imports: [
@@ -87,6 +89,8 @@ const { LoansModule } = require('./modules/loans/loans.module');
     PayrollModule,
     HealthModule,
     LoansModule,
+    AIModule,
+    ISPModule,
   ],
   providers: [
     {

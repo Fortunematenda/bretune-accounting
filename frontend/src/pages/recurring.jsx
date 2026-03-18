@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import Button from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import Dialog from "../components/ui/dialog";
 import Input from "../components/ui/input";
 import Money from "../components/common/money";
@@ -373,11 +372,8 @@ export default function RecurringPage() {
         }
       />
 
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Recurring List</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+        <div className="p-4">
           <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-2.5">
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -563,8 +559,8 @@ export default function RecurringPage() {
               />
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {createOpen && (
         <Dialog

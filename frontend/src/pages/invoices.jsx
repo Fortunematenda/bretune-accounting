@@ -6,7 +6,8 @@ import InvoiceTable from "../components/invoices/invoice-table";
 import { getAccessToken } from "../features/auth/token-store";
 import Dialog from "../components/ui/dialog";
 import Button from "../components/ui/button";
-import { Plus, Receipt, SlidersHorizontal } from "lucide-react";
+import { Plus, Receipt, SlidersHorizontal, FileText } from "lucide-react";
+import EmptyState from "../components/common/EmptyState";
 import ColumnPickerDialog from "../components/common/ColumnPickerDialog";
 import ListPageToolbar from "../components/common/ListPageToolbar";
 import PageHeader from "../components/common/PageHeader";
@@ -255,7 +256,7 @@ export default function InvoicesPage() {
       <PageHeader
         title="Invoices"
         subtitle="Track once-off and recurring invoices"
-        icon={<Receipt className="h-6 w-6 text-violet-600" />}
+        icon={<Receipt className="h-5 w-5 text-violet-600" />}
         extra={
           (clientId || status) && (
             <>
@@ -272,11 +273,9 @@ export default function InvoicesPage() {
         }
       />
 
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Invoice List</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="p-4">
           {selectedIds.length > 0 ? (
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 text-sm">
               <div className="font-medium text-violet-900">
@@ -306,23 +305,24 @@ export default function InvoicesPage() {
               nextParams.delete("page");
               setSearchParams(nextParams, { replace: true });
             }}
-            searchPlaceholder="Invoice number"
+            searchPlaceholder="Search invoices…"
             limit={limit}
             onLimitChange={setLimit}
             onColumnsClick={() => setColumnsOpen(true)}
           />
           {success ? (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
+            <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-800">
               {success}
             </div>
           ) : null}
           {error ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+            <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
               {error}
             </div>
           ) : null}
+          </div>
 
-          <div className="mt-4">
+          <div>
             <InvoiceTable
               rows={sortRows(data?.data || [])}
               page={data?.meta?.page ?? page}
@@ -362,7 +362,19 @@ export default function InvoicesPage() {
             />
 
             {data && (data.data || []).length === 0 ? (
-              <div className="mt-4 text-sm text-slate-600">No invoices found.</div>
+              <EmptyState
+                icon={Receipt}
+                title="No invoices found"
+                description={q ? "Try adjusting your search terms" : "Create your first invoice to get started"}
+                action={
+                  !q ? (
+                    <Button onClick={() => navigate("/invoices/new")} className="h-9">
+                      <Plus className="h-4 w-4 mr-1.5" />
+                      New Invoice
+                    </Button>
+                  ) : null
+                }
+              />
             ) : null}
 
             {data?.meta && (data.data || []).length > 0 ? (

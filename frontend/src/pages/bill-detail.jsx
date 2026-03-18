@@ -5,9 +5,10 @@ import Button from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import RecordBillPaymentDialog from "../components/payments/RecordBillPaymentDialog";
 import Money from "../components/common/money";
-import BillStatusBadge from "../components/bills/BillStatusBadge";
+import StatusBadge from "../components/common/StatusBadge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import ActionsMenu from "../components/common/ActionsMenu";
+import { ArrowLeft, FileText } from "lucide-react";
 
 function fmtDate(d) {
   if (!d) return "—";
@@ -132,219 +133,143 @@ export default function BillDetailsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-xl font-semibold text-slate-900">Bill Details</h1>
-              <p className="mt-1 text-sm text-slate-500">Review bill details and status</p>
-            </div>
+    <div className="space-y-0">
+      {/* Breadcrumb */}
+      <nav className="mb-4">
+        <button
+          type="button"
+          onClick={() => navigate("/bills")}
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Bills
+        </button>
+      </nav>
 
-            <div className="flex flex-wrap items-center gap-2">
+      {loading ? <div className="py-12 text-center text-sm text-slate-500">Loading…</div> : null}
+      {error ? <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">{error}</div> : null}
+
+      {bill ? (
+        <>
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4 pb-5 mb-6 border-b border-slate-200">
+            <div className="flex items-start gap-3 min-w-0">
+              <div className="h-11 w-11 rounded-lg bg-violet-50 ring-1 ring-violet-100 flex items-center justify-center shrink-0">
+                <FileText className="h-5 w-5 text-violet-600" strokeWidth={1.7} />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-xl font-semibold text-slate-900">{formatBillDisplayNumber(bill)}</h1>
+                  <StatusBadge status={overdue ? "OVERDUE" : bill.status} />
+                </div>
+                <p className="mt-0.5 text-sm text-slate-500">{bill.vendorName || "—"}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button variant="outline" className="h-9" onClick={() => navigate(`/bills/${id}/edit`)} disabled={saving || loading}>Edit</Button>
               <ActionsMenu
                 ariaLabel="Bill actions"
-                menuWidthClassName="w-56"
+                buttonClassName="h-9 w-9"
+                menuWidthClassName="w-52"
                 items={[
-                  {
-                    key: "edit",
-                    label: "Edit",
-                    disabled: saving || loading,
-                    onSelect: () => navigate(`/bills/${id}/edit`),
-                  },
-                  {
-                    key: "record_payment",
-                    label: "Record payment",
-                    disabled: saving || loading || bill?.status === "PAID",
-                    onSelect: () => setRecordPaymentOpen(true),
-                  },
-                  {
-                    key: "mark_paid",
-                    label: "Mark as paid",
-                    disabled: saving || loading || bill?.status === "PAID",
-                    onSelect: markPaid,
-                  },
-                  {
-                    key: "delete",
-                    label: "Delete",
-                    tone: "danger",
-                    disabled: saving || loading,
-                    onSelect: deleteBill,
-                  },
+                  { key: "record_payment", label: "Record Payment", disabled: saving || loading || bill?.status === "PAID", onSelect: () => setRecordPaymentOpen(true) },
+                  { key: "mark_paid", label: "Mark as Paid", disabled: saving || loading || bill?.status === "PAID", onSelect: markPaid },
+                  { key: "delete", label: "Delete Bill", tone: "danger", disabled: saving || loading, onSelect: deleteBill },
                 ]}
               />
             </div>
           </div>
-        </div>
 
-        <div className="p-4 sm:p-6 space-y-4">
-          {error ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+          {/* Summary KPIs */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <Card><CardContent className="p-3.5"><div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Total</div><div className="mt-1 text-lg font-semibold tabular-nums text-slate-900"><Money value={bill.totalAmount} /></div></CardContent></Card>
+            <Card><CardContent className="p-3.5"><div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Issue Date</div><div className="mt-1 text-lg font-semibold text-slate-900">{fmtDate(bill.billDate)}</div></CardContent></Card>
+            <Card><CardContent className="p-3.5"><div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Due Date</div><div className={"mt-1 text-lg font-semibold " + (overdue ? "text-rose-600" : "text-slate-900")}>{fmtDate(bill.dueDate)}</div></CardContent></Card>
+            <Card><CardContent className="p-3.5"><div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Tax</div><div className="mt-1 text-lg font-semibold tabular-nums text-slate-900"><Money value={totals.tax || 0} /></div></CardContent></Card>
+          </div>
+
+          {/* Notes */}
+          {parsed.memo ? (
+            <Card className="border-slate-200/80 mb-6">
+              <CardContent className="p-4">
+                <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide mb-1.5">Notes</div>
+                <p className="text-sm text-slate-700">{parsed.memo}</p>
+              </CardContent>
+            </Card>
           ) : null}
 
-          {loading ? <div className="text-sm text-slate-600">Loading…</div> : null}
-
-          {bill ? (
-            <>
-              <Card className="hover:translate-y-0">
-                <CardHeader>
-                  <CardTitle>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0">
-                        <div className="text-xs font-medium text-slate-500">Bill</div>
-                        <div className="mt-1 text-base font-semibold text-slate-900 truncate">
-                          {formatBillDisplayNumber(bill)}
-                        </div>
-                        <div className="mt-1 text-sm text-slate-600">{bill.vendorName || "—"}</div>
-                      </div>
-                      <div className="shrink-0">
-                        <BillStatusBadge status={bill.status} overdue={overdue} />
-                      </div>
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                      <div className="text-xs text-slate-500">Issue date</div>
-                      <div className="mt-1 font-medium">{fmtDate(bill.billDate)}</div>
-                    </div>
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                      <div className="text-xs text-slate-500">Due date</div>
-                      <div className="mt-1 font-medium">{fmtDate(bill.dueDate)}</div>
-                    </div>
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                      <div className="text-xs text-slate-500">Total amount</div>
-                      <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">
-                        <Money value={bill.totalAmount} />
-                      </div>
-                    </div>
+          {/* Line items + Summary */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              <Card className="border-slate-200/80 overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="px-4 py-3">
+                    <h3 className="text-sm font-medium text-slate-700">Line Items</h3>
                   </div>
+                  {Array.isArray(parsed.items) && parsed.items.length > 0 ? (
+                    <div className="overflow-auto">
+                      <table className="min-w-full text-[13px]">
+                        <thead className="bg-slate-50/80">
+                          <tr className="border-y border-slate-200/80">
+                            <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Description</th>
+                            <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Category</th>
+                            <th className="py-2.5 px-3 text-right text-xs font-medium text-slate-500">Qty</th>
+                            <th className="py-2.5 px-3 text-right text-xs font-medium text-slate-500">Unit Cost</th>
+                            <th className="py-2.5 px-3 text-right text-xs font-medium text-slate-500">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white">
+                          {parsed.items.map((it, idx) => {
+                            const qty = Number(it?.quantity ?? 0);
+                            const unit = Number(it?.unitCost ?? 0);
+                            const rate = Number(it?.taxRate ?? 0);
+                            const subtotal = (Number.isFinite(qty) ? qty : 0) * (Number.isFinite(unit) ? unit : 0);
+                            const total = subtotal + subtotal * (Number.isFinite(rate) ? rate / 100 : 0);
 
-                  <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-3">
-                    <div className="lg:col-span-2">
-                      <div className="text-xs font-medium text-slate-500">Notes</div>
-                      <div className="mt-1 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                        {parsed.memo ? parsed.memo : "—"}
-                      </div>
+                            return (
+                              <tr key={idx} className="border-b border-slate-100">
+                                <td className="py-2.5 px-3 font-medium text-slate-900">{it?.description || "—"}</td>
+                                <td className="py-2.5 px-3 text-slate-500">{it?.category || "—"}</td>
+                                <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">{Number.isFinite(qty) ? qty : "—"}</td>
+                                <td className="py-2.5 px-3 text-right tabular-nums text-slate-600"><Money value={Number.isFinite(unit) ? unit : 0} /></td>
+                                <td className="py-2.5 px-3 text-right tabular-nums font-medium text-slate-900"><Money value={total} /></td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-slate-800 dark:bg-slate-900">
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-600 dark:text-slate-300">Subtotal</span>
-                        <span className="font-medium text-slate-900 dark:text-slate-100">
-                          <Money value={totals.subtotal || 0} />
-                        </span>
-                      </div>
-                      <div className="mt-2 flex items-center justify-between">
-                        <span className="text-slate-600 dark:text-slate-300">Tax</span>
-                        <span className="font-medium text-slate-900 dark:text-slate-100">
-                          <Money value={totals.tax || 0} />
-                        </span>
-                      </div>
-                      <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                        <span className="text-slate-700 dark:text-slate-200 font-semibold">Total</span>
-                        <span className="text-slate-900 dark:text-slate-100 font-semibold">
-                          <Money value={totals.total || bill.totalAmount} />
-                        </span>
-                      </div>
+                  ) : (
+                    <div className="px-4 pb-4 text-sm text-slate-400 italic">No line items stored for this bill.</div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            <div>
+              <Card className="border-slate-200/80">
+                <CardContent className="p-4">
+                  <h3 className="text-sm font-medium text-slate-700 mb-3">Summary</h3>
+                  <div className="space-y-2.5 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">Subtotal</span>
+                      <span className="font-medium tabular-nums text-slate-800"><Money value={totals.subtotal || 0} /></span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">Tax</span>
+                      <span className="font-medium tabular-nums text-slate-800"><Money value={totals.tax || 0} /></span>
+                    </div>
+                    <div className="pt-2.5 mt-2 border-t border-slate-200 flex items-center justify-between">
+                      <span className="font-bold text-violet-700">Total</span>
+                      <span className="font-bold tabular-nums text-violet-700"><Money value={totals.total || bill.totalAmount} /></span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
-                  <Card className="hover:translate-y-0">
-                    <CardHeader>
-                      <CardTitle>Line items</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {Array.isArray(parsed.items) && parsed.items.length > 0 ? (
-                        <div className="overflow-hidden rounded-xl border border-slate-200">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Description</TableHead>
-                                <TableHead>Account / Category</TableHead>
-                                <TableHead className="text-right">Qty</TableHead>
-                                <TableHead className="text-right">Unit Cost</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {parsed.items.map((it, idx) => {
-                                const qty = Number(it?.quantity ?? 0);
-                                const unit = Number(it?.unitCost ?? 0);
-                                const rate = Number(it?.taxRate ?? 0);
-                                const subtotal = (Number.isFinite(qty) ? qty : 0) * (Number.isFinite(unit) ? unit : 0);
-                                const total = subtotal + subtotal * (Number.isFinite(rate) ? rate / 100 : 0);
-
-                                return (
-                                  <TableRow key={idx}>
-                                    <TableCell className="font-medium text-slate-900 dark:text-slate-100">
-                                      {it?.description || "—"}
-                                    </TableCell>
-                                    <TableCell className="text-slate-600 dark:text-slate-300">
-                                      {it?.category || "—"}
-                                    </TableCell>
-                                    <TableCell className="text-right text-slate-600 dark:text-slate-300">
-                                      {Number.isFinite(qty) ? qty : "—"}
-                                    </TableCell>
-                                    <TableCell className="text-right text-slate-600 dark:text-slate-300">
-                                      <Money value={Number.isFinite(unit) ? unit : 0} />
-                                    </TableCell>
-                                    <TableCell className="text-right text-slate-900 dark:text-slate-100">
-                                      <Money value={total} />
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      ) : (
-                        <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                          No line items stored for this bill.
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div>
-                  <Card className="hover:translate-y-0">
-                    <CardHeader>
-                      <CardTitle>Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-600 dark:text-slate-300">Subtotal</span>
-                          <span className="font-medium text-slate-900 dark:text-slate-100">
-                            <Money value={totals.subtotal || 0} />
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-600 dark:text-slate-300">Tax</span>
-                          <span className="font-medium text-slate-900 dark:text-slate-100">
-                            <Money value={totals.tax || 0} />
-                          </span>
-                        </div>
-                        <div className="pt-2 mt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                          <span className="text-slate-700 dark:text-slate-200 font-semibold">Total</span>
-                          <span className="text-slate-900 dark:text-slate-100 font-semibold">
-                            <Money value={totals.total || bill.totalAmount} />
-                          </span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </>
-          ) : null}
-        </div>
-      </div>
+            </div>
+          </div>
+        </>
+      ) : null}
 
       {recordPaymentOpen && bill ? (
         <RecordBillPaymentDialog

@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { useAuth } from "./features/auth/auth-context";
 import AppShell from "./components/layout/app-shell";
 import LandingPage from "./pages/landing";
+
 import AboutPage from "./pages/about";
 import GuidesPage from "./pages/guides";
 import BlogPage from "./pages/blog";

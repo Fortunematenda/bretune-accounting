@@ -18,7 +18,7 @@ import { getAccessToken } from "../../features/auth/token-store";
 export default function AppShell({ children }) {
   const { logout, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const hasToken = Boolean(getAccessToken());
 
@@ -51,10 +51,10 @@ export default function AppShell({ children }) {
   }
 
   return (
-    <div className="h-screen overflow-hidden flex bg-violet-50/40">
+    <div className="h-screen overflow-hidden flex bg-slate-50/80">
       <aside
         className={cn(
-          "hidden md:flex md:flex-col border-r border-slate-200 shadow-sm transition-[width] duration-200 overflow-hidden",
+          "hidden md:flex md:flex-col border-r border-slate-200/50 transition-[width] duration-200 overflow-hidden",
           sidebarCollapsed ? "md:w-[72px]" : "md:w-64"
         )}
       >

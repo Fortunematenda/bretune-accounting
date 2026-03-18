@@ -9,8 +9,8 @@ import RecordPaymentDialog from "../components/payments/RecordPaymentDialog";
 import { ArrowLeft, Download, FileText, FileBarChart, Minus, Paperclip, Plus, Receipt, StickyNote, Trash2, Upload, Wallet } from "lucide-react";
 import Money from "../components/common/money";
 import ActionsMenu from "../components/common/ActionsMenu";
-import InvoiceStatusBadge from "../components/invoices/invoice-status-badge";
-import QuoteStatusBadge from "../components/quotes/QuoteStatusBadge";
+import StatusBadge from "../components/common/StatusBadge";
+import EmptyState from "../components/common/EmptyState";
 import { cn } from "../lib/utils";
 
 const TABS = [
@@ -376,148 +376,111 @@ export default function CustomerDetailPage() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Breadcrumbs */}
-      <nav className="text-sm text-slate-500 dark:text-slate-400">
-        <button type="button" onClick={() => navigate("/customers")} className="hover:text-slate-700 dark:hover:text-slate-300">
+    <div className="space-y-6 min-h-screen">
+      {/* Breadcrumb */}
+      <nav>
+        <button
+          type="button"
+          onClick={() => navigate("/customers")}
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
           Customers
         </button>
       </nav>
 
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <Button
-            variant="outline"
-            className="h-10 w-10 p-0"
-            onClick={() => navigate(-1)}
-            aria-label="Back"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="min-w-0">
-            <div className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 truncate">{title}</div>
-            {contactSubtitle ? <div className="mt-0.5 text-sm text-slate-600 dark:text-slate-400 truncate">{contactSubtitle}</div> : null}
-            <div className="mt-2 flex flex-wrap gap-2">
-              {customer?.clientSeq != null ? (
-                <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                  ID {formatClientId(customer.clientSeq)}
-                </span>
-              ) : null}
-              {customer?.status ? (
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                  <span className="relative inline-flex h-2 w-2">
-                    <span
-                      className={
-                        String(customer.status).toUpperCase() === "ACTIVE"
-                          ? "absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"
-                          : "absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"
-                      }
-                    />
-                    <span
-                      className={
-                        String(customer.status).toUpperCase() === "ACTIVE"
-                          ? "relative inline-flex h-2 w-2 rounded-full bg-emerald-500"
-                          : "relative inline-flex h-2 w-2 rounded-full bg-rose-500"
-                      }
-                    />
-                  </span>
-                  {String(customer.status)}
-                </span>
-              ) : null}
-              {customer?.city ? (
-                <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                  {customer.city}
-                </span>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
-        {id ? (
-          <ActionsMenu
-            ariaLabel="Customer actions"
-            buttonClassName="h-10 w-10"
-            buttonIconClassName="h-5 w-5"
-            menuWidthClassName="w-56"
-            items={[
-              {
-                key: "invoice",
-                label: "Create Invoice",
-                onSelect: () => navigate(`/invoices/new?clientId=${id}`),
-              },
-              {
-                key: "quote",
-                label: "Create Quote",
-                onSelect: () => navigate(`/quotes/new?clientId=${id}`),
-              },
-              {
-                key: "payment",
-                label: "Add Payment",
-                onSelect: () => navigate(`/payments?clientId=${id}`),
-              },
-              {
-                key: "credit",
-                label: "Create Credit",
-                onSelect: () => window.alert("Credit notes are not enabled yet."),
-              },
-              {
-                key: "statement",
-                label: "Send Statement",
-                onSelect: () => navigate(`/statements/client?clientId=${id}`),
-              },
-            ]}
-          />
-        ) : null}
-      </div>
-
-      {loading ? <div className="text-sm text-slate-600">Loading…</div> : null}
-      {error ? <div className="text-sm text-red-600">{error}</div> : null}
-      {!loading && !error && !customer ? <div className="text-sm text-slate-600">Customer not found.</div> : null}
+      {loading ? <div className="py-12 text-center text-sm text-slate-500">Loading…</div> : null}
+      {error ? <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">{error}</div> : null}
+      {!loading && !error && !customer ? <div className="py-12 text-center text-sm text-slate-500">Customer not found.</div> : null}
 
       {!loading && !error && customer ? (
         <>
-          {/* Summary bar */}
-          <div className="flex flex-wrap items-center justify-end gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/50">
-            <span className="text-sm text-slate-600 dark:text-slate-400">
-              Account balance <strong className="text-slate-900 dark:text-slate-100 ml-1"><Money value={Number(customer.balance || 0)} /></strong>
-            </span>
-          </div>
+          {/* Header card */}
+          <Card className="border-slate-200/80 shadow-sm overflow-hidden">
+            <CardContent className="p-0">
+              <div className="bg-gradient-to-r from-violet-600 to-violet-500 px-6 py-5">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="h-14 w-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-lg font-bold shrink-0 ring-2 ring-white/30">
+                      {initials}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <h1 className="text-xl font-bold text-white truncate">{title}</h1>
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                          String(customer.status).toUpperCase() === "ACTIVE" ? "bg-emerald-400/20 text-emerald-100" :
+                          String(customer.status).toUpperCase() === "INACTIVE" ? "bg-white/20 text-white/70" :
+                          "bg-amber-400/20 text-amber-100"
+                        }`}>{customer.status}</span>
+                        {customer?.clientSeq != null ? (
+                          <span className="font-mono text-xs text-white/60">#{formatClientId(customer.clientSeq)}</span>
+                        ) : null}
+                      </div>
+                      {contactSubtitle ? <p className="mt-1 text-sm text-violet-100 truncate">{contactSubtitle}</p> : null}
+                      <p className="mt-0.5 text-xs text-violet-200/70">Customer since {memberSince}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button variant="outline" className="h-9 border-white/30 text-white bg-white/10 hover:bg-white/20" onClick={() => setEditMode(true)}>Edit</Button>
+                    <ActionsMenu
+                      ariaLabel="Customer actions"
+                      buttonClassName="h-9 w-9 border-white/30 text-white bg-white/10 hover:bg-white/20"
+                      menuWidthClassName="w-52"
+                      items={[
+                        { key: "invoice", label: "Create Invoice", onSelect: () => navigate(`/invoices/new?clientId=${id}`) },
+                        { key: "quote", label: "Create Quote", onSelect: () => navigate(`/quotes/new?clientId=${id}`) },
+                        { key: "payment", label: "Record Payment", onSelect: () => setRecordPaymentOpen(true) },
+                        { key: "statement", label: "Send Statement", onSelect: () => navigate(`/statements/client?clientId=${id}`) },
+                        { key: "email", label: "Send Email", disabled: !customer.email, onSelect: () => { if (customer.email) { window.location.href = `mailto:${customer.email.replace(/\s*[,;]\s*/g, ",")}`; } } },
+                        { key: "delete", label: "Delete Customer", tone: "danger", onSelect: () => setDeleteConfirmOpen(true) },
+                      ]}
+                    />
+                  </div>
+                </div>
+              </div>
 
-          {/* Action buttons */}
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <Button variant="outline" onClick={() => navigate(`/invoices/new?clientId=${customer.id}`)}>
-              Create Invoice
-            </Button>
-            <Button variant="outline" onClick={() => navigate(`/quotes/new?clientId=${customer.id}`)}>
-              Create Quote
-            </Button>
-            <Button variant="outline" onClick={() => setRecordPaymentOpen(true)}>
-              Record Payment
-            </Button>
-            <Button variant="outline" onClick={() => navigate(`/statements/client?clientId=${customer.id}`)}>
-              Send Statement
-            </Button>
-            <Button variant="outline" onClick={() => setEditMode(true)}>
-              Add Note
-            </Button>
-          </div>
+              {/* KPI strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 divide-x divide-slate-200/80 border-b border-slate-200/80">
+                <div className="px-5 py-4">
+                  <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Balance</div>
+                  <div className="mt-1 text-lg font-bold tabular-nums text-slate-900"><Money value={Number(customer.balance || 0)} /></div>
+                </div>
+                <div className="px-5 py-4">
+                  <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Open</div>
+                  <div className="mt-1 text-lg font-bold tabular-nums text-slate-900">{kpis.openInvoices}</div>
+                </div>
+                <div className="px-5 py-4">
+                  <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Overdue</div>
+                  <div className={"mt-1 text-lg font-bold tabular-nums " + (kpis.overdueTotal > 0 ? "text-rose-600" : "text-slate-900")}><Money value={kpis.overdueTotal} /></div>
+                </div>
+                <div className="px-5 py-4">
+                  <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Credit</div>
+                  <div className={"mt-1 text-lg font-bold tabular-nums " + (kpis.creditTotal > 0 ? "text-emerald-600" : "text-slate-900")}><Money value={kpis.creditTotal} /></div>
+                </div>
+                <div className="px-5 py-4">
+                  <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Paid</div>
+                  <div className="mt-1 text-lg font-bold tabular-nums text-slate-900"><Money value={kpis.paidTotal} /></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Tab bar */}
-          <div className="border-b border-slate-200 dark:border-slate-700">
-            <nav className="flex gap-1 overflow-x-auto" aria-label="Customer sections">
+          <div className="border-b border-slate-200">
+            <nav className="flex gap-0 overflow-x-auto -mb-px" aria-label="Customer sections">
               {TABS.map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setActiveTab(key)}
                   className={cn(
-                    "inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors",
+                    "inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-2.5 text-[13px] font-medium transition-colors",
                     activeTab === key
-                      ? "border-violet-600 text-violet-600 dark:border-violet-400 dark:text-violet-400"
-                      : "border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-200"
+                      ? "border-violet-600 text-violet-700"
+                      : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
                   )}
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
+                  <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
                   {label}
                 </button>
               ))}
@@ -525,192 +488,141 @@ export default function CustomerDetailPage() {
           </div>
 
           {/* Tab content */}
-          <div className="pt-4">
+          <div>
             {activeTab === "information" && (
-              <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
-                <Card>
-                  <CardContent className="p-5">
-                    <div className="relative">
-                      <div className="absolute top-0 right-0">
-                        <ActionsMenu
-                          ariaLabel="Customer profile actions"
-                          buttonClassName="h-8 w-8"
-                          buttonIconClassName="h-4 w-4"
-                          menuWidthClassName="w-48"
-                          items={[
-                            { key: "edit", label: "Edit", onSelect: () => setEditMode(true) },
-                            { key: "delete", label: "Delete", tone: "danger", onSelect: () => setDeleteConfirmOpen(true) },
-                          ]}
-                        />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <Card className="border-slate-200/80 shadow-sm">
+                  <CardHeader className="pb-3 border-b border-slate-100">
+                    <CardTitle className="inline-flex items-center gap-2 text-sm font-semibold">
+                      <FileText className="h-4 w-4 text-violet-500" />
+                      Contact Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Company Name</dt>
+                        <dd className="mt-1 text-slate-800 font-medium">{customer.companyName || "—"}</dd>
                       </div>
-                    </div>
-                    <div className="flex flex-col items-center text-center pt-2">
-                      <div className="h-20 w-20 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 text-xl font-semibold dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
-                        {initials}
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Contact Name</dt>
+                        <dd className="mt-1 text-slate-800">{customer.contactName || "—"}</dd>
                       </div>
-                      <div className="mt-3 text-xs text-slate-500">Member since {memberSince}</div>
-                      <div className="mt-4 w-full space-y-2">
-                        <Button
-                          className="w-full"
-                          onClick={() => {
-                            if (customer.email) {
-                              const addr = customer.email.replace(/\s*[,;]\s*/g, ",");
-                              window.location.href = `mailto:${addr}`;
-                            }
-                          }}
-                          disabled={!customer.email}
-                        >
-                          Send Email
-                        </Button>
-                        <Button variant="outline" className="w-full" onClick={() => navigate(`/statements/client?clientId=${customer.id}`)}>
-                          Statement
-                        </Button>
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Email</dt>
+                        <dd className="mt-1 text-slate-800 break-words">
+                          {customer.email
+                            ? customer.email.split(/[,;]/).map((e, i) => <div key={i} className="text-violet-600">{e.trim()}</div>)
+                            : "—"}
+                        </dd>
                       </div>
-                      <div className="mt-4 w-full rounded-lg border border-slate-200 bg-slate-50/50 p-3 text-left dark:border-slate-700 dark:bg-slate-800/50">
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                          <div>
-                            <div className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Last invoice</div>
-                            <div className="mt-0.5 text-slate-900 dark:text-slate-100">{lastInvoiceDate}</div>
-                          </div>
-                          <div>
-                            <div className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Since</div>
-                            <div className="mt-0.5 text-slate-900 dark:text-slate-100">{memberSince}</div>
-                          </div>
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Phone</dt>
+                        <dd className="mt-1 text-slate-800">{customer.phone || "—"}</dd>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Address</dt>
+                        <dd className="mt-1 text-slate-800">
+                          {[customer.address, customer.city, customer.state, customer.country, customer.postalCode].filter(Boolean).join(", ") || "—"}
+                        </dd>
+                      </div>
+                      {customer.taxNumber ? (
+                        <div>
+                          <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Tax/VAT Number</dt>
+                          <dd className="mt-1 text-slate-800 font-mono text-xs">{customer.taxNumber}</dd>
                         </div>
-                      </div>
-                    </div>
+                      ) : null}
+                    </dl>
                   </CardContent>
                 </Card>
-                <div className="space-y-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="inline-flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-slate-500" />
-                        Main information
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <div className="text-xs text-slate-500">Customer ID</div>
-                          <div className="mt-1 text-slate-900 dark:text-slate-100 font-mono">{formatClientId(customer.clientSeq)}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-500">Emails</div>
-                          <div className="mt-1 text-slate-900 dark:text-slate-100 break-words">
-                            {customer.email
-                              ? customer.email.split(/[,;]/).map((e, i) => <div key={i}>{e.trim()}</div>)
-                              : "—"}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-500">Phone</div>
-                          <div className="mt-1 text-slate-900 dark:text-slate-100">{customer.phone || "—"}</div>
-                        </div>
+                <Card className="border-slate-200/80 shadow-sm">
+                  <CardHeader className="pb-3 border-b border-slate-100">
+                    <CardTitle className="inline-flex items-center gap-2 text-sm font-semibold">
+                      <Wallet className="h-4 w-4 text-violet-500" />
+                      Financial Details
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Balance</dt>
+                        <dd className="mt-1 text-slate-800 font-semibold tabular-nums"><Money value={Number(customer.balance || 0)} /></dd>
                       </div>
-                      <div className="mt-4 text-sm">
-                        <div className="text-xs text-slate-500">Address</div>
-                        <div className="mt-1 text-slate-900 dark:text-slate-100">
-                          {[customer.address, customer.city, customer.state, customer.country].filter(Boolean).join(", ") || "—"}
-                        </div>
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Credit Limit</dt>
+                        <dd className="mt-1 text-slate-800 tabular-nums"><Money value={Number(customer.creditLimit || 0)} /></dd>
                       </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="inline-flex items-center gap-2">
-                        <Wallet className="h-4 w-4 text-slate-500" />
-                        Financial information
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <div className="text-xs text-slate-500">Balance</div>
-                          <div className="mt-1 text-slate-900 dark:text-slate-100 font-medium"><Money value={Number(customer.balance || 0)} /></div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-500">Credit limit</div>
-                          <div className="mt-1 text-slate-900 dark:text-slate-100"><Money value={Number(customer.creditLimit || 0)} /></div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-500">Payment terms</div>
-                          <div className="mt-1 text-slate-900 dark:text-slate-100">{customer.paymentTermsDays != null ? `${customer.paymentTermsDays} days` : "—"}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-500">Opening balance</div>
-                          <div className="mt-1 text-slate-900 dark:text-slate-100"><Money value={Number(customer.openingBalance || 0)} /></div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-500">Total invoiced</div>
-                          <div className="mt-1 text-slate-900 dark:text-slate-100"><Money value={Number(customer.totalInvoiced || 0)} /></div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-500">Total paid</div>
-                          <div className="mt-1 text-slate-900 dark:text-slate-100"><Money value={Number(customer.totalPaid || 0)} /></div>
-                        </div>
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Payment Terms</dt>
+                        <dd className="mt-1 text-slate-800">{customer.paymentTermsDays != null ? `${customer.paymentTermsDays} days` : "—"}</dd>
                       </div>
-                    </CardContent>
-                  </Card>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <Card><CardContent className="p-4"><div className="text-xs font-medium text-slate-600">Open invoices</div><div className="mt-1 text-2xl font-semibold">{kpis.openInvoices}</div></CardContent></Card>
-                    <Card><CardContent className="p-4"><div className="text-xs font-medium text-slate-600">Balance</div><div className="mt-1 text-2xl font-semibold"><Money value={kpis.dueTotal} /></div></CardContent></Card>
-                    <Card><CardContent className="p-4"><div className="text-xs font-medium text-slate-600">Overdue</div><div className={"mt-1 text-2xl font-semibold " + (kpis.overdueTotal > 0 ? "text-rose-700" : "text-slate-900")}><Money value={kpis.overdueTotal} /></div></CardContent></Card>
-                    <Card><CardContent className="p-4"><div className="text-xs font-medium text-slate-600">Credit</div><div className={"mt-1 text-2xl font-semibold " + (kpis.creditTotal > 0 ? "text-emerald-700" : "text-slate-900")}><Money value={kpis.creditTotal} /></div></CardContent></Card>
-                    <Card><CardContent className="p-4"><div className="text-xs font-medium text-slate-600">Paid</div><div className="mt-1 text-2xl font-semibold"><Money value={kpis.paidTotal} /></div></CardContent></Card>
-                  </div>
-                </div>
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Opening Balance</dt>
+                        <dd className="mt-1 text-slate-800 tabular-nums"><Money value={Number(customer.openingBalance || 0)} /></dd>
+                      </div>
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Invoiced</dt>
+                        <dd className="mt-1 text-slate-800 tabular-nums"><Money value={Number(customer.totalInvoiced || 0)} /></dd>
+                      </div>
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Paid</dt>
+                        <dd className="mt-1 text-slate-800 tabular-nums"><Money value={Number(customer.totalPaid || 0)} /></dd>
+                      </div>
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Last Invoice</dt>
+                        <dd className="mt-1 text-slate-800">{lastInvoiceDate}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Customer ID</dt>
+                        <dd className="mt-1 text-slate-800 font-mono text-xs">{formatClientId(customer.clientSeq)}</dd>
+                      </div>
+                    </dl>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
             {activeTab === "invoices" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between gap-3">
-                    <span>Invoices</span>
-                    <Button
-                      size="sm"
-                      className="h-8 w-8 p-0 shrink-0"
-                      onClick={() => navigate(`/invoices/new?clientId=${customer.id}`)}
-                      aria-label="Add invoice"
-                    >
-                      <Plus className="h-4 w-4" />
+              <Card className="border-slate-200/80 overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <h3 className="text-sm font-medium text-slate-700">Invoices</h3>
+                    <Button size="sm" className="h-8" onClick={() => navigate(`/invoices/new?clientId=${customer.id}`)}>
+                      <Plus className="h-3.5 w-3.5 mr-1" /> New Invoice
                     </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                  </div>
                   <div className="overflow-auto">
-                    <table className="min-w-full text-sm">
-                      <thead className="text-left text-slate-600 dark:text-slate-300">
-                        <tr className="border-b border-slate-200 dark:border-slate-800">
-                          <th className="py-3 pr-3">Invoice</th>
-                          <th className="py-3 pr-3">Issue</th>
-                          <th className="py-3 pr-3">Due</th>
-                          <th className="py-3 pr-3">Status</th>
-                          <th className="py-3 pr-3 text-right">Total</th>
-                          <th className="py-3 pr-3 text-right">Balance</th>
+                    <table className="min-w-full text-[13px]">
+                      <thead className="bg-slate-50/80">
+                        <tr className="border-y border-slate-200/80">
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Invoice</th>
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Issue</th>
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Due</th>
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Status</th>
+                          <th className="py-2.5 px-3 text-right text-xs font-medium text-slate-500">Total</th>
+                          <th className="py-2.5 px-3 text-right text-xs font-medium text-slate-500">Balance</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="bg-white">
                         {(Array.isArray(customer.invoices) ? customer.invoices : [])
                           .slice()
                           .sort((a, b) => new Date(b.issueDate || 0).getTime() - new Date(a.issueDate || 0).getTime())
                           .map((inv) => (
                             <tr
                               key={inv.id}
-                              className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 cursor-pointer"
+                              className="border-b border-slate-100 hover:bg-slate-50/80 cursor-pointer transition-colors"
                               onClick={() => navigate(`/invoices/${inv.id}`)}
                             >
-                              <td className="py-3 pr-3 font-medium text-slate-900 dark:text-slate-100">{inv.invoiceNumber}</td>
-                              <td className="py-3 pr-3 text-slate-700 dark:text-slate-300">{fmtDate(inv.issueDate)}</td>
-                              <td className="py-3 pr-3 text-slate-700 dark:text-slate-300">{fmtDate(inv.dueDate)}</td>
-                              <td className="py-3 pr-3"><InvoiceStatusBadge status={inv.status} /></td>
-                              <td className="py-3 pr-3 text-right"><Money value={Number(inv.totalAmount || 0)} /></td>
-                              <td className="py-3 pr-3 text-right"><Money value={Number(inv.balanceDue || 0)} /></td>
+                              <td className="py-2.5 px-3 font-medium text-slate-900">{inv.invoiceNumber}</td>
+                              <td className="py-2.5 px-3 text-slate-500">{fmtDate(inv.issueDate)}</td>
+                              <td className="py-2.5 px-3 text-slate-500">{fmtDate(inv.dueDate)}</td>
+                              <td className="py-2.5 px-3"><StatusBadge status={inv.status} size="sm" /></td>
+                              <td className="py-2.5 px-3 text-right tabular-nums font-medium text-slate-800"><Money value={Number(inv.totalAmount || 0)} /></td>
+                              <td className="py-2.5 px-3 text-right tabular-nums text-slate-600"><Money value={Number(inv.balanceDue || 0)} /></td>
                             </tr>
                           ))}
                         {(Array.isArray(customer.invoices) ? customer.invoices : []).length === 0 ? (
-                          <tr><td className="py-8 text-center text-slate-500" colSpan={6}>No invoices yet.</td></tr>
+                          <tr><td colSpan={6} className="py-0 px-4"><EmptyState icon={Receipt} title="No invoices yet" description="Create an invoice to get started" /></td></tr>
                         ) : null}
                       </tbody>
                     </table>
@@ -720,66 +632,60 @@ export default function CustomerDetailPage() {
             )}
 
             {activeTab === "documents" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between gap-3">
-                    <span className="inline-flex items-center gap-2">
-                      <Paperclip className="h-4 w-4 text-slate-500" />
-                      Documents
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {documentsError ? <div className="mb-3 text-sm text-red-600">{documentsError}</div> : null}
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-2">
-                      <Input
-                        placeholder="Description (optional)"
-                        value={selectedDocumentDescription}
-                        onChange={(e) => setSelectedDocumentDescription(e.target.value)}
-                      />
-                      <Input
-                        type="file"
-                        ref={documentFileInputRef}
-                        onChange={(e) => setSelectedDocumentFile(e.target?.files?.[0] || null)}
-                      />
-                      <Button
-                        type="button"
-                        onClick={handleUploadDocument}
-                        disabled={!selectedDocumentFile || uploadingDocument}
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        Upload
-                      </Button>
+              <Card className="border-slate-200/80 overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="px-4 py-3">
+                    {documentsError ? <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">{documentsError}</div> : null}
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          placeholder="Description (optional)"
+                          value={selectedDocumentDescription}
+                          onChange={(e) => setSelectedDocumentDescription(e.target.value)}
+                          className="h-9"
+                        />
+                        <Input
+                          type="file"
+                          ref={documentFileInputRef}
+                          onChange={(e) => setSelectedDocumentFile(e.target?.files?.[0] || null)}
+                          className="h-9"
+                        />
+                        <Button
+                          type="button"
+                          className="h-9 shrink-0"
+                          onClick={handleUploadDocument}
+                          disabled={!selectedDocumentFile || uploadingDocument}
+                        >
+                          <Upload className="h-4 w-4 mr-1.5" />
+                          Upload
+                        </Button>
+                      </div>
                     </div>
-                    <Button type="button" variant="outline" onClick={loadDocuments} disabled={documentsLoading}>
-                      Refresh
-                    </Button>
                   </div>
 
-                  <div className="mt-4 overflow-auto">
-                    <table className="min-w-full text-sm">
-                      <thead className="text-left text-slate-600 dark:text-slate-300">
-                        <tr className="border-b border-slate-200 dark:border-slate-800">
-                          <th className="py-3 pr-3">File</th>
-                          <th className="py-3 pr-3">Description</th>
-                          <th className="py-3 pr-3">Uploaded</th>
-                          <th className="py-3 pr-3">Size</th>
-                          <th className="py-3 pr-3 text-right">Actions</th>
+                  <div className="overflow-auto">
+                    <table className="min-w-full text-[13px]">
+                      <thead className="bg-slate-50/80">
+                        <tr className="border-y border-slate-200/80">
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">File</th>
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Description</th>
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Uploaded</th>
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Size</th>
+                          <th className="py-2.5 px-3 text-right text-xs font-medium text-slate-500">Actions</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="bg-white">
                         {(Array.isArray(documents) ? documents : []).map((doc) => (
-                          <tr key={doc.id} className="border-b border-slate-100 dark:border-slate-800">
-                            <td className="py-3 pr-3 font-medium text-slate-900 dark:text-slate-100">
+                          <tr key={doc.id} className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors">
+                            <td className="py-2.5 px-3 font-medium text-slate-900">
                               {doc.originalName || "—"}
                             </td>
-                            <td className="py-3 pr-3 text-slate-700 dark:text-slate-300">
+                            <td className="py-2.5 px-3 text-slate-500">
                               {String(doc?.description || "").trim() ? String(doc.description) : "—"}
                             </td>
-                            <td className="py-3 pr-3 text-slate-700 dark:text-slate-300">{fmtDate(doc.createdAt)}</td>
-                            <td className="py-3 pr-3 text-slate-700 dark:text-slate-300">{fmtBytes(doc.size)}</td>
-                            <td className="py-3 pr-3">
+                            <td className="py-2.5 px-3 text-slate-500">{fmtDate(doc.createdAt)}</td>
+                            <td className="py-2.5 px-3 text-slate-500 tabular-nums">{fmtBytes(doc.size)}</td>
+                            <td className="py-2.5 px-3">
                               <div className="flex justify-end">
                                 <ActionsMenu
                                   ariaLabel="Document actions"
@@ -793,10 +699,10 @@ export default function CustomerDetailPage() {
                           </tr>
                         ))}
                         {documentsLoading ? (
-                          <tr><td className="py-8 text-center text-slate-500" colSpan={5}>Loading…</td></tr>
+                          <tr><td className="py-10 text-center text-sm text-slate-500" colSpan={5}>Loading…</td></tr>
                         ) : null}
                         {!documentsLoading && (Array.isArray(documents) ? documents : []).length === 0 ? (
-                          <tr><td className="py-8 text-center text-slate-500" colSpan={5}>No documents yet.</td></tr>
+                          <tr><td colSpan={5} className="py-0 px-4"><EmptyState icon={Paperclip} title="No documents yet" description="Upload a document to get started" /></td></tr>
                         ) : null}
                       </tbody>
                     </table>
@@ -806,51 +712,44 @@ export default function CustomerDetailPage() {
             )}
 
             {activeTab === "quotes" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between gap-3">
-                    <span>Quotes</span>
-                    <Button
-                      size="sm"
-                      className="h-8 w-8 p-0 shrink-0"
-                      onClick={() => navigate(`/quotes/new?clientId=${customer.id}`)}
-                      aria-label="Add quote"
-                    >
-                      <Plus className="h-4 w-4" />
+              <Card className="border-slate-200/80 overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <h3 className="text-sm font-medium text-slate-700">Quotes</h3>
+                    <Button size="sm" className="h-8" onClick={() => navigate(`/quotes/new?clientId=${customer.id}`)}>
+                      <Plus className="h-3.5 w-3.5 mr-1" /> New Quote
                     </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                  </div>
                   <div className="overflow-auto">
-                    <table className="min-w-full text-sm">
-                      <thead className="text-left text-slate-600 dark:text-slate-300">
-                        <tr className="border-b border-slate-200 dark:border-slate-800">
-                          <th className="py-3 pr-3">Quote</th>
-                          <th className="py-3 pr-3">Issue</th>
-                          <th className="py-3 pr-3">Expiry</th>
-                          <th className="py-3 pr-3">Status</th>
-                          <th className="py-3 pr-3 text-right">Total</th>
+                    <table className="min-w-full text-[13px]">
+                      <thead className="bg-slate-50/80">
+                        <tr className="border-y border-slate-200/80">
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Quote</th>
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Issue</th>
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Expiry</th>
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Status</th>
+                          <th className="py-2.5 px-3 text-right text-xs font-medium text-slate-500">Total</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="bg-white">
                         {(Array.isArray(customer.quotes) ? customer.quotes : [])
                           .slice()
                           .sort((a, b) => new Date(b.issueDate || 0).getTime() - new Date(a.issueDate || 0).getTime())
                           .map((q) => (
                             <tr
                               key={q.id}
-                              className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 cursor-pointer"
+                              className="border-b border-slate-100 hover:bg-slate-50/80 cursor-pointer transition-colors"
                               onClick={() => navigate(`/quotes/${q.id}`)}
                             >
-                              <td className="py-3 pr-3 font-medium text-slate-900 dark:text-slate-100">{q.quoteNumber}</td>
-                              <td className="py-3 pr-3 text-slate-700 dark:text-slate-300">{fmtDate(q.issueDate)}</td>
-                              <td className="py-3 pr-3 text-slate-700 dark:text-slate-300">{fmtDate(q.expiryDate)}</td>
-                              <td className="py-3 pr-3"><QuoteStatusBadge status={q.status} /></td>
-                              <td className="py-3 pr-3 text-right"><Money value={Number(q.totalAmount || 0)} /></td>
+                              <td className="py-2.5 px-3 font-medium text-slate-900">{q.quoteNumber}</td>
+                              <td className="py-2.5 px-3 text-slate-500">{fmtDate(q.issueDate)}</td>
+                              <td className="py-2.5 px-3 text-slate-500">{fmtDate(q.expiryDate)}</td>
+                              <td className="py-2.5 px-3"><StatusBadge status={q.status} size="sm" /></td>
+                              <td className="py-2.5 px-3 text-right tabular-nums font-medium text-slate-800"><Money value={Number(q.totalAmount || 0)} /></td>
                             </tr>
                           ))}
                         {(Array.isArray(customer.quotes) ? customer.quotes : []).length === 0 ? (
-                          <tr><td className="py-8 text-center text-slate-500" colSpan={5}>No quotes yet.</td></tr>
+                          <tr><td colSpan={5} className="py-0 px-4"><EmptyState icon={FileText} title="No quotes yet" description="Create a quote to get started" /></td></tr>
                         ) : null}
                       </tbody>
                     </table>
@@ -860,49 +759,42 @@ export default function CustomerDetailPage() {
             )}
 
             {activeTab === "payments" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between gap-3">
-                    <span>Payments</span>
-                    <Button
-                      size="sm"
-                      className="h-8 w-8 p-0 shrink-0"
-                      onClick={() => navigate(`/payments?clientId=${customer.id}&new=1`)}
-                      aria-label="Record payment"
-                    >
-                      <Plus className="h-4 w-4" />
+              <Card className="border-slate-200/80 overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <h3 className="text-sm font-medium text-slate-700">Payments</h3>
+                    <Button size="sm" className="h-8" onClick={() => setRecordPaymentOpen(true)}>
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Record Payment
                     </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                  </div>
                   <div className="overflow-auto">
-                    <table className="min-w-full text-sm">
-                      <thead className="text-left text-slate-600 dark:text-slate-300">
-                        <tr className="border-b border-slate-200 dark:border-slate-800">
-                          <th className="py-3 pr-3">Payment</th>
-                          <th className="py-3 pr-3">Date</th>
-                          <th className="py-3 pr-3">Amount</th>
-                          <th className="py-3 pr-3">Status</th>
+                    <table className="min-w-full text-[13px]">
+                      <thead className="bg-slate-50/80">
+                        <tr className="border-y border-slate-200/80">
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Payment</th>
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Date</th>
+                          <th className="py-2.5 px-3 text-right text-xs font-medium text-slate-500">Amount</th>
+                          <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Status</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="bg-white">
                         {(Array.isArray(customer.payments) ? customer.payments : [])
                           .slice()
                           .sort((a, b) => new Date(b.paymentDate || 0).getTime() - new Date(a.paymentDate || 0).getTime())
                           .map((p) => (
                             <tr
                               key={p.id}
-                              className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 cursor-pointer"
+                              className="border-b border-slate-100 hover:bg-slate-50/80 cursor-pointer transition-colors"
                               onClick={() => navigate(`/payments?clientId=${customer.id}`)}
                             >
-                              <td className="py-3 pr-3 font-medium text-slate-900 dark:text-slate-100">{p.paymentNumber || "—"}</td>
-                              <td className="py-3 pr-3 text-slate-700 dark:text-slate-300">{fmtDate(p.paymentDate)}</td>
-                              <td className="py-3 pr-3 text-right"><Money value={Number(p.amount || 0)} /></td>
-                              <td className="py-3 pr-3">{String(p.status || "—")}</td>
+                              <td className="py-2.5 px-3 font-medium text-slate-900">{p.paymentNumber || "—"}</td>
+                              <td className="py-2.5 px-3 text-slate-500">{fmtDate(p.paymentDate)}</td>
+                              <td className="py-2.5 px-3 text-right tabular-nums font-medium text-slate-800"><Money value={Number(p.amount || 0)} /></td>
+                              <td className="py-2.5 px-3"><StatusBadge status={p.status || "COMPLETED"} size="sm" /></td>
                             </tr>
                           ))}
                         {(Array.isArray(customer.payments) ? customer.payments : []).length === 0 ? (
-                          <tr><td className="py-8 text-center text-slate-500" colSpan={4}>No payments yet.</td></tr>
+                          <tr><td colSpan={4} className="py-0 px-4"><EmptyState icon={Wallet} title="No payments yet" description="Record a payment to get started" /></td></tr>
                         ) : null}
                       </tbody>
                     </table>
@@ -912,58 +804,50 @@ export default function CustomerDetailPage() {
             )}
 
             {activeTab === "statements" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Statements</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-6 text-center">
-                    <FileBarChart className="h-12 w-12 text-slate-400 mx-auto mb-3" />
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Generate and send account statements to this customer.</p>
-                    <Button className="mt-4" onClick={() => navigate(`/statements/client?clientId=${customer.id}`)}>
-                      Send Statement
-                    </Button>
-                  </div>
+              <Card className="border-slate-200/80">
+                <CardContent className="p-0">
+                  <EmptyState
+                    icon={FileBarChart}
+                    title="Account Statements"
+                    description="Generate and send account statements to this customer"
+                    action={
+                      <Button className="h-9" onClick={() => navigate(`/statements/client?clientId=${customer.id}`)}>
+                        Send Statement
+                      </Button>
+                    }
+                  />
                 </CardContent>
               </Card>
             )}
 
             {activeTab === "credit-notes" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Credit Notes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-6 text-center">
-                    <Receipt className="h-12 w-12 text-slate-400 mx-auto mb-3" />
-                    <p className="text-sm text-slate-600 dark:text-slate-400">Credit notes are not available yet. This feature is coming soon.</p>
-                  </div>
+              <Card className="border-slate-200/80">
+                <CardContent className="p-0">
+                  <EmptyState
+                    icon={Receipt}
+                    title="Credit Notes"
+                    description="Credit notes are not available yet. This feature is coming soon."
+                  />
                 </CardContent>
               </Card>
             )}
 
             {activeTab === "notes" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between gap-3">
-                    <span className="inline-flex items-center gap-2">
-                      <StickyNote className="h-4 w-4 text-slate-500" />
+              <Card className="border-slate-200/80">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
+                      <StickyNote className="h-4 w-4 text-slate-400" />
                       Notes
-                    </span>
-                    <Button variant="outline" onClick={() => setEditMode(true)}>+ Add Note</Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4">
+                    </h3>
+                    <Button variant="outline" className="h-8" onClick={() => setEditMode(true)}>Edit Notes</Button>
+                  </div>
+                  <div className="rounded-lg border border-slate-200/80 bg-slate-50/50 p-4">
                     {notesHasContent ? (
-                      <div className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap break-words">{customer.notes}</div>
+                      <div className="text-sm text-slate-700 whitespace-pre-wrap break-words">{customer.notes}</div>
                     ) : (
-                      <div className="text-sm text-slate-500">No notes yet. Add a note to keep track of important information about this customer.</div>
+                      <div className="text-sm text-slate-400 italic">No notes yet. Add a note to keep track of important information about this customer.</div>
                     )}
-                    <div className="mt-4 border-t border-slate-200 pt-4">
-                      <div className="text-xs text-slate-500">Note history</div>
-                      <div className="mt-1 text-sm text-slate-500">Note timeline will appear here.</div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -984,210 +868,163 @@ export default function CustomerDetailPage() {
 
       {editMode && customer ? (
         <Dialog open={editMode} onOpenChange={setEditMode} title="Edit Customer">
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Customer Type</label>
-                <select
-                  className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
-                  value={editForm.type}
-                  onChange={(e) => setEditForm((p) => ({ ...p, type: e.target.value }))}
-                >
-                  <option value="COMPANY">Company</option>
-                  <option value="INDIVIDUAL">Individual</option>
-                </select>
+          <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }}>
+            {/* Section: Basic Info */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+                <FileText className="h-4 w-4 text-violet-500" />
+                <h3 className="text-[13px] font-semibold text-slate-700 uppercase tracking-wider">Basic Information</h3>
               </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">
-                  Customer / Company Name{editForm.type === "COMPANY" ? " *" : ""}
-                </label>
-                <Input
-                  value={editForm.companyName}
-                  onChange={(e) => setEditForm((p) => ({ ...p, companyName: e.target.value }))}
-                  placeholder={editForm.type === "COMPANY" ? "Company name" : "Optional"}
-                />
-                {fieldErrors.companyName ? <div className="text-xs text-red-600">{fieldErrors.companyName}</div> : null}
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Contact Name</label>
-                <Input
-                  value={editForm.contactName}
-                  onChange={(e) => setEditForm((p) => ({ ...p, contactName: e.target.value }))}
-                  placeholder="Full name"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Emails</label>
-                <div className="space-y-2">
-                  {(Array.isArray(editForm.emails) ? editForm.emails : [editForm.email || ""]).map((addr, i) => (
-                    <div key={i} className="flex gap-2">
-                      <Input
-                        type="email"
-                        value={addr}
-                        onChange={(e) => {
-                          const list = [...(editForm.emails || [""])];
-                          list[i] = e.target.value;
-                          setEditForm((p) => ({ ...p, emails: list }));
-                        }}
-                        placeholder="email@example.com"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="shrink-0 h-10 px-2"
-                        onClick={() => {
-                          const list = (editForm.emails || [""]).filter((_, j) => j !== i);
-                          setEditForm((p) => ({ ...p, emails: list.length ? list : [""] }));
-                        }}
-                        disabled={(editForm.emails || [""]).length <= 1}
-                        aria-label="Remove email"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="text-xs"
-                    onClick={() => setEditForm((p) => ({ ...p, emails: [...(p.emails || [""]), ""] }))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">Customer Type</label>
+                  <select
+                    className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-400 transition-shadow"
+                    value={editForm.type}
+                    onChange={(e) => setEditForm((p) => ({ ...p, type: e.target.value }))}
                   >
-                    <Plus className="h-3 w-3 mr-1 inline" />
-                    Add another email
-                  </Button>
+                    <option value="COMPANY">Company</option>
+                    <option value="INDIVIDUAL">Individual</option>
+                  </select>
                 </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Phone</label>
-                <Input
-                  value={editForm.phone}
-                  onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))}
-                  placeholder="+1 555 123 4567"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Status</label>
-                <select
-                  className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
-                  value={editForm.status}
-                  onChange={(e) => setEditForm((p) => ({ ...p, status: e.target.value }))}
-                >
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                  <option value="LEAD">Lead</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Payment Terms (days)</label>
-                <Input
-                  type="number"
-                  value={editForm.paymentTermsDays}
-                  onChange={(e) => setEditForm((p) => ({ ...p, paymentTermsDays: e.target.value }))}
-                  placeholder="30"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Opening Balance</label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={editForm.openingBalance}
-                  onChange={(e) => setEditForm((p) => ({ ...p, openingBalance: e.target.value }))}
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Credit Limit</label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={editForm.creditLimit}
-                  onChange={(e) => setEditForm((p) => ({ ...p, creditLimit: e.target.value }))}
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Tax/VAT #</label>
-                <Input
-                  value={editForm.taxNumber}
-                  onChange={(e) => setEditForm((p) => ({ ...p, taxNumber: e.target.value }))}
-                  placeholder="Optional"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Address</label>
-                <Input
-                  value={editForm.address}
-                  onChange={(e) => setEditForm((p) => ({ ...p, address: e.target.value }))}
-                  placeholder="Street address"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">City</label>
-                <Input
-                  value={editForm.city}
-                  onChange={(e) => setEditForm((p) => ({ ...p, city: e.target.value }))}
-                  placeholder="City"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">State/Province</label>
-                <Input
-                  value={editForm.state}
-                  onChange={(e) => setEditForm((p) => ({ ...p, state: e.target.value }))}
-                  placeholder="State"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Country</label>
-                <Input
-                  value={editForm.country}
-                  onChange={(e) => setEditForm((p) => ({ ...p, country: e.target.value }))}
-                  placeholder="Country"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Postal Code</label>
-                <Input
-                  value={editForm.postalCode}
-                  onChange={(e) => setEditForm((p) => ({ ...p, postalCode: e.target.value }))}
-                  placeholder="Postal code"
-                />
-              </div>
-
-              <div className="space-y-1 md:col-span-2">
-                <label className="text-sm font-medium">Notes</label>
-                <textarea
-                  className="min-h-[80px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  value={editForm.notes}
-                  onChange={(e) => setEditForm((p) => ({ ...p, notes: e.target.value }))}
-                  placeholder="Optional notes about this customer..."
-                />
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">Status</label>
+                  <select
+                    className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-400 transition-shadow"
+                    value={editForm.status}
+                    onChange={(e) => setEditForm((p) => ({ ...p, status: e.target.value }))}
+                  >
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                    <option value="LEAD">Lead</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">
+                    Company Name{editForm.type === "COMPANY" ? " *" : ""}
+                  </label>
+                  <Input
+                    value={editForm.companyName}
+                    onChange={(e) => setEditForm((p) => ({ ...p, companyName: e.target.value }))}
+                    placeholder={editForm.type === "COMPANY" ? "Company name" : "Optional"}
+                    className="rounded-lg focus:ring-violet-500/40 focus:border-violet-400"
+                  />
+                  {fieldErrors.companyName ? <div className="text-xs text-red-600">{fieldErrors.companyName}</div> : null}
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">Contact Name</label>
+                  <Input value={editForm.contactName} onChange={(e) => setEditForm((p) => ({ ...p, contactName: e.target.value }))} placeholder="Full name" className="rounded-lg" />
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setEditMode(false)} disabled={saving}>
+            {/* Section: Contact */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+                <Receipt className="h-4 w-4 text-violet-500" />
+                <h3 className="text-[13px] font-semibold text-slate-700 uppercase tracking-wider">Contact Details</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-[13px] font-medium text-slate-600">Email Addresses</label>
+                  <div className="space-y-2">
+                    {(Array.isArray(editForm.emails) ? editForm.emails : [editForm.email || ""]).map((addr, i) => (
+                      <div key={i} className="flex gap-2">
+                        <Input type="email" value={addr} onChange={(e) => { const list = [...(editForm.emails || [""])]; list[i] = e.target.value; setEditForm((p) => ({ ...p, emails: list })); }} placeholder="email@example.com" className="rounded-lg" />
+                        <Button type="button" variant="outline" size="sm" className="shrink-0 h-10 w-10 px-0 rounded-lg" onClick={() => { const list = (editForm.emails || [""]).filter((_, j) => j !== i); setEditForm((p) => ({ ...p, emails: list.length ? list : [""] })); }} disabled={(editForm.emails || [""]).length <= 1} aria-label="Remove email">
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm" className="text-xs rounded-lg text-violet-600 border-violet-200 hover:bg-violet-50" onClick={() => setEditForm((p) => ({ ...p, emails: [...(p.emails || [""]), ""] }))}>
+                      <Plus className="h-3 w-3 mr-1 inline" />
+                      Add email
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">Phone</label>
+                  <Input value={editForm.phone} onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))} placeholder="+1 555 123 4567" className="rounded-lg" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">Tax/VAT #</label>
+                  <Input value={editForm.taxNumber} onChange={(e) => setEditForm((p) => ({ ...p, taxNumber: e.target.value }))} placeholder="Optional" className="rounded-lg" />
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Address */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+                <FileText className="h-4 w-4 text-violet-500" />
+                <h3 className="text-[13px] font-semibold text-slate-700 uppercase tracking-wider">Address</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-[13px] font-medium text-slate-600">Street Address</label>
+                  <Input value={editForm.address} onChange={(e) => setEditForm((p) => ({ ...p, address: e.target.value }))} placeholder="Street address" className="rounded-lg" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">City</label>
+                  <Input value={editForm.city} onChange={(e) => setEditForm((p) => ({ ...p, city: e.target.value }))} placeholder="City" className="rounded-lg" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">State/Province</label>
+                  <Input value={editForm.state} onChange={(e) => setEditForm((p) => ({ ...p, state: e.target.value }))} placeholder="State" className="rounded-lg" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">Country</label>
+                  <Input value={editForm.country} onChange={(e) => setEditForm((p) => ({ ...p, country: e.target.value }))} placeholder="Country" className="rounded-lg" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">Postal Code</label>
+                  <Input value={editForm.postalCode} onChange={(e) => setEditForm((p) => ({ ...p, postalCode: e.target.value }))} placeholder="Postal code" className="rounded-lg" />
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Financial */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+                <Wallet className="h-4 w-4 text-violet-500" />
+                <h3 className="text-[13px] font-semibold text-slate-700 uppercase tracking-wider">Financial</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">Payment Terms (days)</label>
+                  <Input type="number" value={editForm.paymentTermsDays} onChange={(e) => setEditForm((p) => ({ ...p, paymentTermsDays: e.target.value }))} placeholder="30" className="rounded-lg" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">Opening Balance</label>
+                  <Input type="number" step="0.01" value={editForm.openingBalance} onChange={(e) => setEditForm((p) => ({ ...p, openingBalance: e.target.value }))} placeholder="0.00" className="rounded-lg" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[13px] font-medium text-slate-600">Credit Limit</label>
+                  <Input type="number" step="0.01" value={editForm.creditLimit} onChange={(e) => setEditForm((p) => ({ ...p, creditLimit: e.target.value }))} placeholder="0.00" className="rounded-lg" />
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Notes */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+                <StickyNote className="h-4 w-4 text-violet-500" />
+                <h3 className="text-[13px] font-semibold text-slate-700 uppercase tracking-wider">Notes</h3>
+              </div>
+              <textarea
+                className="min-h-[80px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-400 transition-shadow"
+                value={editForm.notes}
+                onChange={(e) => setEditForm((p) => ({ ...p, notes: e.target.value }))}
+                placeholder="Optional notes about this customer..."
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <Button type="button" variant="outline" onClick={() => setEditMode(false)} disabled={saving} className="rounded-lg">
                 Cancel
               </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? "Saving…" : "Save Changes"}
+              <Button type="submit" disabled={saving} className="rounded-lg bg-violet-600 hover:bg-violet-700">
+                {saving ? "Saving\u2026" : "Save Changes"}
               </Button>
             </div>
           </form>

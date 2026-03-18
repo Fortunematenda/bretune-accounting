@@ -59,16 +59,25 @@ export default function InvoiceLineItems({
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-        <table className="min-w-[640px] w-full text-sm">
+        <table className="min-w-[640px] w-full text-sm table-fixed">
+          <colgroup>
+            <col className="w-[160px]" />
+            <col className="w-auto" style={{ minWidth: 200 }} />
+            <col className="w-[80px]" />
+            <col className="w-[110px]" />
+            <col className="w-[90px]" />
+            <col className="w-[110px]" />
+            <col className="w-[48px]" />
+          </colgroup>
           <thead className="text-left text-slate-500">
             <tr>
-              <th className="px-3 py-2">Product/Service</th>
-              <th className="px-3 py-2">Description</th>
-              <th className="px-3 py-2 w-24">Qty</th>
-              <th className="px-3 py-2 w-32">Unit</th>
-              <th className="px-3 py-2 w-28">VAT %</th>
-              <th className="px-3 py-2 w-32 text-right">Line total</th>
-              <th className="px-3 py-2 w-10"></th>
+              <th className="px-3 py-2 text-xs font-semibold">Product/Service</th>
+              <th className="px-3 py-2 text-xs font-semibold">Description</th>
+              <th className="px-3 py-2 text-xs font-semibold">Qty</th>
+              <th className="px-3 py-2 text-xs font-semibold">Unit</th>
+              <th className="px-3 py-2 text-xs font-semibold">VAT %</th>
+              <th className="px-3 py-2 text-xs font-semibold text-right">Line total</th>
+              <th className="px-2 py-2"></th>
             </tr>
           </thead>
           <tbody>
@@ -83,7 +92,7 @@ export default function InvoiceLineItems({
                 <tr key={idx} className="border-t border-slate-100 align-top">
                   <td className="px-3 py-2">
                     <select
-                      className="h-10 w-48 rounded-md border border-slate-200 bg-white px-3 text-sm"
+                      className="h-10 w-full rounded-md border border-slate-200 bg-white px-2 text-sm truncate"
                       value={r.productId}
                       disabled={readOnly}
                       onChange={(e) => {
@@ -120,6 +129,7 @@ export default function InvoiceLineItems({
                       onChange={(e) => updateRow(idx, { description: e.target.value })}
                       placeholder="Description"
                       disabled={readOnly}
+                      className="w-full"
                     />
                     {rowErrors.description ? (
                       <div className="mt-1 text-xs text-red-600">{rowErrors.description}</div>
@@ -134,6 +144,7 @@ export default function InvoiceLineItems({
                       value={r.quantity}
                       onChange={(e) => updateRow(idx, { quantity: e.target.value })}
                       disabled={readOnly}
+                      className="w-full"
                     />
                     {rowErrors.quantity ? (
                       <div className="mt-1 text-xs text-red-600">{rowErrors.quantity}</div>
@@ -148,6 +159,7 @@ export default function InvoiceLineItems({
                       value={r.unitPrice}
                       onChange={(e) => updateRow(idx, { unitPrice: e.target.value })}
                       disabled={readOnly}
+                      className="w-full"
                     />
                     {rowErrors.unitPrice ? (
                       <div className="mt-1 text-xs text-red-600">{rowErrors.unitPrice}</div>
@@ -162,17 +174,18 @@ export default function InvoiceLineItems({
                       value={vatEnabled ? r.vatPercent : 0}
                       onChange={(e) => updateRow(idx, { vatPercent: e.target.value })}
                       disabled={!vatEnabled || readOnly}
+                      className="w-full"
                     />
                     {!vatEnabled ? <div className="mt-1 text-[11px] text-slate-500">VAT disabled</div> : null}
                   </td>
 
                   <td className="px-3 py-2 text-right">
-                    <div className="h-10 flex items-center justify-end">
+                    <div className="h-10 flex items-center justify-end font-medium text-sm tabular-nums">
                       <Money value={lineTotal} />
                     </div>
                   </td>
 
-                  <td className="px-3 py-2">
+                  <td className="px-2 py-2">
                     {!readOnly && (items || []).length > 1 ? (
                       <button
                         type="button"

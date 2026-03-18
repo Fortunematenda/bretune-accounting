@@ -30,9 +30,10 @@ import {
   Tags,
   Truck,
   Landmark,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
-import Button from "../ui/button";
 
 export const SIDEBAR_NAV = [
   { type: "item", to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -105,7 +106,7 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
 
   const [expandedSections, setExpandedSections] = React.useState(() => {
     const map = {};
-    for (const label of sectionLabels) map[label] = false;
+    for (const label of sectionLabels) map[label] = true;
     return map;
   });
 
@@ -141,23 +142,26 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-white">
+    <div className="h-full flex flex-col overflow-hidden bg-slate-50/70 backdrop-blur-sm">
       {showBrand ? (
         <div
           className={cn(
-            "relative h-16 flex items-center border-b border-slate-100 shrink-0",
-            collapsed ? "px-3 justify-center" : "px-4"
+            "relative h-16 flex items-center border-b border-slate-200/50 shrink-0",
+            collapsed ? "px-2 justify-center" : "px-4"
           )}
         >
           <Link
             to="/dashboard"
             className={cn(
-              "flex items-center font-semibold tracking-tight text-slate-900 hover:opacity-90 transition-opacity",
-              collapsed ? "gap-0" : "gap-3"
+              "flex items-center font-semibold tracking-tight text-slate-900 hover:opacity-90 transition-opacity flex-1 min-w-0",
+              collapsed ? "gap-0 justify-center" : "gap-2.5"
             )}
             onClick={onNavigate}
           >
-            <div className="h-9 w-9 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-slate-200/80 p-0.5">
+            <div className={cn(
+              "rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-slate-200/60 shadow-sm",
+              collapsed ? "h-9 w-9 p-0.5" : "h-10 w-10 p-1"
+            )}>
               <img
                 src="/bretune-logo.png"
                 alt="Bretune Accounting"
@@ -166,19 +170,42 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
             </div>
             {!collapsed ? (
               <div className="leading-tight min-w-0">
-                <div className="text-sm font-semibold text-slate-900 truncate">Bretune</div>
-                <div className="text-xs font-normal text-slate-500 truncate">Accounting</div>
+                <div className="text-sm font-bold text-slate-800 truncate tracking-tight">Bretune</div>
+                <div className="text-[11px] font-medium text-slate-400 truncate">Accounting</div>
               </div>
             ) : null}
           </Link>
+          {!collapsed && typeof onToggleCollapsed === "function" ? (
+            <button
+              type="button"
+              onClick={() => onToggleCollapsed()}
+              className="ml-auto shrink-0 h-7 w-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 transition-colors"
+              title="Collapse sidebar"
+            >
+              <PanelLeftClose className="h-[14px] w-[14px]" strokeWidth={1.5} />
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {collapsed && typeof onToggleCollapsed === "function" ? (
+        <div className="px-2 pt-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => onToggleCollapsed()}
+            className="w-full h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 transition-colors"
+            title="Expand sidebar"
+          >
+            <PanelLeftOpen className="h-[14px] w-[14px]" strokeWidth={1.5} />
+          </button>
         </div>
       ) : null}
 
       <nav
-        className={cn("flex-1 overflow-y-auto py-3", collapsed ? "px-2" : "px-3")}
+        className={cn("flex-1 overflow-y-auto py-2", collapsed ? "px-1.5" : "px-2.5")}
         aria-label={isSettingsPage ? "Settings navigation" : "Primary navigation"}
       >
-        <div className="space-y-0.5">
+        <div className={cn("space-y-0.5", collapsed && "space-y-1")}>
           {(() => {
             let currentSection = null;
             return navItems.flatMap((item, idx) => {
@@ -187,21 +214,12 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
                 if (collapsed) return [];
                 const isExpanded = expandedSections?.[item.label] === true;
                 return [
-                  <button
+                  <div
                     key={`section-${item.label}-${idx}`}
-                    type="button"
-                    className="w-full flex items-center justify-between px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400 hover:text-slate-500"
-                    onClick={() => toggleSection(item.label)}
-                    aria-expanded={isExpanded}
+                    className="px-2.5 pt-5 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400/70"
                   >
-                    <span>{item.label}</span>
-                    <ChevronDown
-                      className={cn(
-                        "h-3.5 w-3.5 transition-transform",
-                        isExpanded ? "rotate-0" : "-rotate-90"
-                      )}
-                    />
-                  </button>,
+                    {item.label}
+                  </div>,
                 ];
               }
 
@@ -223,18 +241,27 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
                   className={({ isActive }) => {
                     const active = useSettingsNav ? isSettingsItemActive(item) : isActive;
                     return cn(
-                      "group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150",
-                      collapsed ? "justify-center" : "gap-3",
+                      "group flex items-center font-medium transition-all duration-150",
+                      collapsed
+                        ? "justify-center rounded-lg h-9 w-9 mx-auto text-[0px]"
+                        : "rounded-lg px-2.5 py-[7px] text-[13px] gap-2.5",
                       active
-                        ? "bg-slate-100 text-gray-900 font-medium"
-                        : "text-gray-600 hover:text-gray-900"
+                        ? collapsed
+                          ? "bg-violet-100/80 text-violet-700"
+                          : "bg-violet-50/80 text-violet-700 font-semibold"
+                        : collapsed
+                          ? "text-slate-400 hover:text-slate-600 hover:bg-slate-200/40"
+                          : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/60"
                     );
                   }}
                   end={item.to === "/" || item.to === "/dashboard"}
                   onClick={onNavigate}
                   title={collapsed ? item.label : undefined}
                 >
-                  <Icon className="h-4 w-4 shrink-0 transition-colors" strokeWidth={2} />
+                  <Icon className={cn(
+                    "shrink-0 transition-colors",
+                    collapsed ? "h-[17px] w-[17px]" : "h-[15px] w-[15px]"
+                  )} strokeWidth={collapsed ? 1.6 : 1.7} />
                   {!collapsed ? <span className="flex-1 truncate">{item.label}</span> : null}
                 </NavLink>,
               ];
@@ -243,29 +270,6 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
         </div>
       </nav>
 
-      {typeof onToggleCollapsed === "function" ? (
-        <div className="p-3 shrink-0 border-t border-slate-100">
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(
-              "w-full rounded-xl h-9 border-slate-200 hover:border-slate-300 hover:bg-slate-50",
-              collapsed ? "justify-center px-0" : "justify-start gap-2"
-            )}
-            onClick={() => onToggleCollapsed()}
-            title={collapsed ? "Expand" : "Collapse"}
-          >
-            {collapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <>
-                <ChevronLeft className="h-4 w-4" />
-                <span>Collapse</span>
-              </>
-            )}
-          </Button>
-        </div>
-      ) : null}
     </div>
   );
 }

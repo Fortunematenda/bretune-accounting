@@ -90,7 +90,7 @@ export default function ActionsMenu({
         ref={menuRef}
         role="menu"
         className={cn(
-          "fixed z-[9999] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg",
+          "fixed z-[9999] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg py-1",
           menuWidthClassName,
           menuClassName
         )}
@@ -102,8 +102,8 @@ export default function ActionsMenu({
             type="button"
             role="menuitem"
             className={cn(
-              "w-full px-3 py-2 text-left text-sm hover:bg-slate-50 focus:outline-none",
-              it.tone === "danger" ? "text-red-700" : "text-slate-700",
+              "w-full px-3 py-2 text-left text-[13px] hover:bg-slate-50 focus:outline-none transition-colors",
+              it.tone === "danger" ? "text-red-600 hover:bg-red-50" : "text-slate-700",
               it.disabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={it.disabled}

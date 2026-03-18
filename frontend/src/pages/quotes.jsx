@@ -10,6 +10,8 @@ import Button from "../components/ui/button";
 import Money from "../components/common/money";
 import { FileText, Plus } from "lucide-react";
 import { cn, formatRecordDisplayId } from "../lib/utils";
+import EmptyState from "../components/common/EmptyState";
+import StatusBadge from "../components/common/StatusBadge";
 import ColumnPickerDialog from "../components/common/ColumnPickerDialog";
 import ListPageToolbar from "../components/common/ListPageToolbar";
 import PageHeader from "../components/common/PageHeader";
@@ -48,33 +50,33 @@ function QuoteRow({ q, visibleColumns, onAction, navigate, displayId }) {
 
   return (
     <tr
-      className="border-t border-slate-100 cursor-pointer hover:bg-violet-50/50 transition-colors group"
+      className="border-b border-slate-100 cursor-pointer hover:bg-slate-50/80 transition-colors group"
       onClick={() => navigate(`/quotes/${q.id}`)}
     >
       {visibleColumns.includes("id") ? (
-        <td className="py-3 px-4 font-mono text-xs text-violet-600 font-medium" title={q.id}>{displayId}</td>
+        <td className="py-2.5 px-3 font-mono text-xs text-slate-500 font-medium whitespace-nowrap" title={q.id}>{displayId}</td>
       ) : null}
       {visibleColumns.includes("quoteNumber") ? (
-        <td className="py-3 px-4 font-medium text-violet-600">{q.quoteNumber}</td>
+        <td className="py-2.5 px-3 font-medium text-slate-900">{q.quoteNumber}</td>
       ) : null}
       {visibleColumns.includes("customer") ? (
-        <td className="py-3 px-4 text-slate-700">{formatCustomerName(q.client)}</td>
+        <td className="py-2.5 px-3 text-slate-600">{formatCustomerName(q.client)}</td>
       ) : null}
       {visibleColumns.includes("status") ? (
-        <td className="py-3 px-4">
-          <QuoteStatusBadge status={q.status} />
+        <td className="py-2.5 px-3">
+          <StatusBadge status={q.status} size="sm" />
         </td>
       ) : null}
       {visibleColumns.includes("expiryDate") ? (
-        <td className="py-3 px-4 text-slate-600">{formatDateForDisplay(q.expiryDate)}</td>
+        <td className="py-2.5 px-3 text-slate-500">{formatDateForDisplay(q.expiryDate)}</td>
       ) : null}
       {visibleColumns.includes("totalAmount") ? (
-        <td className="py-3 px-4 text-right font-medium">
+        <td className="py-2.5 px-3 text-right tabular-nums font-medium text-slate-800">
           <Money value={Number(q.totalAmount || 0)} />
         </td>
       ) : null}
 
-      <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+      <td className="py-2.5 px-3 text-right" onClick={(e) => e.stopPropagation()}>
         <ActionsMenu
           ariaLabel="Quote actions"
           items={[
@@ -145,22 +147,22 @@ function QuoteCard({ q, onAction, navigate, displayId }) {
 
   return (
     <div
-      className="rounded-xl border border-violet-100 bg-white p-4 hover:border-violet-200 hover:shadow-md transition-all cursor-pointer"
+      className="rounded-lg border border-slate-200 bg-white p-4 hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer"
       onClick={() => navigate(`/quotes/${q.id}`)}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-slate-900">{q.quoteNumber}</span>
-            <QuoteStatusBadge status={q.status} />
+            <StatusBadge status={q.status} size="sm" />
           </div>
           <div className="mt-1 text-sm text-slate-600 truncate">{formatCustomerName(q.client)}</div>
           <div className="mt-2 flex items-center gap-3 text-xs text-slate-500">
             <span>Expires {formatDateForDisplay(q.expiryDate)}</span>
-            <span className="font-medium text-slate-700">
+            <span className="font-medium text-slate-700 tabular-nums">
               <Money value={Number(q.totalAmount || 0)} />
             </span>
-            <span className="font-mono text-violet-600 font-medium" title={q.id}>{displayId}</span>
+            <span className="font-mono text-slate-500 font-medium" title={q.id}>{displayId}</span>
           </div>
         </div>
         <div onClick={(e) => e.stopPropagation()}>
@@ -311,82 +313,80 @@ export default function QuotesPage() {
       <PageHeader
         title="Quotes"
         subtitle="Create and manage professional quotes for your customers"
-        icon={<FileText className="h-6 w-6 text-violet-600" />}
+        icon={<FileText className="h-5 w-5 text-violet-600" />}
         extra={clientId ? <div className="text-violet-600 font-medium">Filtered by customer</div> : null}
         action={
           <Button onClick={() => navigate(clientId ? `/quotes/new?clientId=${clientId}` : "/quotes/new")} className="h-9 shrink-0">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1.5" />
             New Quote
           </Button>
         }
       />
 
-      <Card className="border border-slate-200 shadow-sm overflow-hidden">
-        <CardHeader className="pb-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <CardTitle className="text-base font-semibold">Quote List</CardTitle>
-            <div className="flex flex-wrap gap-2">
-              {STATUS_FILTERS.map((f) => (
-                <button
-                  key={f.key}
-                  type="button"
-                  onClick={() => setStatus(f.key)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                    statusFilter === f.key
-                      ? "bg-violet-600 text-white"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  )}
-                >
-                  {f.label}
-                </button>
-              ))}
+      <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <div className="flex flex-wrap gap-1.5">
+                {STATUS_FILTERS.map((f) => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => setStatus(f.key)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors",
+                      statusFilter === f.key
+                        ? "bg-violet-600 text-white"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    )}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ListPageToolbar
+
+            <ListPageToolbar
               searchValue={q}
               onSearchChange={setQuery}
-              searchPlaceholder="Search quote number…"
+              searchPlaceholder="Search quotes…"
               limit={limit}
               onLimitChange={setLimit}
               onColumnsClick={() => setColumnsOpen(true)}
             />
 
-          {error ? (
-            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
-          ) : null}
+            {error ? (
+              <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">{error}</div>
+            ) : null}
+          </div>
 
-          <div className="mt-4">
+          <div>
           {loading ? (
-            <div className="p-8 space-y-4">
+            <div className="p-8 space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-14 rounded-lg bg-slate-100 animate-pulse" />
+                <div key={i} className="h-12 rounded-lg bg-slate-100 animate-pulse" />
               ))}
             </div>
           ) : quotes.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="inline-flex h-14 w-14 rounded-full bg-violet-100 text-violet-600 items-center justify-center mb-4">
-                <FileText className="h-7 w-7" />
-              </div>
-              <h3 className="text-lg font-medium text-slate-900">No quotes yet</h3>
-              <p className="mt-1 text-sm text-slate-600">Create your first quote using the New Quote button above.</p>
-            </div>
+            <EmptyState
+              icon={FileText}
+              title="No quotes yet"
+              description="Quotes you create will appear here"
+            />
           ) : (
             <>
               {/* Desktop table */}
               <div className="hidden md:block overflow-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="text-left text-slate-500 bg-slate-50/80">
-                    <tr>
-                      {visibleColumns.includes("id") ? <th className="py-3 px-4">ID</th> : null}
-                      {visibleColumns.includes("quoteNumber") ? <th className="py-3 px-4">Quote</th> : null}
-                      {visibleColumns.includes("customer") ? <th className="py-3 px-4">Customer</th> : null}
-                      {visibleColumns.includes("status") ? <th className="py-3 px-4">Status</th> : null}
-                      {visibleColumns.includes("expiryDate") ? <th className="py-3 px-4">Expiry</th> : null}
-                      {visibleColumns.includes("totalAmount") ? <th className="py-3 px-4 text-right">Total</th> : null}
-                      <th className="py-3 px-4 text-right w-12"></th>
+                <table className="min-w-full text-[13px]">
+                  <thead className="text-left bg-slate-50/80">
+                    <tr className="border-y border-slate-200/80">
+                      {visibleColumns.includes("id") ? <th className="py-2.5 px-3 text-xs font-medium text-slate-500">ID</th> : null}
+                      {visibleColumns.includes("quoteNumber") ? <th className="py-2.5 px-3 text-xs font-medium text-slate-500">Quote</th> : null}
+                      {visibleColumns.includes("customer") ? <th className="py-2.5 px-3 text-xs font-medium text-slate-500">Customer</th> : null}
+                      {visibleColumns.includes("status") ? <th className="py-2.5 px-3 text-xs font-medium text-slate-500">Status</th> : null}
+                      {visibleColumns.includes("expiryDate") ? <th className="py-2.5 px-3 text-xs font-medium text-slate-500">Expiry</th> : null}
+                      {visibleColumns.includes("totalAmount") ? <th className="py-2.5 px-3 text-right text-xs font-medium text-slate-500">Total</th> : null}
+                      <th className="py-2.5 px-3 text-right w-12"></th>
                     </tr>
                   </thead>
                   <tbody>

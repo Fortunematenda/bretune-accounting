@@ -7,16 +7,10 @@ import Input from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import Money from "../components/common/money";
 import ActionsMenu from "../components/common/ActionsMenu";
+import StatusBadge from "../components/common/StatusBadge";
 import Dialog from "../components/ui/dialog";
 import { ArrowLeft, Landmark, Plus } from "lucide-react";
 import { formatDateForDisplay } from "../lib/dateFormat";
-
-const STATUS_COLORS = {
-  ACTIVE: "bg-blue-100 text-blue-800",
-  PARTIALLY_REPAID: "bg-amber-100 text-amber-800",
-  REPAID: "bg-emerald-100 text-emerald-800",
-  WRITTEN_OFF: "bg-slate-100 text-slate-600",
-};
 
 const STATUS_LABELS = {
   ACTIVE: "Active",
@@ -199,17 +193,19 @@ export default function LoanDetailPage() {
 
   if (loanQuery.isLoading) {
     return (
-      <div className="flex items-center justify-center py-16 text-slate-500 text-sm">Loading…</div>
+      <div className="py-12 text-center text-sm text-slate-500">Loading…</div>
     );
   }
 
   if (loanQuery.error || !loan) {
     return (
       <div className="space-y-4">
-        <button onClick={() => navigate("/loans")} className="inline-flex items-center gap-2 text-violet-600 hover:text-violet-800 text-sm">
-          <ArrowLeft className="h-4 w-4" /> Back to Loans
-        </button>
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+        <nav className="mb-4">
+          <button onClick={() => navigate("/loans")} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+            <ArrowLeft className="h-3.5 w-3.5" /> Loans
+          </button>
+        </nav>
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
           {loanQuery.error?.message || "Loan not found"}
         </div>
       </div>
@@ -219,80 +215,62 @@ export default function LoanDetailPage() {
   const isOverdue = loan.dueDate && new Date(loan.dueDate) < new Date() && loan.status !== "REPAID";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={() => navigate("/loans")}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 shrink-0"
-            aria-label="Back to loans"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
+    <div className="space-y-0">
+      {/* Breadcrumb */}
+      <nav className="mb-4">
+        <button
+          type="button"
+          onClick={() => navigate("/loans")}
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Loans
+        </button>
+      </nav>
+
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 pb-5 mb-6 border-b border-slate-200">
+        <div className="flex items-start gap-3 min-w-0">
+          <div className="h-11 w-11 rounded-lg bg-violet-50 ring-1 ring-violet-100 flex items-center justify-center shrink-0">
+            <Landmark className="h-5 w-5 text-violet-600" strokeWidth={1.7} />
+          </div>
           <div className="min-w-0">
-            <h1 className="text-xl font-semibold text-slate-900 truncate">{loan.borrowerName}</h1>
-            {loan.borrowerContact && <p className="text-sm text-slate-500">{loan.borrowerContact}</p>}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-xl font-semibold text-slate-900 truncate">{loan.borrowerName}</h1>
+              <StatusBadge status={isOverdue ? "OVERDUE" : loan.status} />
+            </div>
+            {loan.borrowerContact && <p className="mt-0.5 text-sm text-slate-500">{loan.borrowerContact}</p>}
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[loan.status] || "bg-slate-100 text-slate-700"}`}>
-            {STATUS_LABELS[loan.status] || loan.status}
-          </span>
-          {isOverdue && (
-            <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-100 text-red-700">
-              Overdue
-            </span>
-          )}
+          <Button variant="outline" className="h-9" onClick={openEdit}>Edit</Button>
           <ActionsMenu
             ariaLabel="Loan actions"
+            buttonClassName="h-9 w-9"
             menuWidthClassName="w-52"
             items={[
-              { key: "edit", label: "Edit loan", onSelect: openEdit },
-              { key: "repay", label: "Record repayment", disabled: loan.status === "REPAID", hint: loan.status === "REPAID" ? "Loan is fully repaid" : "", onSelect: () => setRepayOpen(true) },
-              { key: "add", label: "Add another loan", onSelect: openNewLoan },
-              { key: "delete", label: "Delete loan", tone: "danger", onSelect: handleDelete },
+              { key: "repay", label: "Record Repayment", disabled: loan.status === "REPAID", onSelect: () => setRepayOpen(true) },
+              { key: "add", label: "Add Another Loan", onSelect: openNewLoan },
+              { key: "delete", label: "Delete Loan", tone: "danger", onSelect: handleDelete },
             ]}
           />
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-slate-200">
-          <CardContent className="p-4">
-            <p className="text-xs font-medium uppercase text-slate-500">Loan Amount</p>
-            <p className="mt-1 text-2xl font-bold text-slate-900 tabular-nums"><Money value={loan.amount} /></p>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-200">
-          <CardContent className="p-4">
-            <p className="text-xs font-medium uppercase text-slate-500">Outstanding</p>
-            <p className={`mt-1 text-2xl font-bold tabular-nums ${loan.outstandingBalance > 0 ? "text-red-600" : "text-emerald-600"}`}>
-              <Money value={loan.outstandingBalance} />
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-200">
-          <CardContent className="p-4">
-            <p className="text-xs font-medium uppercase text-slate-500">Total Repaid</p>
-            <p className="mt-1 text-2xl font-bold text-emerald-600 tabular-nums"><Money value={totalRepaid} /></p>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-200">
-          <CardContent className="p-4">
-            <p className="text-xs font-medium uppercase text-slate-500">Repayment Progress</p>
-            <p className="mt-1 text-2xl font-bold text-violet-600">{progressPct}%</p>
-            <div className="mt-2 h-1.5 w-full rounded-full bg-slate-200">
-              <div className="h-1.5 rounded-full bg-violet-500 transition-all" style={{ width: `${progressPct}%` }} />
-            </div>
-          </CardContent>
-        </Card>
+      {/* Summary KPIs */}
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 mb-6">
+        <Card><CardContent className="p-3.5"><div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Loan Amount</div><div className="mt-1 text-lg font-semibold tabular-nums text-slate-900"><Money value={loan.amount} /></div></CardContent></Card>
+        <Card><CardContent className="p-3.5"><div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Outstanding</div><div className={"mt-1 text-lg font-semibold tabular-nums " + (loan.outstandingBalance > 0 ? "text-rose-600" : "text-emerald-600")}><Money value={loan.outstandingBalance} /></div></CardContent></Card>
+        <Card><CardContent className="p-3.5"><div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Total Repaid</div><div className="mt-1 text-lg font-semibold tabular-nums text-emerald-600"><Money value={totalRepaid} /></div></CardContent></Card>
+        <Card><CardContent className="p-3.5"><div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Progress</div><div className="mt-1 text-lg font-semibold text-violet-600">{progressPct}%</div><div className="mt-1.5 h-1.5 w-full rounded-full bg-slate-200"><div className="h-1.5 rounded-full bg-violet-500 transition-all" style={{ width: `${progressPct}%` }} /></div></CardContent></Card>
       </div>
 
+      {/* Details + Repayments */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="border-slate-200 lg:col-span-1">
+        <Card className="border-slate-200/80 lg:col-span-1">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <Landmark className="h-4 w-4 text-violet-600" />
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Landmark className="h-4 w-4 text-slate-400" />
               Loan Details
             </CardTitle>
           </CardHeader>
@@ -305,51 +283,50 @@ export default function LoanDetailPage() {
               { label: "Notes", value: loan.notes || "—" },
             ].map(({ label, value }) => (
               <div key={label} className="flex justify-between gap-3 text-sm">
-                <span className="text-slate-500 shrink-0">{label}</span>
-                <span className="text-slate-900 text-right">{value}</span>
+                <span className="text-slate-400 shrink-0">{label}</span>
+                <span className="text-slate-800 text-right">{value}</span>
               </div>
             ))}
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 lg:col-span-2">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center justify-between">
-              <span>Repayment History</span>
+        <Card className="border-slate-200/80 lg:col-span-2 overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex items-center justify-between px-4 py-3">
+              <h3 className="text-sm font-medium text-slate-700">Repayment History</h3>
               {loan.status !== "REPAID" && (
-                <Button size="sm" className="h-8 gap-1.5 text-xs" onClick={() => setRepayOpen(true)}>
-                  <Plus className="h-3.5 w-3.5" />
-                  Record Repayment
+                <Button size="sm" className="h-8" onClick={() => setRepayOpen(true)}>
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Record Repayment
                 </Button>
               )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </div>
             {repayments.length === 0 ? (
-              <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-10 text-center">
-                <p className="text-sm font-medium text-slate-700">No repayments yet</p>
-                <p className="mt-1 text-sm text-slate-500">Record a repayment when your borrower pays back</p>
+              <div className="px-4 pb-6 pt-2">
+                <div className="rounded-lg border-2 border-dashed border-slate-200 bg-slate-50/50 py-8 text-center">
+                  <p className="text-sm font-medium text-slate-600">No repayments yet</p>
+                  <p className="mt-1 text-xs text-slate-400">Record a repayment when your borrower pays back</p>
+                </div>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-xl border border-slate-200">
-                <table className="min-w-full divide-y divide-slate-200">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Date</th>
-                      <th className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Amount</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Notes</th>
-                      <th className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-600"></th>
+              <div className="overflow-auto">
+                <table className="min-w-full text-[13px]">
+                  <thead className="bg-slate-50/80">
+                    <tr className="border-y border-slate-200/80">
+                      <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Date</th>
+                      <th className="py-2.5 px-3 text-right text-xs font-medium text-slate-500">Amount</th>
+                      <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-500">Notes</th>
+                      <th className="py-2.5 px-3 text-right text-xs font-medium text-slate-500"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
+                  <tbody className="bg-white">
                     {repayments.map((r) => (
-                      <tr key={r.id} className="hover:bg-slate-50/50">
-                        <td className="px-4 py-3 text-sm text-slate-600">{formatDateForDisplay(r.paymentDate)}</td>
-                        <td className="px-4 py-3 text-right font-medium tabular-nums text-emerald-600">
+                      <tr key={r.id} className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors">
+                        <td className="py-2.5 px-3 text-slate-600">{formatDateForDisplay(r.paymentDate)}</td>
+                        <td className="py-2.5 px-3 text-right font-medium tabular-nums text-emerald-600">
                           +<Money value={r.amount} />
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-500">{r.notes || "—"}</td>
-                        <td className="px-2 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-2.5 px-3 text-slate-500">{r.notes || "—"}</td>
+                        <td className="py-2.5 px-2 text-right" onClick={(ev) => ev.stopPropagation()}>
                           <ActionsMenu
                             ariaLabel="Repayment actions"
                             items={[

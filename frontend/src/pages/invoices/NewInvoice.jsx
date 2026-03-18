@@ -185,12 +185,7 @@ export default function NewInvoicePage() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-xl font-semibold">{isEdit ? "Edit Invoice" : "New Invoice"}</h1>
-            <p className="text-sm text-slate-600">
-              {isEdit ? "Edit invoice details" : "Create and send professional invoices"}
-            </p>
-          </div>
+          <h1 className="text-xl font-semibold">{isEdit ? "Edit Invoice" : "New Invoice"}</h1>
         </div>
 
         {isEdit && invoice?.id ? (

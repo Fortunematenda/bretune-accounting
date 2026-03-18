@@ -50,17 +50,27 @@ export default function QuoteLineItems({ items, setItems, products, vatEnabled, 
       </div>
 
       <div className="overflow-auto rounded-xl border border-violet-100 bg-white">
-        <table className="min-w-full text-sm">
+        <table className="min-w-full text-sm table-fixed">
+          <colgroup>
+            <col className="w-[160px]" />
+            <col className="w-auto" style={{ minWidth: 200 }} />
+            <col className="w-[80px]" />
+            <col className="w-[110px]" />
+            <col className="w-[100px]" />
+            <col className="w-[80px]" />
+            <col className="w-[110px]" />
+            <col className="w-[48px]" />
+          </colgroup>
           <thead className="text-left text-slate-500">
             <tr>
-              <th className="px-4 py-3">Product</th>
-              <th className="px-4 py-3">Description</th>
-              <th className="px-4 py-3 w-20">Qty</th>
-              <th className="px-4 py-3 w-28">Unit price</th>
-              <th className="px-4 py-3 w-24">Discount</th>
-              <th className="px-4 py-3 w-20">VAT %</th>
-              <th className="px-4 py-3 w-28 text-right">Amount</th>
-              <th className="px-4 py-3 w-12"></th>
+              <th className="px-3 py-3 text-xs font-semibold">Product</th>
+              <th className="px-3 py-3 text-xs font-semibold">Description</th>
+              <th className="px-3 py-3 text-xs font-semibold">Qty</th>
+              <th className="px-3 py-3 text-xs font-semibold">Unit price</th>
+              <th className="px-3 py-3 text-xs font-semibold">Discount</th>
+              <th className="px-3 py-3 text-xs font-semibold">VAT %</th>
+              <th className="px-3 py-3 text-xs font-semibold text-right">Amount</th>
+              <th className="px-2 py-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -76,9 +86,9 @@ export default function QuoteLineItems({ items, setItems, products, vatEnabled, 
 
               return (
                 <tr key={idx} className="border-t border-slate-100 align-top">
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-3">
                     <select
-                      className="h-10 min-w-[140px] rounded-lg border border-violet-200 bg-white px-3 text-sm focus:border-violet-400 focus:ring-2 focus:ring-violet-200"
+                      className="h-10 w-full rounded-lg border border-violet-200 bg-white px-2 text-sm focus:border-violet-400 focus:ring-2 focus:ring-violet-200 truncate"
                       value={r.productId || ""}
                       onChange={(e) => {
                         const nextId = e.target.value;
@@ -105,54 +115,54 @@ export default function QuoteLineItems({ items, setItems, products, vatEnabled, 
                       ))}
                     </select>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-3">
                     <Input
                       value={r.description}
                       onChange={(e) => updateRow(idx, { description: e.target.value })}
                       placeholder="Description"
-                      className="border-violet-200 focus:border-violet-400"
+                      className="w-full border-violet-200 focus:border-violet-400"
                     />
                     {rowErrors.description ? (
                       <div className="mt-1 text-xs text-red-600">{rowErrors.description}</div>
                     ) : null}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-3">
                     <Input
                       type="number"
                       min={0}
                       step="0.01"
                       value={r.quantity}
                       onChange={(e) => updateRow(idx, { quantity: e.target.value })}
-                      className="border-violet-200"
+                      className="w-full border-violet-200"
                     />
                     {rowErrors.quantity ? (
                       <div className="mt-1 text-xs text-red-600">{rowErrors.quantity}</div>
                     ) : null}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-3">
                     <Input
                       type="number"
                       min={0}
                       step="0.01"
                       value={r.unitPrice}
                       onChange={(e) => updateRow(idx, { unitPrice: e.target.value })}
-                      className="border-violet-200"
+                      className="w-full border-violet-200"
                     />
                     {rowErrors.unitPrice ? (
                       <div className="mt-1 text-xs text-red-600">{rowErrors.unitPrice}</div>
                     ) : null}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-3">
                     <Input
                       type="number"
                       min={0}
                       step="0.01"
                       value={r.discount}
                       onChange={(e) => updateRow(idx, { discount: e.target.value })}
-                      className="border-violet-200"
+                      className="w-full border-violet-200"
                     />
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-3">
                     <Input
                       type="number"
                       min={0}
@@ -164,21 +174,21 @@ export default function QuoteLineItems({ items, setItems, products, vatEnabled, 
                         updateRow(idx, { taxRate: String((pct / 100).toFixed(4)) });
                       }}
                       disabled={!vatEnabled}
-                      className="border-violet-200 w-16"
+                      className="w-full border-violet-200"
                       placeholder={vatEnabled ? "15" : "0"}
                     />
                     {!vatEnabled ? <div className="mt-1 text-[11px] text-slate-500">—</div> : null}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="h-10 flex items-center justify-end font-medium">
+                  <td className="px-3 py-3 text-right">
+                    <div className="h-10 flex items-center justify-end font-medium text-sm tabular-nums">
                       <Money value={lineTotal} />
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-2 py-3">
                     {(items || []).length > 1 ? (
                       <button
                         type="button"
-                        className="h-10 w-10 inline-flex items-center justify-center rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
                         onClick={() => removeRow(idx)}
                         aria-label="Remove line"
                       >

@@ -190,7 +190,7 @@ export default function LoansPage() {
       <PageHeader
         title="Loans Given"
         subtitle="Track money you've lent to friends, family, or colleagues"
-        icon={<Landmark className="h-6 w-6 text-violet-600" />}
+        icon={<Landmark className="h-5 w-5 text-violet-600" />}
         action={
           <Button onClick={() => setNewOpen(true)} className="h-9 shrink-0 gap-2">
             <Plus className="h-4 w-4" />
@@ -230,50 +230,49 @@ export default function LoansPage() {
       </div>
 
       {/* Borrowers table */}
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Borrowers</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loansQuery.error && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {loansQuery.error.message}
-            </div>
-          )}
+      <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="p-4">
+            {loansQuery.error && (
+              <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+                {loansQuery.error.message}
+              </div>
+            )}
 
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-2.5 mb-4">
-            <div className="relative flex-1 min-w-[180px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                className="pl-9 h-9"
-                placeholder="Search borrower, purpose…"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-              />
+            <div className="flex flex-wrap items-center gap-2.5 rounded-lg bg-white border border-slate-200/80 px-3 py-2">
+              <div className="relative flex-1 min-w-[180px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  className="pl-9 h-9"
+                  placeholder="Search borrowers…"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                />
+              </div>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-600"
+              >
+                <option value="">All statuses</option>
+                {Object.entries(STATUS_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
+              </select>
             </div>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="h-9 rounded-lg border border-slate-200 px-3 text-sm"
-            >
-              <option value="">All statuses</option>
-              {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
-            </select>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-slate-200">
-            <table className="min-w-full">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="w-8 px-2 py-3" />
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Borrower</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-600">Loans</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Total Loaned</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Outstanding</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Status</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Actions</th>
+          <div>
+            <table className="min-w-full text-[13px]">
+              <thead className="bg-slate-50/80">
+                <tr className="border-y border-slate-200/80">
+                  <th className="w-8 px-2 py-2.5" />
+                  <th className="px-3 py-2.5 text-left text-xs font-medium text-slate-500">Borrower</th>
+                  <th className="px-3 py-2.5 text-center text-xs font-medium text-slate-500">Loans</th>
+                  <th className="px-3 py-2.5 text-right text-xs font-medium text-slate-500">Total Loaned</th>
+                  <th className="px-3 py-2.5 text-right text-xs font-medium text-slate-500">Outstanding</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium text-slate-500">Status</th>
+                  <th className="px-3 py-2.5 text-right text-xs font-medium text-slate-500">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -281,12 +280,13 @@ export default function LoansPage() {
                   <tr><td colSpan={7} className="px-4 py-10 text-center text-sm text-slate-500">Loading…</td></tr>
                 ) : borrowerGroups.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-14 text-center">
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="rounded-full bg-slate-100 p-4">
-                          <Landmark className="h-8 w-8 text-slate-400" />
+                    <td colSpan={7} className="px-4 py-0">
+                      <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                        <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center mb-4">
+                          <Landmark className="h-6 w-6 text-slate-400" strokeWidth={1.5} />
                         </div>
-                        <p className="text-sm text-slate-500">No loans recorded yet</p>
+                        <h3 className="text-sm font-semibold text-slate-800">No loans recorded yet</h3>
+                        <p className="mt-1 text-sm text-slate-500">Record a loan to start tracking</p>
                       </div>
                     </td>
                   </tr>
@@ -299,7 +299,7 @@ export default function LoansPage() {
                       <React.Fragment key={group.key}>
                         {/* Group / borrower row */}
                         <tr
-                          className={`border-t border-slate-200 ${hasMultiple ? "cursor-pointer hover:bg-violet-50/40" : "hover:bg-violet-50/20"} transition-colors`}
+                          className={`border-b border-slate-100 ${hasMultiple ? "cursor-pointer hover:bg-slate-50/80" : "hover:bg-slate-50/80"} transition-colors`}
                           onClick={() => hasMultiple ? toggleExpand(group.key) : navigate(`/loans/${group.loans[0].id}`)}
                         >
                           <td className="w-8 px-2 py-3 text-center text-slate-400">
@@ -346,7 +346,7 @@ export default function LoansPage() {
                         {isOpen && group.loans.map((loan) => (
                           <tr
                             key={loan.id}
-                            className="border-t border-slate-100 bg-violet-50/30 hover:bg-violet-50/60 cursor-pointer transition-colors"
+                            className="border-b border-slate-100 bg-slate-50/40 hover:bg-slate-50/80 cursor-pointer transition-colors"
                             onClick={() => navigate(`/loans/${loan.id}`)}
                           >
                             <td className="w-8 px-2 py-2.5" />
@@ -389,7 +389,7 @@ export default function LoansPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={newOpen} onOpenChange={setNewOpen} title="Record a Loan" className="max-w-lg">
+      <Dialog open={newOpen} onOpenChange={setNewOpen} title="Record a Loan" description="Lend money and track repayments" size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
           {formError && (
             <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>

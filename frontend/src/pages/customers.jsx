@@ -5,7 +5,9 @@ import Input from "../components/ui/input";
 import Button from "../components/ui/button";
 import Dialog from "../components/ui/dialog";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Download, Minus, Plus, Upload, SlidersHorizontal, Users } from "lucide-react";
+import { Download, Minus, Plus, Upload, SlidersHorizontal, Users, UserPlus } from "lucide-react";
+import StatusBadge from "../components/common/StatusBadge";
+import EmptyState from "../components/common/EmptyState";
 import Money from "../components/common/money";
 import ActionsMenu from "../components/common/ActionsMenu";
 import ColumnPickerDialog from "../components/common/ColumnPickerDialog";
@@ -497,7 +499,7 @@ export default function ClientsPage() {
       <PageHeader
         title="Customers"
         subtitle="Manage your customer and contact records"
-        icon={<Users className="h-6 w-6 text-violet-600" />}
+        icon={<Users className="h-5 w-5 text-violet-600" />}
         action={
           <Button
             onClick={() => {
@@ -526,17 +528,15 @@ export default function ClientsPage() {
             }}
             className="h-9 shrink-0"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1.5" />
             New Customer
           </Button>
         }
       />
 
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Customer List</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="p-4">
           <input
             ref={importInputRef}
             type="file"
@@ -559,26 +559,27 @@ export default function ClientsPage() {
               nextParams.delete("page");
               setSearchParams(nextParams, { replace: true });
             }}
-            searchPlaceholder="Search"
+            searchPlaceholder="Search customers…"
             limit={limit}
             onLimitChange={setLimit}
             onColumnsClick={() => setColumnsOpen(true)}
           />
           {success ? (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
+            <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-800">
               {success}
             </div>
           ) : null}
           {error ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+            <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
               {error}
             </div>
           ) : null}
+          </div>
 
-          <div className="mt-4 overflow-auto">
-            <table className="min-w-max w-full text-sm">
-              <thead className="text-left text-slate-500 bg-slate-50">
-                <tr className="border-b border-slate-200">
+          <div className="overflow-auto">
+            <table className="min-w-max w-full text-[13px]">
+              <thead className="text-left bg-slate-50/80">
+                <tr className="border-y border-slate-200/80">
                   {visibleColumns.includes("customerNo") ? (
                     <SortableTableHeader label="ID" columnKey="customerNo" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   ) : null}
@@ -627,7 +628,7 @@ export default function ClientsPage() {
                   {visibleColumns.includes("totalPaid") ? (
                     <SortableTableHeader label="Paid" columnKey="totalPaid" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} align="right" className="hidden sm:table-cell" />
                   ) : null}
-                  <th className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">Actions</th>
+                  <th className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-xs font-medium text-slate-500">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -636,83 +637,75 @@ export default function ClientsPage() {
                   return (
                   <tr
                     key={c.id}
-                    className="border-t border-slate-100 cursor-pointer hover:bg-violet-50/50 transition-colors"
+                    className="border-b border-slate-100 cursor-pointer hover:bg-slate-50/80 transition-colors"
                     onClick={() => navigate(`/customers/${c.id}`)}
                   >
                     {visibleColumns.includes("customerNo") ? (
-                      <td className="py-3 px-3 font-mono text-xs text-violet-600 font-medium whitespace-nowrap" title={c.id}>{displayId}</td>
+                      <td className="py-2.5 px-3 font-mono text-xs text-slate-500 font-medium whitespace-nowrap" title={c.id}>{displayId}</td>
                     ) : null}
                     {visibleColumns.includes("status") ? (
-                      <td className="py-3 px-3 whitespace-nowrap">
-                        <span
-                          className={(() => {
-                            const s = String(c.status || "").toUpperCase();
-                            if (s === "ACTIVE") return "inline-flex items-center rounded-md border border-violet-200 bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700";
-                            if (s === "SUSPENDED") return "inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700";
-                            if (s === "INACTIVE") return "inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700";
-                            return "inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-0.5 text-xs font-medium text-slate-700";
-                          })()}
-                        >
-                          {String(c.status || "—")}
-                        </span>
+                      <td className="py-2.5 px-3 whitespace-nowrap">
+                        <StatusBadge status={c.status} size="sm" />
                       </td>
                     ) : null}
                     {visibleColumns.includes("name") ? (
-                      <td className="py-3 px-3 min-w-[260px]">
-                        <div className="font-medium text-violet-600 hover:text-violet-700 leading-6">{c.companyName ? c.companyName : c.contactName}</div>
-                        {c.companyName ? <div className="text-xs text-slate-500">{c.contactName}</div> : null}
+                      <td className="py-2.5 px-3 min-w-[240px]">
+                        <div className="font-medium text-slate-900 leading-5">{c.companyName ? c.companyName : c.contactName}</div>
+                        {c.companyName ? <div className="text-xs text-slate-400 mt-0.5">{c.contactName}</div> : null}
                       </td>
                     ) : null}
                     {visibleColumns.includes("phone") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">{c.phone || "—"}</td>
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-slate-600">{c.phone || "—"}</td>
                     ) : null}
                     {visibleColumns.includes("email") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">{c.email || "—"}</td>
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-slate-600">{c.email || "—"}</td>
                     ) : null}
                     {visibleColumns.includes("address") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">{c.address || "—"}</td>
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-slate-600">{c.address || "—"}</td>
                     ) : null}
                     {visibleColumns.includes("createdAt") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">{formatDateForDisplay(c.createdAt)}</td>
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-slate-500">{formatDateForDisplay(c.createdAt)}</td>
                     ) : null}
                     {visibleColumns.includes("city") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">{c.city || "—"}</td>
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-slate-600">{c.city || "—"}</td>
                     ) : null}
                     {visibleColumns.includes("type") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">{c.type || "—"}</td>
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap">
+                        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">{c.type || "—"}</span>
+                      </td>
                     ) : null}
                     {visibleColumns.includes("paymentTermsDays") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">{c.paymentTermsDays} days</td>
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-slate-600">{c.paymentTermsDays} days</td>
                     ) : null}
                     {visibleColumns.includes("balance") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-right tabular-nums font-medium text-slate-800">
                         <Money value={Number(c.balance || 0)} />
                       </td>
                     ) : null}
                     {visibleColumns.includes("taxNumber") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">{c.taxNumber || "—"}</td>
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-slate-600">{c.taxNumber || "—"}</td>
                     ) : null}
                     {visibleColumns.includes("openingBalance") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-right tabular-nums text-slate-600">
                         <Money value={Number(c.openingBalance || 0)} />
                       </td>
                     ) : null}
                     {visibleColumns.includes("creditLimit") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-right tabular-nums text-slate-600">
                         <Money value={Number(c.creditLimit || 0)} />
                       </td>
                     ) : null}
                     {visibleColumns.includes("totalInvoiced") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-right tabular-nums text-slate-600">
                         <Money value={Number(c.totalInvoiced || 0)} />
                       </td>
                     ) : null}
                     {visibleColumns.includes("totalPaid") ? (
-                      <td className="hidden sm:table-cell py-3 px-3 whitespace-nowrap">
+                      <td className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-right tabular-nums text-slate-600">
                         <Money value={Number(c.totalPaid || 0)} />
                       </td>
                     ) : null}
-                    <td className="hidden sm:table-cell py-3 px-3 text-right">
+                    <td className="hidden sm:table-cell py-2.5 px-3 text-right">
                       <ActionsMenu
                         ariaLabel="Customer actions"
                         items={[
@@ -741,7 +734,27 @@ export default function ClientsPage() {
             </table>
 
             {data && (data.data || []).length === 0 ? (
-              <div className="mt-4 text-sm text-slate-600">No customers found for the selected search.</div>
+              <EmptyState
+                icon={Users}
+                title="No customers found"
+                description={q ? "Try adjusting your search terms" : "Get started by adding your first customer"}
+                action={
+                  !q ? (
+                    <Button
+                      onClick={() => {
+                        setEditingId(null);
+                        setForm({ type: "COMPANY", companyName: "", contactName: "", emails: [""], phone: "", address: "", city: "", state: "", country: "", postalCode: "", taxType: "NONE", taxNumber: "", paymentTermsDays: 30, openingBalance: "0.00", creditLimit: "0.00", status: "ACTIVE", notes: "" });
+                        setFieldErrors({});
+                        setOpen(true);
+                      }}
+                      className="h-9"
+                    >
+                      <UserPlus className="h-4 w-4 mr-1.5" />
+                      Add Customer
+                    </Button>
+                  ) : null
+                }
+              />
             ) : null}
 
             {data?.meta && (data.data || []).length > 0 ? (
@@ -861,7 +874,8 @@ export default function ClientsPage() {
           }
         }}
         title={editingId ? "Edit Customer" : "New Customer"}
-        className="max-w-2xl"
+        description={editingId ? "Update customer information" : "Add a new customer to your account"}
+        size="lg"
       >
         <form className="space-y-5" onSubmit={saveCustomer}>
           <div className="rounded-xl border border-slate-200 bg-slate-50/30 p-4 space-y-4">

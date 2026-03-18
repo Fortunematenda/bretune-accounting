@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { api } from "../lib/api";
-import { AlertTriangle, BarChart3, Building2, BookOpen, Calendar, ChevronDown, CreditCard, FileText, FilePlus2, Landmark, LayoutGrid, Package, Pencil, PieChart, Plus, Receipt, RefreshCw, Timer, TrendingUp, Users, Wallet } from "lucide-react";
+import { AlertTriangle, BarChart3, Building2, BookOpen, Calendar, ChevronDown, CreditCard, FileText, FilePlus2, Landmark, LayoutGrid, Package, Pencil, PieChart, Plus, Receipt, RefreshCw, Sparkles, Timer, TrendingUp, Users, Wallet } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/ui/button";
 import Money from "../components/common/money";
@@ -15,6 +15,11 @@ import TasksCard from "../components/dashboard/TasksCard";
 import RecentInvoicePaymentsCard from "../components/dashboard/RecentInvoicePaymentsCard";
 import BankAccountCard from "../components/dashboard/BankAccountCard";
 import LoansCard from "../components/dashboard/LoansCard";
+import RevenueExpenseChart from "../components/dashboard/RevenueExpenseChart";
+import CashFlowChart from "../components/dashboard/CashFlowChart";
+import QuickActionsMenu from "../components/dashboard/QuickActionsMenu";
+import AIAssistantPanel from "../components/dashboard/AIAssistantPanel";
+import NetworkStatusWidget from "../components/dashboard/NetworkStatusWidget";
 import { useAuth } from "../features/auth/auth-context";
 import { formatDateForDisplay } from "../lib/dateFormat";
 
@@ -46,18 +51,24 @@ export default function DashboardPage() {
     kpis: true,
     agingSummary: true,
     recentActivity: true,
-    revenueCard: true,
-    topUnpaidCustomers: true,
-    unpaidSplit: true,
-    arAgingByCustomer: true,
-    unpaidTransactions: true,
-    fixedAssetsCount: true,
-    journalEntriesMtd: true,
-    currencyRates: true,
-    payRunStatus: true,
-    upcomingBills: true,
+    revenueExpenseChart: true,
+    cashFlowChart: true,
+    aiAssistant: true,
+    networkStatus: true,
+    revenueCard: false,
+    topUnpaidCustomers: false,
+    unpaidSplit: false,
+    arAgingByCustomer: false,
+    unpaidTransactions: false,
+    fixedAssetsCount: false,
+    journalEntriesMtd: false,
+    currencyRates: false,
+    payRunStatus: false,
+    upcomingBills: false,
     loansCard: true,
   });
+
+  const [period, setPeriod] = useState("month"); // month | quarter | year
 
   const layoutStorageKey = useMemo(() => {
     const id = user?.id || user?.userId || user?.email || "anon";
@@ -186,6 +197,40 @@ export default function DashboardPage() {
     ];
   }, [summary]);
 
+  const monthlyChartData = useMemo(() => {
+    const monthly = summary?.monthlyRevenue;
+    if (!monthly) return [];
+    const months = Array.isArray(monthly.months) ? monthly.months : [];
+    return months.map((m) => ({
+      revenue: Number(m.revenue || m.invoiced || 0),
+      expenses: Number(m.expenses || m.costs || 0),
+    }));
+  }, [summary]);
+
+  const cashFlowData = useMemo(() => {
+    const cf = summary?.cashFlow;
+    if (!cf) return [];
+    const months = Array.isArray(cf.months) ? cf.months : [];
+    return months.map((m) => ({
+      cashIn: Number(m.cashIn || m.received || 0),
+      cashOut: Number(m.cashOut || m.paid || 0),
+    }));
+  }, [summary]);
+
+  const kpiSparklines = useMemo(() => {
+    const sparks = summary?.sparklines || {};
+    const build = (arr) => {
+      if (!Array.isArray(arr) || arr.length < 2) return undefined;
+      return arr.map((v, i) => ({ v: Number(v || 0) }));
+    };
+    return {
+      outstandingReceivables: build(sparks.outstandingReceivables),
+      overdueReceivables: build(sparks.overdueReceivables),
+      cashCollectedMtd: build(sparks.cashCollectedMtd),
+      invoicesIssuedMtd: build(sparks.invoicesIssuedMtd),
+    };
+  }, [summary]);
+
   const dashboardCompanyName = useMemo(() => {
     const direct = user?.companyName;
     if (direct) return String(direct);
@@ -258,69 +303,173 @@ export default function DashboardPage() {
   }, [dashboardCompanyName]);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 space-y-6">
+    <div className="min-h-screen dashboard-bg p-4 sm:p-6 lg:p-8 space-y-6">
       {error ? (
-        <div className="sm:hidden inline-flex w-full items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          <AlertTriangle className="h-4 w-4" />
-          <span>{error}</span>
-        </div>
-      ) : null}
-
-      {/* Xero-style company header */}
-      <div className="hidden sm:block rounded-lg border border-slate-200 bg-slate-100/80 px-5 py-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white font-semibold text-lg">
-              {companyInitials}
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-lg font-bold text-slate-900 truncate">{dashboardCompanyName}</h1>
-              <p className="text-sm text-slate-500">Dashboard</p>
-            </div>
-          </div>
-          <div className="hidden lg:block text-sm text-slate-500 shrink-0">
-            <Link to="/reports" className="text-violet-600 hover:text-violet-700 font-medium">
-              View reports →
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Business Overview section - Xero style */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h2 className="text-xl font-bold text-slate-900">Business Overview</h2>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            type="button"
-            variant="outline"
-            className="h-9 border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-            onClick={() => navigate("/reports")}
-          >
-            View reports
-          </Button>
-          <Button
-            type="button"
-            className="h-9 bg-violet-600 hover:bg-violet-700 text-white inline-flex items-center gap-2"
-            onClick={() => setCustomizeOpen(true)}
-          >
-            <Pencil className="h-4 w-4" />
-            Edit homepage
-          </Button>
-        </div>
-      </div>
-
-      {error ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 flex items-center gap-2">
+        <div className="inline-flex w-full items-center gap-2.5 rounded-xl border border-red-200/80 bg-red-50/80 backdrop-blur-sm px-4 py-3 text-sm text-red-700">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="relative" ref={filtersRef}>
+      {/* Modern company header with greeting */}
+      <div className="hidden sm:block relative z-50">
+        <div className="relative rounded-2xl border border-slate-200/80 bg-white/60 backdrop-blur-sm p-6">
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-500/[0.05] via-transparent to-indigo-500/[0.03]" />
+          <div className="relative flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-violet-700 text-white font-bold text-lg shadow-lg shadow-violet-600/20">
+                {companyInitials}
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-xl font-bold text-slate-900 truncate tracking-tight">{dashboardCompanyName}</h1>
+                <p className="text-sm text-slate-400 mt-0.5">Business Dashboard</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Period selector */}
+              <div className="flex items-center gap-1 rounded-lg bg-slate-100/80 p-0.5">
+                {[
+                  { key: "month", label: "Month" },
+                  { key: "quarter", label: "Quarter" },
+                  { key: "year", label: "Year" },
+                ].map((o) => (
+                  <button
+                    key={o.key}
+                    type="button"
+                    onClick={() => setPeriod(o.key)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                      period === o.key
+                        ? "bg-white text-slate-800 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="relative" ref={filtersRef}>
+                <button
+                  type="button"
+                  className="h-9 rounded-xl border border-slate-200/80 bg-white/80 px-3.5 text-xs font-medium text-slate-600 flex items-center gap-2 hover:bg-white hover:border-slate-300 transition-colors"
+                  onClick={() => {
+                    setOpenFilter((p) => {
+                      if (p === "date") return null;
+                      setDateRangeDraft((d) => ({ ...d, ...dateRange }));
+                      return "date";
+                    });
+                  }}
+                >
+                  <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                  <span className="truncate max-w-[140px]">{dateRangeLabel}</span>
+                  <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                </button>
+
+                {openFilter === "date" ? (
+                  <div className="absolute right-0 z-[60] mt-2 w-80 rounded-2xl border border-slate-200/80 bg-white shadow-xl shadow-slate-200/50 p-5">
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3">Date Range</div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <div className="text-[11px] font-medium text-slate-500">Start</div>
+                        <input
+                          type="date"
+                          className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs focus:ring-2 focus:ring-violet-500/20 focus:border-violet-300 outline-none transition-all"
+                          value={dateRangeDraft.start}
+                          onChange={(e) => setDateRangeDraft((p) => ({ ...p, start: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <div className="text-[11px] font-medium text-slate-500">End</div>
+                        <input
+                          type="date"
+                          className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs focus:ring-2 focus:ring-violet-500/20 focus:border-violet-300 outline-none transition-all"
+                          value={dateRangeDraft.end}
+                          onChange={(e) => setDateRangeDraft((p) => ({ ...p, end: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="h-8 text-xs rounded-lg"
+                        onClick={() => {
+                          setDateRangeDraft({ start: "", end: "" });
+                          setDateRange({ start: "", end: "" });
+                          setOpenFilter(null);
+                        }}
+                      >
+                        Clear
+                      </Button>
+                      <Button
+                        type="button"
+                        className="h-8 text-xs rounded-lg bg-violet-600 hover:bg-violet-700 text-white shadow-sm shadow-violet-600/20"
+                        onClick={() => {
+                          setDateRange({ ...dateRangeDraft });
+                          setOpenFilter(null);
+                        }}
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                className="h-9 w-9 rounded-xl border border-slate-200/80 bg-white/80 flex items-center justify-center text-slate-500 hover:bg-white hover:border-slate-300 hover:text-slate-700 transition-colors"
+                onClick={fetchDashboard}
+                title="Refresh"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+              </button>
+              <Link to="/reports" className="h-9 rounded-xl border border-slate-200/80 bg-white/80 px-3.5 text-xs font-medium text-slate-600 flex items-center gap-2 hover:bg-white hover:border-slate-300 transition-colors">
+                <BarChart3 className="h-3.5 w-3.5 text-slate-400" />
+                Reports
+              </Link>
+              <QuickActionsMenu />
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 text-xs rounded-xl"
+                onClick={() => setCustomizeOpen(true)}
+              >
+                <Pencil className="h-3.5 w-3.5 mr-1" />
+                Customize
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile header */}
+      <div className="sm:hidden">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-violet-700 text-white font-bold text-sm shadow-md shadow-violet-600/20">
+              {companyInitials}
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-base font-bold text-slate-900 truncate">{dashboardCompanyName}</h1>
+              <p className="text-[11px] text-slate-400">Dashboard</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-8 text-xs rounded-lg border-slate-200"
+            onClick={() => setCustomizeOpen(true)}
+          >
+            <Pencil className="h-3 w-3 mr-1" />
+            Edit
+          </Button>
+        </div>
+
+        {/* Mobile date filter */}
+        <div className="relative mb-3" ref={!filtersRef.current ? filtersRef : undefined}>
           <button
             type="button"
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 flex items-center justify-between gap-3 shadow-sm"
+            className="w-full rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2 text-xs text-slate-600 flex items-center justify-between gap-2"
             onClick={() => {
               setOpenFilter((p) => {
                 if (p === "date") return null;
@@ -330,61 +479,11 @@ export default function DashboardPage() {
             }}
           >
             <span className="flex items-center gap-2 min-w-0">
-              <Calendar className="h-4 w-4 text-slate-500" />
+              <Calendar className="h-3.5 w-3.5 text-slate-400" />
               <span className="truncate">{dateRangeLabel}</span>
             </span>
-            <ChevronDown className="h-4 w-4 text-slate-500" />
+            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
           </button>
-
-          {openFilter === "date" ? (
-            <div className="absolute z-30 mt-2 w-full rounded-xl border border-slate-200 bg-white shadow-lg p-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <div className="text-xs text-slate-500">Start date</div>
-                  <input
-                    type="date"
-                    className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
-                    value={dateRangeDraft.start}
-                    onChange={(e) => setDateRangeDraft((p) => ({ ...p, start: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <div className="text-xs text-slate-500">End date</div>
-                  <input
-                    type="date"
-                    className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
-                    value={dateRangeDraft.end}
-                    onChange={(e) => setDateRangeDraft((p) => ({ ...p, end: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-4 flex items-center justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-9"
-                  onClick={() => {
-                    setDateRangeDraft({ start: "", end: "" });
-                    setDateRange({ start: "", end: "" });
-                    setOpenFilter(null);
-                  }}
-                >
-                  Clear
-                </Button>
-                <Button
-                  type="button"
-                  className="h-9 bg-violet-600 hover:bg-violet-700 text-white"
-                  onClick={() => {
-                    setDateRange({ ...dateRangeDraft });
-                    setOpenFilter(null);
-                  }}
-                >
-                  Apply
-                </Button>
-              </div>
-            </div>
-          ) : null}
         </div>
       </div>
 
@@ -394,9 +493,9 @@ export default function DashboardPage() {
         onSendStatement={() => navigate("/statements")}
       />
 
-      {/* Xero-style row 1: 4 cards - Invoices, Bills, Bank, Bank */}
+      {/* Primary financial cards row */}
       {!loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="stagger-children grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <InvoicesOwedCard
             totalOwed={summary?.kpis?.outstandingReceivables?.value}
             overdueAmount={summary?.kpis?.overdueReceivables?.value}
@@ -428,17 +527,22 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      {/* Loans card */}
+      {/* Loans section */}
       {layout.loansCard && !loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           <LoansCard
             summary={loansSummary}
             onNewLoan={() => navigate("/loans")}
           />
-          <Card className="border border-slate-200 bg-white shadow-sm sm:col-span-1 xl:col-span-2">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-semibold">Outstanding Loans by Borrower</CardTitle>
-            </CardHeader>
+          <Card className="border border-slate-200/80 bg-white/80 backdrop-blur-sm sm:col-span-1 xl:col-span-2">
+            <div className="p-5 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-xl bg-indigo-500/10 flex items-center justify-center ring-1 ring-indigo-500/20">
+                  <Landmark className="h-4 w-4 text-indigo-600" strokeWidth={1.8} />
+                </div>
+                <span className="text-[13px] font-semibold text-slate-800">Outstanding Loans by Borrower</span>
+              </div>
+            </div>
             <CardContent>
               {!loansSummary || Number(loansSummary.totalLoaned ?? 0) === 0 ? (
                 <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center">
@@ -489,7 +593,7 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      {/* Xero-style row 2: Tasks + Recent invoice payments */}
+      {/* Tasks + Recent invoice payments */}
       {!loading ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <TasksCard
@@ -503,21 +607,19 @@ export default function DashboardPage() {
       ) : null}
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="stagger-children grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent>
-                <div className="h-4 w-24 rounded bg-slate-200 mb-3" />
-                <div className="h-9 w-32 rounded bg-slate-200 mb-2" />
-                <div className="h-3 w-full rounded bg-slate-100" />
-              </CardContent>
-            </Card>
+            <div key={i} className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-sm p-5 animate-shimmer">
+              <div className="h-3 w-20 rounded-full bg-slate-200/80 mb-4" />
+              <div className="h-8 w-28 rounded-lg bg-slate-200/60 mb-3" />
+              <div className="h-2.5 w-full rounded-full bg-slate-100/80" />
+            </div>
           ))}
         </div>
       ) : null}
 
       {layout.kpis && !loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="stagger-children grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {kpis.map((k) => (
             <KpiCard
               key={k.key}
@@ -527,20 +629,34 @@ export default function DashboardPage() {
               trend={k.trend}
               icon={k.icon}
               tone={k.tone}
+              sparklineData={kpiSparklines[k.key]}
             />
           ))}
+        </div>
+      ) : null}
+
+      {/* Charts row: Revenue vs Expense + Cash Flow */}
+      {(layout.revenueExpenseChart || layout.cashFlowChart) && !loading ? (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          {layout.revenueExpenseChart ? <RevenueExpenseChart monthlyData={monthlyChartData} onPeriodChange={() => {}} /> : null}
+          {layout.cashFlowChart ? <CashFlowChart cashFlowData={cashFlowData} /> : null}
         </div>
       ) : null}
 
       {layout.topUnpaidCustomers || layout.unpaidSplit ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {layout.topUnpaidCustomers ? (
-            <Card className="border border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-base font-semibold">Invoices owed to you</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mt-3 space-y-2">
+            <Card className="border border-slate-200/80 bg-white/80 backdrop-blur-sm">
+              <div className="p-5 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl bg-violet-500/10 flex items-center justify-center ring-1 ring-violet-500/20">
+                    <Receipt className="h-4 w-4 text-violet-600" strokeWidth={1.8} />
+                  </div>
+                  <span className="text-[13px] font-semibold text-slate-800">Invoices owed to you</span>
+                </div>
+              </div>
+              <CardContent className="pt-0">
+                <div className="space-y-2.5">
                   {topUnpaid.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center">
                       <p className="text-sm text-slate-600 mb-3">No unpaid invoices found.</p>
@@ -555,20 +671,20 @@ export default function DashboardPage() {
                       return topUnpaid.map((r) => {
                         const pct = Math.max(0, Math.min(100, (Number(r.amountDue || 0) / max) * 100));
                         return (
-                          <div key={r.clientId} className="grid grid-cols-1 sm:grid-cols-[180px_1fr_90px] gap-2 sm:gap-3 items-center">
+                          <div key={r.clientId} className="group grid grid-cols-1 sm:grid-cols-[160px_1fr_90px] gap-2 sm:gap-3 items-center">
                             <Link
                               to={`/customers/${r.clientId}`}
-                                    className="text-xs text-violet-600 hover:text-violet-700 truncate font-medium"
+                              className="text-xs text-violet-600 hover:text-violet-700 truncate font-semibold"
                             >
                               {r.customerName}
                             </Link>
-                            <div className="h-7 rounded bg-slate-100 overflow-hidden flex">
+                            <div className="h-6 rounded-lg bg-slate-100/80 overflow-hidden flex">
                               <div
-                                className="h-full rounded-l shrink-0 transition-[width]"
-                                style={{ width: `${pct}%`, minWidth: pct > 0 ? "4px" : 0, backgroundColor: "#7c3aed" }}
+                                className="h-full rounded-lg shrink-0 transition-all duration-500 ease-out bg-gradient-to-r from-violet-500 to-violet-400"
+                                style={{ width: `${pct}%`, minWidth: pct > 0 ? "4px" : 0 }}
                               />
                             </div>
-                            <div className="text-right text-xs text-slate-700">{fmtMoney(r.amountDue)}</div>
+                            <div className="text-right text-xs font-semibold text-slate-700">{fmtMoney(r.amountDue)}</div>
                           </div>
                         );
                       });
@@ -582,12 +698,17 @@ export default function DashboardPage() {
           )}
 
           {layout.unpaidSplit ? (
-            <Card className="border border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-base font-semibold">Unpaid split by status</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+            <Card className="border border-slate-200/80 bg-white/80 backdrop-blur-sm">
+              <div className="p-5 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl bg-rose-500/10 flex items-center justify-center ring-1 ring-rose-500/20">
+                    <PieChart className="h-4 w-4 text-rose-600" strokeWidth={1.8} />
+                  </div>
+                  <span className="text-[13px] font-semibold text-slate-800">Unpaid split by status</span>
+                </div>
+              </div>
+              <CardContent className="pt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                   <div className="flex items-center justify-center">
                     <svg width="220" height="220" viewBox="0 0 220 220">
                       {(() => {
@@ -665,12 +786,17 @@ export default function DashboardPage() {
       {layout.arAgingByCustomer || layout.unpaidTransactions ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {layout.arAgingByCustomer ? (
-            <Card className="border border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-base font-semibold">AR Aging by Customer</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mt-3">
+            <Card className="border border-slate-200/80 bg-white/80 backdrop-blur-sm">
+              <div className="p-5 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                    <Receipt className="h-4 w-4 text-amber-600" strokeWidth={1.8} />
+                  </div>
+                  <span className="text-[13px] font-semibold text-slate-800">AR Aging by Customer</span>
+                </div>
+              </div>
+              <CardContent className="pt-0">
+                <div>
                   {agingByCustomer.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center">
                       <p className="text-sm text-slate-600 mb-3">No aging data yet.</p>
@@ -761,12 +887,17 @@ export default function DashboardPage() {
           )}
 
           {layout.unpaidTransactions ? (
-            <Card className="border border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-base font-semibold">Unpaid Invoices</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mt-3">
+            <Card className="border border-slate-200/80 bg-white/80 backdrop-blur-sm">
+              <div className="p-5 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl bg-violet-500/10 flex items-center justify-center ring-1 ring-violet-500/20">
+                    <FileText className="h-4 w-4 text-violet-600" strokeWidth={1.8} />
+                  </div>
+                  <span className="text-[13px] font-semibold text-slate-800">Unpaid Invoices</span>
+                </div>
+              </div>
+              <CardContent className="pt-0">
+                <div>
                   {unpaidTransactions.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center">
                       <p className="text-sm text-slate-600 mb-3">No unpaid invoices.</p>
@@ -855,23 +986,30 @@ export default function DashboardPage() {
             </div>
           ) : null}
           {layout.recentActivity ? <RecentActivity items={summary?.recentActivity} /> : null}
+          {layout.aiAssistant ? <AIAssistantPanel /> : null}
+          {layout.networkStatus ? <NetworkStatusWidget /> : null}
         </div>
       ) : null}
 
       {layout.revenueCard ? (
-        <Card className="border border-slate-200">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">
-              {summary?.monthlyRevenue?.isWholeTotal ? "Revenue (Accrual)" : "Revenue (Accrual) — MTD"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="border border-slate-200/80 bg-white/80 backdrop-blur-sm overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/[0.04] to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 to-emerald-400 opacity-60" />
+          <div className="relative p-5">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <TrendingUp className="h-4 w-4 text-emerald-600" strokeWidth={1.8} />
+              </div>
+              <span className="text-[13px] font-semibold text-slate-800">
+                {summary?.monthlyRevenue?.isWholeTotal ? "Revenue (Accrual)" : "Revenue (Accrual) — MTD"}
+              </span>
+            </div>
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
-                <div className="text-3xl font-semibold tracking-tight text-slate-900">
+                <div className="text-xl font-bold tracking-tight text-slate-900 animate-count-up">
                   <Money value={summary?.kpis?.revenueAccrualMtd?.value || 0} />
                 </div>
-                <div className="mt-1 text-xs text-slate-500">
+                <div className="mt-1.5 text-[11px] text-slate-400 font-medium">
                   {summary
                     ? summary.monthlyRevenue?.isWholeTotal
                       ? `${summary.monthlyRevenue?.invoiceCount ?? 0} invoices (total)`
@@ -879,9 +1017,9 @@ export default function DashboardPage() {
                     : "Loading…"}
                 </div>
               </div>
-              <div className="text-xs text-slate-500">Revenue (Accrual) vs Cash Received gives a clearer picture.</div>
+              <div className="text-[11px] text-slate-400 max-w-[200px]">Revenue (Accrual) vs Cash Received gives a clearer picture.</div>
             </div>
-          </CardContent>
+          </div>
         </Card>
       ) : null}
 
@@ -906,68 +1044,75 @@ export default function DashboardPage() {
             />
           ) : null}
           {layout.currencyRates ? (
-            <Card
-              className="cursor-pointer border-l-4 border-l-violet-600 border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow"
+            <div
+              className="card-glow group cursor-pointer relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white transition-all duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
               onClick={() => navigate("/currencies")}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === "Enter" && navigate("/currencies")}
             >
-              <CardContent className="pt-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
-                    <Wallet className="h-5 w-5" />
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/[0.05] to-transparent" />
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500 to-violet-400 opacity-60" />
+              <div className="relative p-5">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="h-9 w-9 rounded-xl bg-violet-500/10 flex items-center justify-center ring-1 ring-violet-500/20">
+                    <Wallet className="h-4 w-4 text-violet-600" strokeWidth={1.8} />
                   </div>
-                  <div>
-                    <div className="text-xs font-medium text-slate-500">Currency rates</div>
-                    <div className="text-lg font-semibold text-slate-900">
-                      {currencyInfo.rateVsUsd != null ? (
-                        <>1 USD = {Number(currencyInfo.rateVsUsd).toLocaleString(undefined, { maximumFractionDigits: 4 })} {currencyInfo.displayCurrencyCode}</>
-                      ) : (
-                        <>{currencyInfo.displayCurrencyCode} · {currencyInfo.rateCount} rates</>
-                      )}
-                    </div>
-                    <div className="text-xs text-slate-500">Click to manage currencies</div>
-                  </div>
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Currency rates</div>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-sm font-bold tracking-tight text-slate-900">
+                  {currencyInfo.rateVsUsd != null ? (
+                    <>1 USD = {Number(currencyInfo.rateVsUsd).toLocaleString(undefined, { maximumFractionDigits: 4 })} {currencyInfo.displayCurrencyCode}</>
+                  ) : (
+                    <>{currencyInfo.displayCurrencyCode} · {currencyInfo.rateCount} rates</>
+                  )}
+                </div>
+                <div className="mt-1 text-[11px] text-slate-400">Click to manage currencies</div>
+              </div>
+            </div>
           ) : null}
           {layout.payRunStatus ? (
-            <Card className="border-l-4 border-l-amber-400 bg-gradient-to-br from-amber-50/30 to-white">
-              <CardContent className="pt-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
-                    <Users className="h-5 w-5" />
+            <div className="card-glow group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white transition-all duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.05] to-transparent" />
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-500 to-amber-400 opacity-60" />
+              <div className="relative p-5">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                    <Users className="h-4 w-4 text-amber-600" strokeWidth={1.8} />
                   </div>
-                  <div>
-                    <div className="text-xs font-medium text-slate-500">Pay run status</div>
-                    <div className="text-sm font-medium text-slate-900">
-                      Draft: {payRunStatus.DRAFT ?? 0} · Processed: {payRunStatus.PROCESSED ?? 0} · Paid: {payRunStatus.PAID ?? 0}
-                    </div>
-                  </div>
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Pay run status</div>
+                </div>
+                <div className="flex items-center gap-3 text-sm mb-3">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600"><span className="h-2 w-2 rounded-full bg-slate-300"></span>Draft: {payRunStatus.DRAFT ?? 0}</span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600"><span className="h-2 w-2 rounded-full bg-blue-400"></span>Processed: {payRunStatus.PROCESSED ?? 0}</span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600"><span className="h-2 w-2 rounded-full bg-emerald-400"></span>Paid: {payRunStatus.PAID ?? 0}</span>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 text-xs"
+                  className="h-8 text-xs rounded-lg border-slate-200"
                   onClick={() => navigate("/payroll")}
                 >
                   View payroll
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ) : null}
         </div>
       ) : null}
 
       {layout.upcomingBills ? (
-        <Card className="border border-slate-200">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Bills to pay</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="mt-3">
+        <Card className="border border-slate-200/80 bg-white/80 backdrop-blur-sm">
+          <div className="p-5 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                <Receipt className="h-4 w-4 text-amber-600" strokeWidth={1.8} />
+              </div>
+              <span className="text-[13px] font-semibold text-slate-800">Upcoming bills</span>
+            </div>
+          </div>
+          <CardContent className="pt-0">
+            <div>
               {upcomingBills.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center">
                   <p className="text-sm text-slate-600 mb-3">No bills due in the next 30 days.</p>
@@ -1067,6 +1212,10 @@ export default function DashboardPage() {
                   <div className="space-y-1.5">
                     {[
                       { key: "kpis", label: "KPI tiles", icon: BarChart3 },
+                      { key: "revenueExpenseChart", label: "Revenue vs Expenses chart", icon: TrendingUp },
+                      { key: "cashFlowChart", label: "Cash Flow chart", icon: Wallet },
+                      { key: "aiAssistant", label: "AI Assistant panel", icon: Sparkles },
+                      { key: "networkStatus", label: "Network Status (ISP)", icon: Wallet },
                       { key: "revenueCard", label: "Revenue (accrual)", icon: TrendingUp },
                       { key: "recentActivity", label: "Recent activity", icon: Timer },
                     ].map((w) => (
@@ -1173,6 +1322,10 @@ export default function DashboardPage() {
                         kpis: true,
                         agingSummary: true,
                         recentActivity: true,
+                        revenueExpenseChart: true,
+                        cashFlowChart: true,
+                        aiAssistant: true,
+                        networkStatus: true,
                         revenueCard: true,
                         topUnpaidCustomers: true,
                         unpaidSplit: true,
@@ -1198,6 +1351,10 @@ export default function DashboardPage() {
                         kpis: false,
                         agingSummary: false,
                         recentActivity: false,
+                        revenueExpenseChart: false,
+                        cashFlowChart: false,
+                        aiAssistant: false,
+                        networkStatus: false,
                         revenueCard: false,
                         topUnpaidCustomers: false,
                         unpaidSplit: false,

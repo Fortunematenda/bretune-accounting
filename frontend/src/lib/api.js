@@ -606,4 +606,74 @@ export const api = {
   deleteLoan: (id) => request(`/loans/${id}`, { method: "DELETE" }),
   addLoanRepayment: (id, payload) => request(`/loans/${id}/repayments`, { method: "POST", body: payload }),
   deleteLoanRepayment: (loanId, repaymentId) => request(`/loans/${loanId}/repayments/${repaymentId}`, { method: "DELETE" }),
+
+  // ── AI Automation ──────────────────────────────
+  aiSuggestions: (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ""))
+    ).toString();
+    return request(`/ai/suggestions${qs ? `?${qs}` : ""}`);
+  },
+  aiSuggestionStats: () => request("/ai/suggestions/stats"),
+  aiAcceptSuggestion: (id) => request(`/ai/suggestions/${id}/accept`, { method: "PUT" }),
+  aiDismissSuggestion: (id) => request(`/ai/suggestions/${id}/dismiss`, { method: "PUT" }),
+  aiRunCategorize: () => request("/ai/categorize", { method: "POST" }),
+  aiRunMatch: () => request("/ai/match", { method: "POST" }),
+  aiRunDuplicates: () => request("/ai/detect-duplicates", { method: "POST" }),
+  aiListRules: (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ""))
+    ).toString();
+    return request(`/ai/rules${qs ? `?${qs}` : ""}`);
+  },
+  aiCreateRule: (payload) => request("/ai/rules", { method: "POST", body: payload }),
+  aiUpdateRule: (id, payload) => request(`/ai/rules/${id}`, { method: "PUT", body: payload }),
+  aiDeleteRule: (id) => request(`/ai/rules/${id}`, { method: "DELETE" }),
+
+  // ── ISP Network Management ─────────────────────
+  ispDashboard: () => request("/isp/dashboard"),
+  ispListDevices: (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ""))
+    ).toString();
+    return request(`/isp/devices${qs ? `?${qs}` : ""}`);
+  },
+  ispGetDevice: (id) => request(`/isp/devices/${id}`),
+  ispCreateDevice: (payload) => request("/isp/devices", { method: "POST", body: payload }),
+  ispUpdateDevice: (id, payload) => request(`/isp/devices/${id}`, { method: "PUT", body: payload }),
+  ispDeleteDevice: (id) => request(`/isp/devices/${id}`, { method: "DELETE" }),
+  ispListPlans: (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ""))
+    ).toString();
+    return request(`/isp/plans${qs ? `?${qs}` : ""}`);
+  },
+  ispCreatePlan: (payload) => request("/isp/plans", { method: "POST", body: payload }),
+  ispUpdatePlan: (id, payload) => request(`/isp/plans/${id}`, { method: "PUT", body: payload }),
+  ispDeletePlan: (id) => request(`/isp/plans/${id}`, { method: "DELETE" }),
+  ispListClientLinks: (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ""))
+    ).toString();
+    return request(`/isp/client-links${qs ? `?${qs}` : ""}`);
+  },
+  ispCreateClientLink: (payload) => request("/isp/client-links", { method: "POST", body: payload }),
+  ispUpdateClientLink: (id, payload) => request(`/isp/client-links/${id}`, { method: "PUT", body: payload }),
+  ispSuspendClient: (id, reason) => request(`/isp/client-links/${id}/suspend`, { method: "PUT", body: { reason } }),
+  ispReactivateClient: (id) => request(`/isp/client-links/${id}/reactivate`, { method: "PUT" }),
+  ispTerminateClient: (id) => request(`/isp/client-links/${id}/terminate`, { method: "PUT" }),
+  ispListAlerts: (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ""))
+    ).toString();
+    return request(`/isp/alerts${qs ? `?${qs}` : ""}`);
+  },
+  ispResolveAlert: (id) => request(`/isp/alerts/${id}/resolve`, { method: "PUT" }),
+  ispBillingDue: () => request("/isp/billing/due"),
+  ispAutoSuspendCandidates: (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ""))
+    ).toString();
+    return request(`/isp/billing/auto-suspend${qs ? `?${qs}` : ""}`);
+  },
 };

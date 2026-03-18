@@ -5,9 +5,10 @@ import { useAuth } from "../features/auth/auth-context";
 import { Card, CardContent } from "../components/ui/card";
 import Button from "../components/ui/button";
 import Dialog from "../components/ui/dialog";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Calendar, CreditCard, Download, FileText, Pencil, Receipt, Send, User, Wallet } from "lucide-react";
 import Money from "../components/common/money";
 import ActionsMenu from "../components/common/ActionsMenu";
+import StatusBadge from "../components/common/StatusBadge";
 import QuoteForm from "../components/quotes/QuoteForm";
 import { getAccessToken } from "../features/auth/token-store";
 
@@ -33,22 +34,6 @@ function initialsFrom(text) {
     .toUpperCase();
 }
 
-function StatusBadge({ status }) {
-  const s = String(status || "").toUpperCase();
-  const styles = {
-    DRAFT: "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300",
-    SENT: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-    ACCEPTED: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-    REJECTED: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-    EXPIRED: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  };
-  const c = styles[s] || styles.DRAFT;
-  return (
-    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${c}`}>
-      {s || "DRAFT"}
-    </span>
-  );
-}
 
 export default function QuoteDetailPage() {
   const navigate = useNavigate();
@@ -245,195 +230,178 @@ export default function QuoteDetailPage() {
     }
   }
 
+  const statusColor = (() => {
+    const s = String(quote?.status || "").toUpperCase();
+    if (s === "ACCEPTED") return { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" };
+    if (s === "SENT") return { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500" };
+    if (s === "REJECTED") return { bg: "bg-rose-50", text: "text-rose-700", dot: "bg-rose-500" };
+    if (s === "EXPIRED") return { bg: "bg-slate-100", text: "text-slate-500", dot: "bg-slate-400" };
+    return { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400" };
+  })();
+
   return (
-    <div className="space-y-6" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <Button variant="outline" className="h-10 w-10 p-0" onClick={() => navigate("/quotes")} aria-label="Back to quotes">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+    <div className="space-y-5 min-h-screen">
+      {/* Top bar: breadcrumb + title + actions */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            type="button"
+            onClick={() => navigate("/quotes")}
+            className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors shrink-0"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
           <div className="min-w-0">
-            <div className="text-lg sm:text-xl font-semibold text-[#111827] truncate">{title}</div>
-            <div className="text-sm text-[#6B7280] truncate">{clientName}</div>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-lg font-bold text-slate-900 truncate">{title}</h1>
+              {quote ? (
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusColor.bg} ${statusColor.text}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${statusColor.dot}`} />
+                  {quote.status}
+                </span>
+              ) : null}
+            </div>
+            {quote ? <p className="text-[13px] text-slate-500 truncate">{clientName}</p> : null}
           </div>
         </div>
-
-        {quote?.id ? (
-          <ActionsMenu
-            ariaLabel="Quote actions"
-            buttonClassName="h-10 w-10"
-            buttonIconClassName="h-5 w-5"
-            menuWidthClassName="w-56"
-            items={[
-              { key: "pdf", label: "Download PDF", onSelect: downloadPdf },
-              { key: "edit", label: "Edit quote", onSelect: () => setEditOpen(true) },
-              { key: "send", label: "Send quote", disabled: !canSend, hint: !canSend ? "Only draft quotes can be sent" : "", onSelect: sendQuote },
-              { key: "accept", label: "Accept", disabled: !canAccept, hint: !canAccept ? "Only sent quotes can be accepted" : "", onSelect: acceptQuote },
-              { key: "reject", label: "Reject", disabled: !canReject, hint: !canReject ? "Only sent quotes can be rejected" : "", onSelect: rejectQuote },
-              {
-                key: "convert",
-                label: isConverted ? `Converted to invoice ${quote?.invoice?.invoiceNumber ?? ""}` : "Convert to invoice",
-                disabled: !canConvert,
-                hint: isConverted ? "This quote has already been converted" : !canConvert ? "Only accepted quotes can be converted" : "",
-                onSelect: convertToInvoice,
-              },
-              isConverted && quote?.invoice?.id && {
-                key: "view-invoice",
-                label: "View invoice",
-                onSelect: () => navigate(`/invoices/${quote.invoice.id}`),
-              },
-            ].filter(Boolean)}
-          />
+        {quote ? (
+          <div className="flex items-center gap-2 shrink-0">
+            <Button variant="outline" className="h-9 gap-1.5 text-[13px]" onClick={downloadPdf}>
+              <Download className="h-3.5 w-3.5" />
+              PDF
+            </Button>
+            {canSend && (
+              <Button variant="outline" className="h-9 gap-1.5 text-[13px]" onClick={sendQuote}>
+                <Send className="h-3.5 w-3.5" />
+                Send
+              </Button>
+            )}
+            {canEdit && (
+              <Button variant="outline" className="h-9 gap-1.5 text-[13px]" onClick={() => setEditOpen(true)}>
+                <Pencil className="h-3.5 w-3.5" />
+                Edit
+              </Button>
+            )}
+            <ActionsMenu
+              ariaLabel="Quote actions"
+              buttonClassName="h-9 w-9"
+              menuWidthClassName="w-52"
+              items={[
+                { key: "accept", label: "Accept", disabled: !canAccept, onSelect: acceptQuote },
+                { key: "reject", label: "Reject", disabled: !canReject, onSelect: rejectQuote },
+                { key: "convert", label: isConverted ? "Already Converted" : "Convert to Invoice", disabled: !canConvert, onSelect: convertToInvoice },
+                isConverted && quote?.invoice?.id && { key: "view-invoice", label: "View Invoice", onSelect: () => navigate(`/invoices/${quote.invoice.id}`) },
+              ].filter(Boolean)}
+            />
+          </div>
         ) : null}
       </div>
 
       {error ? (
-        <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700">{error}</div>
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">{error}</div>
       ) : null}
 
       {loading ? (
-        <div className="space-y-4">
-          <div className="h-48 rounded-xl bg-slate-100 animate-pulse" />
-          <div className="h-32 rounded-xl bg-slate-100 animate-pulse" />
-          <div className="h-64 rounded-xl bg-slate-100 animate-pulse" />
-        </div>
+        <div className="py-12 text-center text-sm text-slate-500">Loading\u2026</div>
       ) : !quote ? (
-        <div className="rounded-xl border border-[#E5E7EB] bg-white p-12 text-center">
-          <p className="text-[#6B7280]">Quote not found.</p>
-          <Button variant="outline" className="mt-4" onClick={() => navigate("/quotes")}>
-            Back to quotes
-          </Button>
-        </div>
+        <div className="py-12 text-center text-sm text-slate-500">Quote not found.</div>
       ) : (
-        <div className="max-w-4xl">
-          <Card className="overflow-hidden shadow-sm border-[#E5E7EB] rounded-xl bg-white">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-5">
+          {/* LEFT COLUMN: Quote Document */}
+          <Card className="overflow-hidden shadow-sm border-slate-200/80 bg-white">
             <CardContent className="p-0">
-              {/* Header: Logo left | Quote details right */}
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 px-8 pt-8 pb-6 border-b border-[#E5E7EB]">
-                <div className="flex items-center gap-4">
-                  <div className="h-14 w-14 rounded-xl bg-[#7C3AED] flex items-center justify-center text-white text-xl font-bold shadow-sm">
-                    {initialsFrom(companyName)}
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold text-[#111827]">{companyName}</div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-x-6 gap-y-1 text-right">
-                  <div>
-                    <div className="text-xs font-medium text-[#6B7280]">Quote #</div>
-                    <div className="text-sm font-semibold text-[#111827]">{quote.quoteNumber || "—"}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-[#6B7280]">Issue Date</div>
-                    <div className="text-sm font-semibold text-[#111827]">{fmtDate(quote.issueDate)}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-[#6B7280]">Valid Until</div>
-                    <div className="text-sm font-semibold text-[#111827]">{fmtDate(quote.expiryDate)}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-[#6B7280]">Status</div>
-                    <div className="mt-1">
-                      <StatusBadge status={quote.status} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Company block */}
-              <div className="px-8 pt-6 pb-6">
-                <div className="space-y-1 text-sm text-[#6B7280]">
-                  {companyAddress ? <div>{companyAddress}</div> : null}
-                  {companySettings?.businessPhone ? <div>Phone: {companySettings.businessPhone}</div> : null}
-                  {companySettings?.businessEmail ? <div>Email: {companySettings.businessEmail}</div> : null}
-                  <div>VAT: —</div>
-                </div>
-              </div>
-
-              {/* Quote For – client block */}
-              <div className="px-8 pb-6">
-                <div className="rounded-lg border border-[#E5E7EB] bg-[#F8F9FB] p-5 shadow-sm">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-[#6B7280] mb-2">Quote For</div>
-                  <div className="text-sm font-semibold text-[#111827]">{clientName}</div>
-                  {quote?.client?.email ? (
-                    <div className="mt-1 text-sm text-[#6B7280]">{quote.client.email}</div>
-                  ) : null}
-                  {quote?.client?.phone ? (
-                    <div className="mt-1 text-sm text-[#6B7280]">{quote.client.phone}</div>
-                  ) : null}
-                  {(quote?.client?.address || quote?.client?.city) ? (
-                    <div className="mt-1 text-sm text-[#6B7280]">
-                      {[quote.client.address, quote.client.city, quote.client.country].filter(Boolean).join(", ")}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-
-              {/* Line items table */}
-              <div className="px-8 pb-6">
-                <div className="rounded-lg border border-[#E5E7EB] overflow-hidden">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                      <tr className="bg-[#F8F9FB]">
-                        <th className="px-5 py-4 text-left font-semibold text-[#111827]">Description</th>
-                        <th className="px-5 py-4 text-right font-semibold text-[#111827] w-16">Qty</th>
-                        <th className="px-5 py-4 text-right font-semibold text-[#111827] w-28">Unit Price</th>
-                        <th className="px-5 py-4 text-right font-semibold text-[#111827] w-24">Discount</th>
-                        <th className="px-5 py-4 text-right font-semibold text-[#111827] w-20">VAT %</th>
-                        <th className="px-5 py-4 text-right font-semibold text-[#111827] w-32">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(quote.items || []).map((it, idx) => (
-                        <tr key={it.id} className={idx % 2 === 0 ? "bg-white" : "bg-[#FAFAFA]"}>
-                          <td className="px-5 py-4 text-[#111827] border-t border-[#E5E7EB]">
-                            {it.description || it.productName || "—"}
-                          </td>
-                          <td className="px-5 py-4 text-right text-[#6B7280] border-t border-[#E5E7EB]">
-                            {String(it.quantity)}
-                          </td>
-                          <td className="px-5 py-4 text-right text-[#6B7280] border-t border-[#E5E7EB]">
-                            <Money value={Number(it.unitPrice || 0)} />
-                          </td>
-                          <td className="px-5 py-4 text-right text-[#6B7280] border-t border-[#E5E7EB]">
-                            <Money value={Number(it.discount || 0)} />
-                          </td>
-                          <td className="px-5 py-4 text-right text-[#6B7280] border-t border-[#E5E7EB]">
-                            {Math.round((Number(it.taxRate || 0) * 100))}%
-                          </td>
-                          <td className="px-5 py-4 text-right font-medium text-[#111827] border-t border-[#E5E7EB]">
-                            <Money value={Number(it.total || 0)} />
-                          </td>
-                        </tr>
-                      ))}
-                      {(quote.items || []).length === 0 ? (
-                        <tr>
-                          <td className="px-5 py-6 text-[#6B7280] text-center" colSpan={6}>
-                            No line items.
-                          </td>
-                        </tr>
+              {/* Company header */}
+              <div className="px-8 pt-8 pb-6 border-b border-slate-100">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <img src="/bretune-logo.png" alt="" className="h-12 w-12 rounded-xl object-contain bg-slate-50 border border-slate-100" />
+                    <div>
+                      <div className="text-base font-bold text-slate-900">{companyName}</div>
+                      {companyAddress ? (
+                        <div className="text-[13px] text-slate-500 mt-0.5 leading-relaxed">
+                          {companyAddress.split(/,\s*/).map((p, i, arr) => (
+                            <React.Fragment key={i}>{p}{i < arr.length - 1 ? ", " : ""}</React.Fragment>
+                          ))}
+                        </div>
                       ) : null}
-                    </tbody>
-                  </table>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-2xl font-extrabold text-violet-600 uppercase tracking-wider">Quote</div>
+                    <div className="text-sm text-slate-500 mt-1 font-mono">{quote.quoteNumber || "\u2014"}</div>
+                  </div>
                 </div>
               </div>
 
-              {/* Totals section */}
-              <div className="px-8 pb-6">
-                <div className="rounded-xl bg-[#F8F9FB] border border-[#E5E7EB] p-6 shadow-sm max-w-sm ml-auto">
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#6B7280]">Subtotal</span>
-                      <Money value={Number(quote.subtotal || 0)} className="text-[#111827] font-medium" />
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#6B7280]">VAT</span>
-                      <Money value={Number(quote.taxAmount || 0)} className="text-[#111827] font-medium" />
-                    </div>
-                    <div className="flex justify-between text-base pt-2 border-t border-[#E5E7EB]">
-                      <span className="font-semibold text-[#111827]">Total</span>
-                      <Money value={Number(quote.totalAmount || 0)} className="font-bold text-[#7C3AED]" />
-                    </div>
+              {/* Quote For + Quote meta */}
+              <div className="px-8 py-6 grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-slate-100">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Quote For</div>
+                  <div className="text-sm font-semibold text-slate-900">{clientName}</div>
+                  {[quote?.client?.address, quote?.client?.city, quote?.client?.country].filter(Boolean).map((p, i) => (
+                    <div key={i} className="text-[13px] text-slate-600 mt-0.5">{p}</div>
+                  ))}
+                  {quote?.client?.email ? <div className="text-[13px] text-slate-500 mt-1">{quote.client.email}</div> : null}
+                  {quote?.client?.phone ? <div className="text-[13px] text-slate-500 mt-0.5">{quote.client.phone}</div> : null}
+                </div>
+                <div className="md:text-right">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Quote Details</div>
+                  <dl className="inline-grid grid-cols-[auto_auto] gap-x-4 gap-y-1.5 text-[13px] md:ml-auto">
+                    <dt className="text-slate-500">Quote #</dt>
+                    <dd className="font-medium text-slate-800 text-right">{quote.quoteNumber || "\u2014"}</dd>
+                    <dt className="text-slate-500">Issue Date</dt>
+                    <dd className="font-medium text-slate-800 text-right">{fmtDate(quote.issueDate)}</dd>
+                    <dt className="text-slate-500">Valid Until</dt>
+                    <dd className="font-medium text-slate-800 text-right">{fmtDate(quote.expiryDate)}</dd>
+                  </dl>
+                </div>
+              </div>
+
+              {/* Line items */}
+              <div className="px-8 py-6">
+                <table className="min-w-full text-[13px]">
+                  <thead>
+                    <tr className="border-b-2 border-slate-200">
+                      <th className="pb-3 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Description</th>
+                      <th className="pb-3 text-right text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Qty</th>
+                      <th className="pb-3 text-right text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Price</th>
+                      <th className="pb-3 text-right text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Discount</th>
+                      <th className="pb-3 text-right text-[11px] font-semibold text-slate-400 uppercase tracking-wider">VAT</th>
+                      <th className="pb-3 text-right text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(quote.items || []).map((it, idx) => (
+                      <tr key={it.id} className={idx > 0 ? "border-t border-slate-100" : ""}>
+                        <td className="py-3 text-slate-800">{it.description || it.productName || "\u2014"}</td>
+                        <td className="py-3 text-right tabular-nums text-slate-700">{String(it.quantity)}</td>
+                        <td className="py-3 text-right tabular-nums text-slate-700"><Money value={Number(it.unitPrice || 0)} /></td>
+                        <td className="py-3 text-right tabular-nums text-slate-500"><Money value={Number(it.discount || 0)} /></td>
+                        <td className="py-3 text-right tabular-nums text-slate-500">{Math.round((Number(it.taxRate || 0) * 100))}%</td>
+                        <td className="py-3 text-right tabular-nums font-semibold text-slate-900"><Money value={Number(it.total || 0)} /></td>
+                      </tr>
+                    ))}
+                    {(quote.items || []).length === 0 ? (
+                      <tr><td className="py-10 text-slate-400 text-center text-sm" colSpan={6}>No line items</td></tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Totals */}
+              <div className="px-8 pb-6 flex justify-end">
+                <div className="w-72 space-y-1.5 text-[13px]">
+                  <div className="flex justify-between py-1.5">
+                    <span className="text-slate-500">Subtotal</span>
+                    <span className="text-slate-800 font-medium tabular-nums"><Money value={Number(quote.subtotal || 0)} /></span>
+                  </div>
+                  <div className="flex justify-between py-1.5">
+                    <span className="text-slate-500">VAT</span>
+                    <span className="text-slate-800 font-medium tabular-nums"><Money value={Number(quote.taxAmount || 0)} /></span>
+                  </div>
+                  <div className="flex justify-between py-2.5 border-t-2 border-slate-900">
+                    <span className="text-[15px] font-bold text-slate-900">Total</span>
+                    <span className="text-[15px] font-bold text-slate-900 tabular-nums"><Money value={Number(quote.totalAmount || 0)} /></span>
                   </div>
                 </div>
               </div>
@@ -441,18 +409,16 @@ export default function QuoteDetailPage() {
               {/* Notes / Scope of Work */}
               {quote.notes ? (
                 <div className="px-8 pb-6">
-                  <div className="rounded-lg border border-[#E5E7EB] bg-white p-5">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-[#6B7280] mb-2">Notes / Scope of Work</div>
-                    <div className="text-sm text-[#111827] whitespace-pre-wrap">{quote.notes}</div>
-                  </div>
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Notes / Scope of Work</div>
+                  <div className="text-[13px] text-slate-600 whitespace-pre-wrap">{quote.notes}</div>
                 </div>
               ) : null}
 
               {/* Terms & Conditions */}
               <div className="px-8 pb-6">
-                <div className="rounded-lg border border-[#E5E7EB] bg-[#F8F9FB] p-5">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-[#6B7280] mb-2">Terms & Conditions</div>
-                  <div className="text-sm text-[#6B7280]">
+                <div className="rounded-lg border border-slate-200/60 bg-slate-50/50 p-4">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Terms & Conditions</div>
+                  <div className="text-[13px] text-slate-500">
                     This quote is valid until {fmtDate(quote.expiryDate)}. Payment terms as agreed. Please contact us with any questions.
                   </div>
                 </div>
@@ -460,20 +426,20 @@ export default function QuoteDetailPage() {
 
               {/* Acceptance Area */}
               <div className="px-8 pb-6">
-                <div className="rounded-lg border border-[#E5E7EB] bg-white p-5">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-[#6B7280] mb-4">Acceptance</div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="rounded-lg border border-slate-200/60 bg-white p-4">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3">Acceptance</div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
-                      <div className="text-xs font-medium text-[#6B7280] mb-1">Accepted By</div>
-                      <div className="h-10 border-b border-[#E5E7EB]" />
+                      <div className="text-xs font-medium text-slate-400 mb-1">Accepted By</div>
+                      <div className="h-8 border-b border-slate-300" />
                     </div>
                     <div>
-                      <div className="text-xs font-medium text-[#6B7280] mb-1">Signature</div>
-                      <div className="h-10 border-b border-[#E5E7EB]" />
+                      <div className="text-xs font-medium text-slate-400 mb-1">Signature</div>
+                      <div className="h-8 border-b border-slate-300" />
                     </div>
                     <div>
-                      <div className="text-xs font-medium text-[#6B7280] mb-1">Date</div>
-                      <div className="h-10 border-b border-[#E5E7EB]" />
+                      <div className="text-xs font-medium text-slate-400 mb-1">Date</div>
+                      <div className="h-8 border-b border-slate-300" />
                     </div>
                   </div>
                 </div>
@@ -481,66 +447,158 @@ export default function QuoteDetailPage() {
 
               {/* Banking Details */}
               {(companySettings?.bankName || companySettings?.accountNumber || companySettings?.accountName) ? (
-                <div className="px-8 pb-6">
-                  <div className="rounded-lg border border-[#E5E7EB] overflow-hidden">
-                    <div className="bg-[#E5E7EB] px-4 py-2.5">
-                      <div className="text-sm font-bold text-[#374151]">Banking Details</div>
-                    </div>
-                    <div className="bg-white p-4 space-y-2 text-sm text-[#374151]">
-                      {companySettings?.bankName ? (
-                        <div>Bank: {companySettings.bankName}</div>
-                      ) : null}
-                      {companySettings?.accountName ? (
-                        <div>Account Holder: {companySettings.accountName}</div>
-                      ) : null}
-                      {companySettings?.accountType ? (
-                        <div>Account Type: {companySettings.accountType}</div>
-                      ) : null}
-                      {companySettings?.accountNumber ? (
-                        <div>Account Number: {companySettings.accountNumber}</div>
-                      ) : null}
-                      {companySettings?.branchCode ? (
-                        <div>Branch Code: {companySettings.branchCode}</div>
-                      ) : null}
-                    </div>
+                <div className="mx-8 mb-6 rounded-xl bg-slate-900 p-5">
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">Banking Details</div>
+                  <div className="grid grid-cols-2 gap-3 text-[13px]">
+                    {companySettings?.bankName ? <div><span className="text-slate-500">Bank</span><div className="text-white font-medium mt-0.5">{companySettings.bankName}</div></div> : null}
+                    {companySettings?.accountName ? <div><span className="text-slate-500">Account Holder</span><div className="text-white font-medium mt-0.5">{companySettings.accountName}</div></div> : null}
+                    {companySettings?.accountNumber ? <div><span className="text-slate-500">Account Number</span><div className="text-white font-mono font-medium mt-0.5">{companySettings.accountNumber}</div></div> : null}
+                    {companySettings?.branchCode ? <div><span className="text-slate-500">Branch Code</span><div className="text-white font-mono font-medium mt-0.5">{companySettings.branchCode}</div></div> : null}
                   </div>
                 </div>
               ) : null}
 
-              {/* Quick actions */}
-              <div className="px-8 pb-8 pt-4 border-t border-[#E5E7EB] flex flex-wrap gap-2">
-                {canEdit ? (
-                  <Button variant="outline" className="border-[#E5E7EB]" onClick={() => setEditOpen(true)}>
-                    Edit quote
-                  </Button>
-                ) : null}
-                <Button variant="outline" className="border-[#E5E7EB]" onClick={downloadPdf} disabled={!!actionLoading}>
-                  <Download className="h-4 w-4 mr-2" />
-                  {actionLoading === "pdf" ? "Downloading…" : "Download PDF"}
-                </Button>
-                <Button
-                  className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
-                  onClick={sendQuote}
-                  disabled={!canSend || actionLoading}
-                >
-                  {actionLoading === "send" ? "Sending…" : "Send quote"}
-                </Button>
-                {isConverted && quote?.invoice?.id ? (
-                  <Button
-                    variant="outline"
-                    className="border-emerald-200 text-emerald-800"
-                    onClick={() => navigate(`/invoices/${quote.invoice.id}`)}
-                  >
-                    View invoice {quote.invoice.invoiceNumber}
-                  </Button>
-                ) : canConvert ? (
-                  <Button variant="outline" className="border-[#E5E7EB]" onClick={convertToInvoice} disabled={actionLoading}>
-                    {actionLoading === "convert" ? "Converting…" : "Convert to invoice"}
-                  </Button>
-                ) : null}
-              </div>
+              <div className="text-xs text-slate-400 text-center py-4 border-t border-slate-100">Thank you for your business</div>
             </CardContent>
           </Card>
+
+          {/* RIGHT COLUMN: Sidebar info cards */}
+          <div className="space-y-4">
+            {/* Quote Summary */}
+            <Card className="border-slate-200/80 shadow-sm overflow-hidden">
+              <CardContent className="p-0">
+                <div className="px-5 py-4 border-b border-slate-100">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                    <Wallet className="h-4 w-4 text-violet-500" />
+                    Quote Summary
+                  </div>
+                </div>
+                <div className="p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] text-slate-500">Total Amount</span>
+                    <span className="text-[15px] font-bold tabular-nums text-slate-900"><Money value={Number(quote.totalAmount || 0)} /></span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg bg-violet-50 border border-violet-100 p-3">
+                      <div className="text-[11px] font-medium text-violet-600 uppercase tracking-wider">Subtotal</div>
+                      <div className="mt-1 text-base font-bold tabular-nums text-violet-700"><Money value={Number(quote.subtotal || 0)} /></div>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                      <div className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">VAT</div>
+                      <div className="mt-1 text-base font-bold tabular-nums text-slate-700"><Money value={Number(quote.taxAmount || 0)} /></div>
+                    </div>
+                  </div>
+                  <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 text-center">
+                    <div className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Line Items</div>
+                    <div className="mt-1 text-lg font-bold text-slate-900">{(quote.items || []).length}</div>
+                  </div>
+                  {canConvert ? (
+                    <Button className="w-full h-9 gap-1.5 bg-violet-600 hover:bg-violet-700 text-[13px]" onClick={convertToInvoice}>
+                      <Receipt className="h-3.5 w-3.5" />
+                      Convert to Invoice
+                    </Button>
+                  ) : null}
+                  {isConverted && quote?.invoice?.id ? (
+                    <Button variant="outline" className="w-full h-9 gap-1.5 text-[13px] text-violet-600 border-violet-200 hover:bg-violet-50" onClick={() => navigate(`/invoices/${quote.invoice.id}`)}>
+                      <FileText className="h-3.5 w-3.5" />
+                      View Invoice
+                    </Button>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quote Details */}
+            <Card className="border-slate-200/80 shadow-sm">
+              <CardContent className="p-0">
+                <div className="px-5 py-4 border-b border-slate-100">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                    <FileText className="h-4 w-4 text-violet-500" />
+                    Quote Details
+                  </div>
+                </div>
+                <div className="p-5 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0"><Receipt className="h-4 w-4 text-violet-500" /></div>
+                    <div><div className="text-[11px] text-slate-400 font-medium">Quote Number</div><div className="text-[13px] font-semibold text-slate-900">{quote.quoteNumber || "\u2014"}</div></div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0"><Calendar className="h-4 w-4 text-blue-500" /></div>
+                    <div><div className="text-[11px] text-slate-400 font-medium">Issue Date</div><div className="text-[13px] font-semibold text-slate-900">{fmtDate(quote.issueDate)}</div></div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-amber-50 flex items-center justify-center shrink-0"><Calendar className="h-4 w-4 text-amber-500" /></div>
+                    <div><div className="text-[11px] text-slate-400 font-medium">Valid Until</div><div className="text-[13px] font-semibold text-slate-900">{fmtDate(quote.expiryDate)}</div></div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className={`h-8 w-8 rounded-lg ${statusColor.bg} flex items-center justify-center shrink-0`}><FileText className={`h-4 w-4 ${statusColor.text}`} /></div>
+                    <div><div className="text-[11px] text-slate-400 font-medium">Status</div><div className={`text-[13px] font-semibold ${statusColor.text}`}>{quote.status}</div></div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Customer Info */}
+            <Card className="border-slate-200/80 shadow-sm">
+              <CardContent className="p-0">
+                <div className="px-5 py-4 border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                      <User className="h-4 w-4 text-violet-500" />
+                      Customer
+                    </div>
+                    {quote?.clientId ? (
+                      <button type="button" onClick={() => navigate(`/customers/${quote.clientId}`)} className="text-[12px] font-medium text-violet-600 hover:text-violet-700 transition-colors">
+                        View profile
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 text-sm font-bold shrink-0">
+                      {initialsFrom(clientName)}
+                    </div>
+                    <div>
+                      <div className="text-[13px] font-semibold text-slate-900">{clientName}</div>
+                      {quote?.client?.email ? <div className="text-[12px] text-slate-500">{quote.client.email}</div> : null}
+                    </div>
+                  </div>
+                  {quote?.client?.phone ? (
+                    <div className="text-[13px] text-slate-600 mt-2">{quote.client.phone}</div>
+                  ) : null}
+                  {[quote?.client?.address, quote?.client?.city, quote?.client?.country].filter(Boolean).length > 0 ? (
+                    <div className="text-[13px] text-slate-500 mt-2">
+                      {[quote?.client?.address, quote?.client?.city, quote?.client?.country].filter(Boolean).join(", ")}
+                    </div>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card className="border-slate-200/80 shadow-sm">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" className="h-9 gap-1.5 text-[12px] justify-center" onClick={downloadPdf}>
+                    <Download className="h-3.5 w-3.5" />
+                    Download
+                  </Button>
+                  {canSend ? (
+                    <Button variant="outline" className="h-9 gap-1.5 text-[12px] justify-center" onClick={sendQuote}>
+                      <Send className="h-3.5 w-3.5" />
+                      Send Quote
+                    </Button>
+                  ) : (
+                    <Button variant="outline" className="h-9 gap-1.5 text-[12px] justify-center" disabled>
+                      <Send className="h-3.5 w-3.5" />
+                      Send Quote
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
 
@@ -571,9 +629,9 @@ export default function QuoteDetailPage() {
       >
         {convertResult ? (
           <div className="space-y-4">
-            <p className="text-[#6B7280]">
+            <p className="text-slate-600">
               Invoice{" "}
-              <span className="font-semibold text-[#111827]">
+              <span className="font-semibold text-slate-900">
                 {convertResult.invoiceNumber ?? convertResult.invoice?.invoiceNumber ?? "—"}
               </span>{" "}
               has been created from this quote.
@@ -583,7 +641,6 @@ export default function QuoteDetailPage() {
                 Close
               </Button>
               <Button
-                className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
                 onClick={() => {
                   const invId = convertResult.id ?? convertResult.invoice?.id;
                   setConvertResult(null);

@@ -1,4 +1,5 @@
 const { Module } = require('@nestjs/common');
+const { ConfigModule, ConfigService } = require('@nestjs/config');
 const { JwtModule } = require('@nestjs/jwt');
 const { PassportModule } = require('@nestjs/passport');
 const { AuthController } = require('./auth.controller');
@@ -10,12 +11,16 @@ const { SubscriptionsModule } = require('../subscriptions/subscriptions.module')
 
 @Module({
   imports: [
+    ConfigModule,
     PassportModule,
     AutomationModule,
     SubscriptionsModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN || '7d' },
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (configService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get('JWT_EXPIRES_IN') || '7d' },
+      }),
     }),
   ],
   controllers: [AuthController],

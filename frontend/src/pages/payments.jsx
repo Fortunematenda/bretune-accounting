@@ -10,7 +10,12 @@ import Pagination from "../components/common/Pagination";
 import ListPageToolbar from "../components/common/ListPageToolbar";
 import PageHeader from "../components/common/PageHeader";
 import ActionsMenu from "../components/common/ActionsMenu";
-import { CreditCard, Plus } from "lucide-react";
+import ColumnPickerDialog from "../components/common/ColumnPickerDialog";
+import SortableTableHeader from "../components/common/SortableTableHeader";
+import { usePersistentColumns } from "../utils/usePersistentColumns";
+import { useColumnSort } from "../utils/useColumnSort";
+import { CreditCard, Plus, Wallet } from "lucide-react";
+import EmptyState from "../components/common/EmptyState";
 import { formatDateForDisplay } from "../lib/dateFormat";
 import { formatRecordDisplayId } from "../lib/utils";
 
@@ -65,6 +70,37 @@ export default function PaymentsPage() {
   const [customerDropdownOpen, setCustomerDropdownOpen] = useState(false);
   const [invoiceOptions, setInvoiceOptions] = useState([]);
   const [loadingInvoices, setLoadingInvoices] = useState(false);
+  const [columnsOpen, setColumnsOpen] = useState(false);
+
+  const requiredColumnKeys = new Set(["id", "customer"]);
+  const columnDefs = [
+    { key: "id", label: "ID" },
+    { key: "date", label: "Date" },
+    { key: "customer", label: "Customer" },
+    { key: "invoice", label: "Invoice" },
+    { key: "method", label: "Method" },
+    { key: "amount", label: "Amount" },
+    { key: "reference", label: "Reference" },
+  ];
+  const columnOrder = columnDefs.map((c) => c.key);
+  const defaultVisibleColumns = ["id", "date", "customer", "invoice", "method", "amount", "reference"];
+
+  const [visibleColumns, setVisibleColumns, resetVisibleColumns] = usePersistentColumns({
+    storageKey: "ba_payments_visible_columns",
+    columnOrder,
+    defaultVisibleColumns,
+    requiredKeys: Array.from(requiredColumnKeys),
+  });
+
+  const sortColumnDefs = columnDefs.map((c) => ({
+    ...c,
+    getValue:
+      c.key === "customer" ? (r) => (r?.client?.companyName || r?.client?.contactName || "")
+      : c.key === "amount" ? (r) => Number(r?.amount) || 0
+      : c.key === "date" ? (r) => r?.paymentDate || ""
+      : undefined,
+  }));
+  const { sortKey, sortDir, toggleSort, sortRows } = useColumnSort(sortColumnDefs);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -387,178 +423,123 @@ export default function PaymentsPage() {
       <PageHeader
         title="Payments"
         subtitle="Track receipts and payment allocations"
-        icon={<CreditCard className="h-6 w-6 text-violet-600" />}
+        icon={<CreditCard className="h-5 w-5 text-violet-600" />}
         action={
           <Button onClick={() => setNewPaymentOpen(true)} className="h-9 shrink-0">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1.5" />
             Record Payment
           </Button>
         }
       />
 
-      <Card className="border border-slate-200 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Payment List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
+      <Card className="border border-slate-200/80 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="p-4">
+            {error && (
+              <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+                {error}
+              </div>
+            )}
 
-          <ListPageToolbar
-            searchValue={q}
-            onSearchChange={(next) => {
-              const nextParams = new URLSearchParams(searchParams);
-              if (next) nextParams.set("q", next);
-              else nextParams.delete("q");
-              nextParams.delete("page");
-              setSearchParams(nextParams, { replace: true });
-            }}
-            searchPlaceholder="Search by reference, notes…"
-            limit={limit}
-            onLimitChange={setLimit}
-          />
+            <ListPageToolbar
+              searchValue={q}
+              onSearchChange={(next) => {
+                const nextParams = new URLSearchParams(searchParams);
+                if (next) nextParams.set("q", next);
+                else nextParams.delete("q");
+                nextParams.delete("page");
+                setSearchParams(nextParams, { replace: true });
+              }}
+              searchPlaceholder="Search payments…"
+              limit={limit}
+              onLimitChange={setLimit}
+              onColumnsClick={() => setColumnsOpen(true)}
+            />
+          </div>
 
-          <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      ID
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Date
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Customer
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Invoice
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Method
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Amount
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Reference
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                  {loading ? (
-                    <tr>
-                        <td colSpan={8} className="px-4 py-12 text-center text-sm text-slate-500">
-                        Loading…
-                      </td>
-                    </tr>
-                  ) : rawPayments.length === 0 ? (
-                    <tr>
-                        <td colSpan={8} className="px-4 py-12 text-center">
-                        <div className="flex flex-col items-center gap-3">
-                          <div className="rounded-full bg-slate-100 p-4">
-                            <CreditCard className="h-8 w-8 text-slate-400" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-slate-700">No payments yet</p>
-                            <p className="text-sm text-slate-500">Record a payment to get started</p>
-                          </div>
-                          <Button onClick={() => setNewPaymentOpen(true)} className="bg-violet-600 hover:bg-violet-700">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Record Payment
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    paymentsWithAllocations.map((p, index) => {
-                      const displayId = formatRecordDisplayId(p);
-                      return (
-                      <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-4 py-3 font-mono text-sm font-medium text-violet-600" title={p.id}>
-                          {displayId}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-600">
-                          {formatDateForDisplay(p.paymentDate)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <Link
-                            to={p.clientId ? `/customers/${p.clientId}` : "#"}
-                            className="font-medium text-violet-600 hover:text-violet-800 truncate block max-w-[160px]"
-                          >
+          <div className="overflow-auto">
+            <table className="min-w-max w-full text-[13px]">
+              <thead className="text-left bg-slate-50/80">
+                <tr className="border-y border-slate-200/80">
+                  {visibleColumns.includes("id") ? <SortableTableHeader label="ID" columnKey="id" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} /> : null}
+                  {visibleColumns.includes("date") ? <SortableTableHeader label="Date" columnKey="date" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} /> : null}
+                  {visibleColumns.includes("customer") ? <SortableTableHeader label="Customer" columnKey="customer" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} /> : null}
+                  {visibleColumns.includes("invoice") ? <SortableTableHeader label="Invoice" columnKey="invoice" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="hidden sm:table-cell" /> : null}
+                  {visibleColumns.includes("method") ? <SortableTableHeader label="Method" columnKey="method" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="hidden sm:table-cell" /> : null}
+                  {visibleColumns.includes("amount") ? <SortableTableHeader label="Amount" columnKey="amount" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} align="right" className="hidden sm:table-cell" /> : null}
+                  {visibleColumns.includes("reference") ? <SortableTableHeader label="Reference" columnKey="reference" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="hidden sm:table-cell" /> : null}
+                  <th className="hidden sm:table-cell py-2.5 px-3 whitespace-nowrap text-xs font-medium text-slate-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortRows(paymentsWithAllocations).map((p) => {
+                  const displayId = formatRecordDisplayId(p);
+                  return (
+                    <tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors">
+                      {visibleColumns.includes("id") ? <td className="py-2.5 px-3 font-mono text-xs font-medium text-slate-500 whitespace-nowrap" title={p.id}>{displayId}</td> : null}
+                      {visibleColumns.includes("date") ? <td className="py-2.5 px-3 text-slate-500 whitespace-nowrap">{formatDateForDisplay(p.paymentDate)}</td> : null}
+                      {visibleColumns.includes("customer") ? (
+                        <td className="py-2.5 px-3">
+                          <Link to={p.clientId ? `/customers/${p.clientId}` : "#"} className="font-medium text-slate-900 hover:text-violet-700 truncate block max-w-[160px]">
                             {p.client?.companyName || p.client?.contactName || "—"}
                           </Link>
                         </td>
-                        <td className="px-4 py-3">
-                          <Link
-                            to={p.invoiceId ? `/invoices/${p.invoiceId}` : "#"}
-                            className="text-sm text-violet-600 hover:text-violet-800"
-                          >
-                            {getInvoiceLabel(p)}
-                          </Link>
+                      ) : null}
+                      {visibleColumns.includes("invoice") ? (
+                        <td className="hidden sm:table-cell py-2.5 px-3">
+                          <Link to={p.invoiceId ? `/invoices/${p.invoiceId}` : "#"} className="text-slate-600 hover:text-violet-700">{getInvoiceLabel(p)}</Link>
                         </td>
-                        <td className="px-4 py-3">
-                          <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
-                            {getMethodLabel(p.method)}
-                          </span>
+                      ) : null}
+                      {visibleColumns.includes("method") ? (
+                        <td className="hidden sm:table-cell py-2.5 px-3">
+                          <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">{getMethodLabel(p.method)}</span>
                         </td>
-                        <td className="px-4 py-3 text-right font-medium tabular-nums text-slate-900">
-                          <Money value={p.amount || 0} />
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-500">
-                          {p.transactionId || "—"}
-                        </td>
-                        <td className="px-2 py-3 text-right">
-                          <ActionsMenu
-                            items={[
-                              {
-                                key: "reallocate",
-                                label: "Reallocate",
-                                disabled:
-                                  String(p.status || "").toUpperCase() === "VOIDED" ||
-                                  String(p.method || "").toUpperCase() === "CREDIT_NOTE",
-                                onSelect: () => openReallocate(p),
-                              },
-                              {
-                                key: "void",
-                                label: "Void payment",
-                                tone: "danger",
-                                disabled: String(p.status || "").toUpperCase() === "VOIDED",
-                                onSelect: () => handleVoidPayment(p),
-                              },
-                            ]}
-                            ariaLabel="Payment actions"
-                            buttonClassName="h-8 w-8"
-                          />
-                        </td>
-                      </tr>
-                    );})
-                  )}
-                </tbody>
-              </table>
-            </div>
+                      ) : null}
+                      {visibleColumns.includes("amount") ? <td className="hidden sm:table-cell py-2.5 px-3 text-right font-medium tabular-nums text-slate-800"><Money value={p.amount || 0} /></td> : null}
+                      {visibleColumns.includes("reference") ? <td className="hidden sm:table-cell py-2.5 px-3 text-slate-500">{p.transactionId || "—"}</td> : null}
+                      <td className="hidden sm:table-cell py-2.5 px-3 text-right">
+                        <ActionsMenu
+                          items={[
+                            { key: "reallocate", label: "Reallocate", disabled: String(p.status || "").toUpperCase() === "VOIDED" || String(p.method || "").toUpperCase() === "CREDIT_NOTE", onSelect: () => openReallocate(p) },
+                            { key: "void", label: "Void payment", tone: "danger", disabled: String(p.status || "").toUpperCase() === "VOIDED", onSelect: () => handleVoidPayment(p) },
+                          ]}
+                          ariaLabel="Payment actions"
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
 
-            {data?.meta && rawPayments.length > 0 && (
-              <Pagination
-                page={data.meta.page}
-                limit={data.meta.limit}
-                total={data.meta.total}
-                onPageChange={setPage}
+            {data && rawPayments.length === 0 ? (
+              <EmptyState
+                icon={CreditCard}
+                title="No payments yet"
+                description="Record a payment to get started"
+                action={
+                  <Button onClick={() => setNewPaymentOpen(true)} className="h-9">
+                    <Plus className="h-4 w-4 mr-1.5" />
+                    Record Payment
+                  </Button>
+                }
               />
-            )}
+            ) : null}
           </div>
+
+          {data?.meta && rawPayments.length > 0 && (
+            <Pagination
+              page={data.meta.page}
+              limit={data.meta.limit}
+              total={data.meta.total}
+              onPageChange={setPage}
+            />
+          )}
         </CardContent>
       </Card>
 
       {newPaymentOpen && (
-        <Dialog open={newPaymentOpen} onOpenChange={setNewPaymentOpen} title="Record Payment">
+        <Dialog open={newPaymentOpen} onOpenChange={setNewPaymentOpen} title="Record Payment" description="Allocate a payment to one or more invoices" size="lg">
           <form
             className="space-y-4"
             onSubmit={(e) => {
@@ -840,6 +821,20 @@ export default function PaymentsPage() {
           </div>
         </Dialog>
       ) : null}
+
+      <ColumnPickerDialog
+        open={columnsOpen}
+        onOpenChange={setColumnsOpen}
+        columnDefs={columnDefs}
+        visibleColumns={visibleColumns}
+        requiredColumnKeys={requiredColumnKeys}
+        onToggle={(key) => {
+          setVisibleColumns((prev) =>
+            prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+          );
+        }}
+        onReset={resetVisibleColumns}
+      />
     </div>
   );
 }
