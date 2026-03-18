@@ -394,46 +394,41 @@ export default function ReportsPage() {
         </div>
         <div className="flex items-center gap-2">
           {(activeReport === "revenue-accrual" || activeReport === "revenue-cash" || activeReport === "profit-loss") && (
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5">
-              <Calendar className="h-3.5 w-3.5 text-slate-400" />
+            <div className="flex items-center gap-2">
               <input
                 type="date"
                 value={dateStart}
                 onChange={(e) => setDateStart(e.target.value)}
-                className="h-7 border-0 bg-transparent px-1 text-sm text-slate-700 focus:outline-none"
-                placeholder="From"
+                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-violet-400 focus:ring-2 focus:ring-violet-200 outline-none"
               />
-              <span className="text-slate-300">–</span>
+              <span className="text-slate-400 text-sm">to</span>
               <input
                 type="date"
                 value={dateEnd}
                 onChange={(e) => setDateEnd(e.target.value)}
-                className="h-7 border-0 bg-transparent px-1 text-sm text-slate-700 focus:outline-none"
-                placeholder="To"
+                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-violet-400 focus:ring-2 focus:ring-violet-200 outline-none"
               />
             </div>
           )}
           {(activeReport === "trial-balance" || activeReport === "balance-sheet") && (
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5">
-              <Calendar className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-xs text-slate-500">As of</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-500">As of</span>
               <input
                 type="date"
                 value={accountingAsOf}
                 onChange={(e) => setAccountingAsOf(e.target.value)}
-                className="h-7 border-0 bg-transparent px-1 text-sm text-slate-700 focus:outline-none"
+                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-violet-400 focus:ring-2 focus:ring-violet-200 outline-none"
               />
             </div>
           )}
           {activeReport === "aging" && (
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5">
-              <Calendar className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-xs text-slate-500">As of</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-500">As of</span>
               <input
                 type="date"
                 value={agingAsOf}
                 onChange={(e) => setAgingAsOf(e.target.value)}
-                className="h-7 border-0 bg-transparent px-1 text-sm text-slate-700 focus:outline-none"
+                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-violet-400 focus:ring-2 focus:ring-violet-200 outline-none"
               />
             </div>
           )}
