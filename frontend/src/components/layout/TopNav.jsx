@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, FileText, Menu } from "lucide-react";
+import { createPortal } from "react-dom";
 import Button from "../ui/button";
 import { cn } from "../../lib/utils";
 import GlobalSearch from "./GlobalSearch";
@@ -185,7 +186,7 @@ export default function TopNav({
   }
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 border-b border-slate-200/60 px-4 sm:px-5 lg:px-6 flex items-center justify-between">
+    <header className="sticky top-0 z-[100] h-16 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 border-b border-slate-200/60 px-4 sm:px-5 lg:px-6 flex items-center justify-between">
       <div className="flex items-center gap-3 min-w-0">
         <Button
           type="button"
@@ -296,11 +297,12 @@ export default function TopNav({
             <ChevronDown className="h-4 w-4 text-slate-500" />
           </button>
 
-          {open ? (
+          {open && createPortal(
             <div
               ref={menuRef}
               role="menu"
-              className="absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden"
+              className="fixed right-4 top-16 mt-2 w-56 rounded-xl border border-slate-200 bg-white shadow-xl overflow-hidden z-[9999]"
+              style={{ maxWidth: '224px' }}
             >
               <div className="px-3 py-2 border-b border-slate-100">
                 <div className="text-xs text-slate-500">Signed in as</div>
@@ -342,8 +344,9 @@ export default function TopNav({
               >
                 Logout
               </button>
-            </div>
-          ) : null}
+            </div>,
+            document.body
+          )}
         </div>
       </div>
     </header>

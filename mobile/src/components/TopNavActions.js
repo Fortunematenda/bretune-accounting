@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingTop: 88,
     paddingRight: 18,
+    zIndex: 999,
   },
   menu: {
     width: 180,
@@ -87,6 +88,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
+    zIndex: 1000,
+    elevation: 10,
   },
   item: {
     flexDirection: 'row',
