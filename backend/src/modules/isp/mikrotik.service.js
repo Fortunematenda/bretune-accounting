@@ -278,26 +278,127 @@ class MikroTikService {
   }
 
   // ──────────────────────────────────────────────
+  // BANDWIDTH / TRAFFIC PER USER
+  // ──────────────────────────────────────────────
+
+  async getPPPoEInterfaceStats() {
+    try {
+      const ifaces = await this.execute('/interface/print', [
+        '?type=pppoe-in',
+      ]);
+      const stats = {};
+      for (const i of ifaces) {
+        const name = (i.name || '').replace(/^<pppoe-/, '').replace(/>$/, '');
+        if (name) {
+          stats[name] = {
+            txBytes: Number(i['tx-byte'] || 0),
+            rxBytes: Number(i['rx-byte'] || 0),
+            txPackets: Number(i['tx-packet'] || 0),
+            rxPackets: Number(i['rx-packet'] || 0),
+          };
+        }
+      }
+      return stats;
+    } catch (err) {
+      this.logger.warn(`Failed to get PPPoE interface stats: ${err.message}`);
+      return {};
+    }
+  }
+
+  async getDynamicQueueStats() {
+    try {
+      const queues = await this.execute('/queue/simple/print');
+      const stats = {};
+      for (const q of queues) {
+        const target = q.target || '';
+        const name = q.name || '';
+        const bytesStr = q.bytes || '0/0';
+        const [txBytes, rxBytes] = bytesStr.split('/').map(Number);
+        const rateStr = q.rate || '0/0';
+        const [txRate, rxRate] = rateStr.split('/').map(Number);
+        const maxLimit = q['max-limit'] || '';
+        const [maxUp, maxDown] = (maxLimit || '').split('/').map((v) => v || '0');
+        const key = name.replace(/^<pppoe-/, '').replace(/>$/, '') || target;
+        if (key) {
+          stats[key] = {
+            queueName: q.name,
+            target,
+            txBytes: txBytes || 0,
+            rxBytes: rxBytes || 0,
+            txRate: txRate || 0,
+            rxRate: rxRate || 0,
+            maxLimitUp: maxUp,
+            maxLimitDown: maxDown,
+            disabled: q.disabled === 'true',
+          };
+        }
+      }
+      return stats;
+    } catch (err) {
+      this.logger.warn(`Failed to get queue stats: ${err.message}`);
+      return {};
+    }
+  }
+
+  async getLiveTrafficForUser(username) {
+    try {
+      const ifaces = await this.execute('/interface/print', [
+        `?name=<pppoe-${username}>`,
+      ]);
+      if (!ifaces.length) return null;
+      const stats = await this.execute('/interface/monitor-traffic', [
+        `=interface=<pppoe-${username}>`,
+        '=once=',
+      ]);
+      if (!stats.length) return null;
+      const s = stats[0];
+      return {
+        rxBitsPerSecond: Number(s['rx-bits-per-second'] || 0),
+        txBitsPerSecond: Number(s['tx-bits-per-second'] || 0),
+        rxPacketsPerSecond: Number(s['rx-packets-per-second'] || 0),
+        txPacketsPerSecond: Number(s['tx-packets-per-second'] || 0),
+      };
+    } catch (err) {
+      this.logger.warn(`Failed to get live traffic for ${username}: ${err.message}`);
+      return null;
+    }
+  }
+
+  // ──────────────────────────────────────────────
   // FULL DASHBOARD
   // ──────────────────────────────────────────────
 
   async getRouterDashboard() {
     try {
-      const [resource, identity, active, secrets, profiles, interfaces] = await Promise.all([
+      const [resource, identity, active, secrets, profiles, interfaces, ifaceStats, queueStats] = await Promise.all([
         this.getSystemResource(),
         this.getIdentity(),
         this.getActiveConnections(),
         this.getSecrets(),
         this.getProfiles(),
         this.getInterfaces(),
+        this.getPPPoEInterfaceStats(),
+        this.getDynamicQueueStats(),
       ]);
 
       const activeUsernames = new Set(active.map((a) => a.name));
-      const enrichedSecrets = secrets.map((s) => ({
-        ...s,
-        isOnline: activeUsernames.has(s.name),
-        activeSession: active.find((a) => a.name === s.name) || null,
-      }));
+      const enrichedSecrets = secrets.map((s) => {
+        const iStats = ifaceStats[s.name] || null;
+        const qStats = queueStats[s.name] || null;
+        return {
+          ...s,
+          isOnline: activeUsernames.has(s.name),
+          activeSession: active.find((a) => a.name === s.name) || null,
+          bandwidth: iStats || qStats ? {
+            txBytes: iStats?.txBytes || qStats?.txBytes || 0,
+            rxBytes: iStats?.rxBytes || qStats?.rxBytes || 0,
+            txRate: qStats?.txRate || 0,
+            rxRate: qStats?.rxRate || 0,
+            maxLimitUp: qStats?.maxLimitUp || '',
+            maxLimitDown: qStats?.maxLimitDown || '',
+          } : null,
+        };
+      });
 
       return {
         connected: true,

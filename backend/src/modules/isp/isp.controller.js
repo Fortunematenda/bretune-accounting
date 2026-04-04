@@ -275,6 +275,11 @@ class ISPController {
     return this.mikroTik.getLogs(query.limit ? Number(query.limit) : 50);
   }
 
+  @Get('router/traffic/:username')
+  async routerUserTraffic(@Param('username') username) {
+    return this.mikroTik.getLiveTrafficForUser(username);
+  }
+
   @Post('router/disconnect/:username')
   async routerDisconnect(@Param('username') username) {
     return this.mikroTik.disconnectByUsername(username);

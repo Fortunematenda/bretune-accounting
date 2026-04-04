@@ -26,6 +26,8 @@ import {
   EyeOff,
   Gauge,
   ArrowUpDown,
+  ArrowDown,
+  ArrowUp,
   MoreHorizontal,
 } from "lucide-react";
 
@@ -35,6 +37,19 @@ function formatBytes(bytes) {
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+
+function formatBits(bits) {
+  if (!bits) return "0 bps";
+  const k = 1000;
+  const sizes = ["bps", "Kbps", "Mbps", "Gbps"];
+  const i = Math.floor(Math.log(bits) / Math.log(k));
+  return parseFloat((bits / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+
+function formatRate(bytesPerSec) {
+  if (!bytesPerSec) return "0 bps";
+  return formatBits(bytesPerSec * 8);
 }
 
 // ────────────────────────────────────────────────────
@@ -281,6 +296,36 @@ function ClientDetailModal({ open, onClose, client }) {
                   <div className="text-sm font-medium text-slate-800 mt-0.5 truncate">{val || "—"}</div>
                 </div>
               ))}
+            </div>
+          </>
+        ) : null}
+
+        {client.bandwidth ? (
+          <>
+            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider pt-2">Bandwidth & Usage</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-blue-50/50 rounded-lg px-3 py-3 border border-blue-100">
+                <div className="text-[10px] font-semibold text-blue-400 uppercase tracking-wider">Download (RX)</div>
+                <div className="text-lg font-bold text-blue-700 mt-0.5">{isOnline ? formatRate(client.bandwidth.rxRate) : "Offline"}</div>
+                <div className="text-xs text-blue-500 mt-1">Total: {formatBytes(client.bandwidth.rxBytes)}</div>
+              </div>
+              <div className="bg-emerald-50/50 rounded-lg px-3 py-3 border border-emerald-100">
+                <div className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Upload (TX)</div>
+                <div className="text-lg font-bold text-emerald-700 mt-0.5">{isOnline ? formatRate(client.bandwidth.txRate) : "Offline"}</div>
+                <div className="text-xs text-emerald-500 mt-1">Total: {formatBytes(client.bandwidth.txBytes)}</div>
+              </div>
+              {client.bandwidth.maxLimitDown || client.bandwidth.maxLimitUp ? (
+                <>
+                  <div className="bg-slate-50 rounded-lg px-3 py-2.5">
+                    <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Max Download</div>
+                    <div className="text-sm font-medium text-slate-800 mt-0.5">{client.bandwidth.maxLimitDown || "Unlimited"}</div>
+                  </div>
+                  <div className="bg-slate-50 rounded-lg px-3 py-2.5">
+                    <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Max Upload</div>
+                    <div className="text-sm font-medium text-slate-800 mt-0.5">{client.bandwidth.maxLimitUp || "Unlimited"}</div>
+                  </div>
+                </>
+              ) : null}
             </div>
           </>
         ) : null}
@@ -574,7 +619,8 @@ export default function NetworkPage() {
                     <SortHeader field="ip">IP Address</SortHeader>
                     <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">MAC / Caller ID</th>
                     <SortHeader field="uptime">Uptime</SortHeader>
-                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Comment</th>
+                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Bandwidth</th>
+                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Usage</th>
                     <th className="px-3 py-2.5 text-right text-[10px] font-semibold text-slate-400 uppercase tracking-wider w-20">Actions</th>
                   </tr>
                 </thead>
@@ -610,7 +656,34 @@ export default function NetworkPage() {
                         <td className="px-3 py-2.5 text-sm text-slate-700 font-mono">{s?.address || "—"}</td>
                         <td className="px-3 py-2.5 text-xs text-slate-500 font-mono">{s?.callerId || c.lastCallerId || "—"}</td>
                         <td className="px-3 py-2.5 text-sm text-slate-600">{s?.uptime || "—"}</td>
-                        <td className="px-3 py-2.5 text-xs text-slate-500 truncate max-w-[150px]">{c.comment || "—"}</td>
+                        <td className="px-3 py-2.5">
+                          {c.bandwidth && isOnline ? (
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-1 text-xs">
+                                <ArrowDown className="h-3 w-3 text-blue-500" />
+                                <span className="font-medium text-blue-700">{formatRate(c.bandwidth.rxRate)}</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-xs">
+                                <ArrowUp className="h-3 w-3 text-emerald-500" />
+                                <span className="font-medium text-emerald-700">{formatRate(c.bandwidth.txRate)}</span>
+                              </div>
+                            </div>
+                          ) : <span className="text-xs text-slate-400">—</span>}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          {c.bandwidth ? (
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-1 text-xs">
+                                <ArrowDown className="h-3 w-3 text-blue-400" />
+                                <span className="text-slate-600">{formatBytes(c.bandwidth.rxBytes)}</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-xs">
+                                <ArrowUp className="h-3 w-3 text-emerald-400" />
+                                <span className="text-slate-600">{formatBytes(c.bandwidth.txBytes)}</span>
+                              </div>
+                            </div>
+                          ) : <span className="text-xs text-slate-400">—</span>}
+                        </td>
                         <td className="px-3 py-2.5 text-right">
                           <div className="relative inline-block">
                             <button onClick={() => setActionMenuId(actionMenuId === c.name ? null : c.name)} className="h-7 w-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">

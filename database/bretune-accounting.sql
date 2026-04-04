@@ -5,7 +5,7 @@
 -- Dumped from database version 17.5
 -- Dumped by pg_dump version 17.5
 
--- Started on 2026-03-17 21:00:08
+-- Started on 2026-04-04 12:32:05
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -30,7 +30,7 @@ SET row_security = off;
 ALTER SCHEMA public OWNER TO postgres;
 
 --
--- TOC entry 5829 (class 0 OID 0)
+-- TOC entry 5950 (class 0 OID 0)
 -- Dependencies: 5
 -- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
 --
@@ -39,7 +39,39 @@ COMMENT ON SCHEMA public IS '';
 
 
 --
--- TOC entry 1129 (class 1247 OID 204726)
+-- TOC entry 926 (class 1247 OID 276442)
+-- Name: AISuggestionStatus; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."AISuggestionStatus" AS ENUM (
+    'PENDING',
+    'ACCEPTED',
+    'DISMISSED'
+);
+
+
+ALTER TYPE public."AISuggestionStatus" OWNER TO postgres;
+
+--
+-- TOC entry 929 (class 1247 OID 276450)
+-- Name: AISuggestionType; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."AISuggestionType" AS ENUM (
+    'CATEGORIZE_TRANSACTION',
+    'MATCH_INVOICE',
+    'MATCH_BILL',
+    'DUPLICATE_INVOICE',
+    'DUPLICATE_BILL',
+    'DUPLICATE_EXPENSE',
+    'EXPENSE_SUGGESTION'
+);
+
+
+ALTER TYPE public."AISuggestionType" OWNER TO postgres;
+
+--
+-- TOC entry 1178 (class 1247 OID 204726)
 -- Name: AccountingPeriodStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -52,7 +84,23 @@ CREATE TYPE public."AccountingPeriodStatus" AS ENUM (
 ALTER TYPE public."AccountingPeriodStatus" OWNER TO postgres;
 
 --
--- TOC entry 1126 (class 1247 OID 204721)
+-- TOC entry 932 (class 1247 OID 276466)
+-- Name: AutomationRuleAction; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."AutomationRuleAction" AS ENUM (
+    'CATEGORIZE',
+    'MATCH_INVOICE',
+    'MATCH_BILL',
+    'TAG',
+    'NOTIFY'
+);
+
+
+ALTER TYPE public."AutomationRuleAction" OWNER TO postgres;
+
+--
+-- TOC entry 1175 (class 1247 OID 204721)
 -- Name: BankReconciliationStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -65,7 +113,7 @@ CREATE TYPE public."BankReconciliationStatus" AS ENUM (
 ALTER TYPE public."BankReconciliationStatus" OWNER TO postgres;
 
 --
--- TOC entry 1027 (class 1247 OID 204096)
+-- TOC entry 1076 (class 1247 OID 204096)
 -- Name: BillStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -83,7 +131,22 @@ CREATE TYPE public."BillStatus" AS ENUM (
 ALTER TYPE public."BillStatus" OWNER TO postgres;
 
 --
--- TOC entry 940 (class 1247 OID 203598)
+-- TOC entry 935 (class 1247 OID 276478)
+-- Name: ClientServiceStatus; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."ClientServiceStatus" AS ENUM (
+    'ACTIVE',
+    'SUSPENDED',
+    'PENDING',
+    'TERMINATED'
+);
+
+
+ALTER TYPE public."ClientServiceStatus" OWNER TO postgres;
+
+--
+-- TOC entry 989 (class 1247 OID 203598)
 -- Name: ClientStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -97,7 +160,7 @@ CREATE TYPE public."ClientStatus" AS ENUM (
 ALTER TYPE public."ClientStatus" OWNER TO postgres;
 
 --
--- TOC entry 1006 (class 1247 OID 203963)
+-- TOC entry 1055 (class 1247 OID 203963)
 -- Name: ClientTaxType; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -111,7 +174,7 @@ CREATE TYPE public."ClientTaxType" AS ENUM (
 ALTER TYPE public."ClientTaxType" OWNER TO postgres;
 
 --
--- TOC entry 937 (class 1247 OID 203592)
+-- TOC entry 986 (class 1247 OID 203592)
 -- Name: ClientType; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -124,7 +187,7 @@ CREATE TYPE public."ClientType" AS ENUM (
 ALTER TYPE public."ClientType" OWNER TO postgres;
 
 --
--- TOC entry 1168 (class 1247 OID 204907)
+-- TOC entry 1217 (class 1247 OID 204907)
 -- Name: DepreciationMethod; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -137,7 +200,7 @@ CREATE TYPE public."DepreciationMethod" AS ENUM (
 ALTER TYPE public."DepreciationMethod" OWNER TO postgres;
 
 --
--- TOC entry 1003 (class 1247 OID 203950)
+-- TOC entry 1052 (class 1247 OID 203950)
 -- Name: DocumentType; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -150,7 +213,7 @@ CREATE TYPE public."DocumentType" AS ENUM (
 ALTER TYPE public."DocumentType" OWNER TO postgres;
 
 --
--- TOC entry 988 (class 1247 OID 203891)
+-- TOC entry 1037 (class 1247 OID 203891)
 -- Name: EmailStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -164,7 +227,7 @@ CREATE TYPE public."EmailStatus" AS ENUM (
 ALTER TYPE public."EmailStatus" OWNER TO postgres;
 
 --
--- TOC entry 1096 (class 1247 OID 204540)
+-- TOC entry 1145 (class 1247 OID 204540)
 -- Name: ExpenseStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -179,7 +242,7 @@ CREATE TYPE public."ExpenseStatus" AS ENUM (
 ALTER TYPE public."ExpenseStatus" OWNER TO postgres;
 
 --
--- TOC entry 1162 (class 1247 OID 204881)
+-- TOC entry 1211 (class 1247 OID 204881)
 -- Name: InventoryMovementType; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -195,7 +258,7 @@ CREATE TYPE public."InventoryMovementType" AS ENUM (
 ALTER TYPE public."InventoryMovementType" OWNER TO postgres;
 
 --
--- TOC entry 943 (class 1247 OID 203606)
+-- TOC entry 992 (class 1247 OID 203606)
 -- Name: InvoiceStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -212,7 +275,7 @@ CREATE TYPE public."InvoiceStatus" AS ENUM (
 ALTER TYPE public."InvoiceStatus" OWNER TO postgres;
 
 --
--- TOC entry 991 (class 1247 OID 203898)
+-- TOC entry 1040 (class 1247 OID 203898)
 -- Name: JobRunStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -225,7 +288,7 @@ CREATE TYPE public."JobRunStatus" AS ENUM (
 ALTER TYPE public."JobRunStatus" OWNER TO postgres;
 
 --
--- TOC entry 1075 (class 1247 OID 204390)
+-- TOC entry 1124 (class 1247 OID 204390)
 -- Name: JournalEntryStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -240,7 +303,7 @@ CREATE TYPE public."JournalEntryStatus" AS ENUM (
 ALTER TYPE public."JournalEntryStatus" OWNER TO postgres;
 
 --
--- TOC entry 1078 (class 1247 OID 204396)
+-- TOC entry 1127 (class 1247 OID 204396)
 -- Name: JournalSourceType; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -259,7 +322,7 @@ CREATE TYPE public."JournalSourceType" AS ENUM (
 ALTER TYPE public."JournalSourceType" OWNER TO postgres;
 
 --
--- TOC entry 1072 (class 1247 OID 204378)
+-- TOC entry 1121 (class 1247 OID 204378)
 -- Name: LedgerAccountType; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -275,7 +338,7 @@ CREATE TYPE public."LedgerAccountType" AS ENUM (
 ALTER TYPE public."LedgerAccountType" OWNER TO postgres;
 
 --
--- TOC entry 922 (class 1247 OID 244925)
+-- TOC entry 965 (class 1247 OID 244925)
 -- Name: LoanStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -290,7 +353,55 @@ CREATE TYPE public."LoanStatus" AS ENUM (
 ALTER TYPE public."LoanStatus" OWNER TO postgres;
 
 --
--- TOC entry 1177 (class 1247 OID 204941)
+-- TOC entry 938 (class 1247 OID 276488)
+-- Name: NetworkAlertSeverity; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."NetworkAlertSeverity" AS ENUM (
+    'INFO',
+    'WARNING',
+    'CRITICAL'
+);
+
+
+ALTER TYPE public."NetworkAlertSeverity" OWNER TO postgres;
+
+--
+-- TOC entry 941 (class 1247 OID 276496)
+-- Name: NetworkDeviceStatus; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."NetworkDeviceStatus" AS ENUM (
+    'ONLINE',
+    'OFFLINE',
+    'DEGRADED',
+    'MAINTENANCE'
+);
+
+
+ALTER TYPE public."NetworkDeviceStatus" OWNER TO postgres;
+
+--
+-- TOC entry 944 (class 1247 OID 276506)
+-- Name: NetworkDeviceType; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."NetworkDeviceType" AS ENUM (
+    'ROUTER',
+    'SWITCH',
+    'ACCESS_POINT',
+    'OLT',
+    'ONT',
+    'RADIO',
+    'SERVER',
+    'OTHER'
+);
+
+
+ALTER TYPE public."NetworkDeviceType" OWNER TO postgres;
+
+--
+-- TOC entry 1226 (class 1247 OID 204941)
 -- Name: PayRunStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -305,7 +416,7 @@ CREATE TYPE public."PayRunStatus" AS ENUM (
 ALTER TYPE public."PayRunStatus" OWNER TO postgres;
 
 --
--- TOC entry 952 (class 1247 OID 203642)
+-- TOC entry 1001 (class 1247 OID 203642)
 -- Name: PaymentMethod; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -323,7 +434,7 @@ CREATE TYPE public."PaymentMethod" AS ENUM (
 ALTER TYPE public."PaymentMethod" OWNER TO postgres;
 
 --
--- TOC entry 949 (class 1247 OID 203632)
+-- TOC entry 998 (class 1247 OID 203632)
 -- Name: PaymentStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -339,7 +450,7 @@ CREATE TYPE public."PaymentStatus" AS ENUM (
 ALTER TYPE public."PaymentStatus" OWNER TO postgres;
 
 --
--- TOC entry 1024 (class 1247 OID 204086)
+-- TOC entry 1073 (class 1247 OID 204086)
 -- Name: ProjectStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -354,7 +465,7 @@ CREATE TYPE public."ProjectStatus" AS ENUM (
 ALTER TYPE public."ProjectStatus" OWNER TO postgres;
 
 --
--- TOC entry 946 (class 1247 OID 203620)
+-- TOC entry 995 (class 1247 OID 203620)
 -- Name: QuoteStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -370,7 +481,7 @@ CREATE TYPE public."QuoteStatus" AS ENUM (
 ALTER TYPE public."QuoteStatus" OWNER TO postgres;
 
 --
--- TOC entry 955 (class 1247 OID 203656)
+-- TOC entry 1004 (class 1247 OID 203656)
 -- Name: RecurringFrequency; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -387,7 +498,7 @@ CREATE TYPE public."RecurringFrequency" AS ENUM (
 ALTER TYPE public."RecurringFrequency" OWNER TO postgres;
 
 --
--- TOC entry 1132 (class 1247 OID 204732)
+-- TOC entry 1181 (class 1247 OID 204732)
 -- Name: RecurringJournalFrequency; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -401,7 +512,7 @@ CREATE TYPE public."RecurringJournalFrequency" AS ENUM (
 ALTER TYPE public."RecurringJournalFrequency" OWNER TO postgres;
 
 --
--- TOC entry 1114 (class 1247 OID 204637)
+-- TOC entry 1163 (class 1247 OID 204637)
 -- Name: SubscriptionStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -416,7 +527,7 @@ CREATE TYPE public."SubscriptionStatus" AS ENUM (
 ALTER TYPE public."SubscriptionStatus" OWNER TO postgres;
 
 --
--- TOC entry 1066 (class 1247 OID 204354)
+-- TOC entry 1115 (class 1247 OID 204354)
 -- Name: SupplierStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -429,7 +540,7 @@ CREATE TYPE public."SupplierStatus" AS ENUM (
 ALTER TYPE public."SupplierStatus" OWNER TO postgres;
 
 --
--- TOC entry 1039 (class 1247 OID 204138)
+-- TOC entry 1088 (class 1247 OID 204138)
 -- Name: TaskActivityAction; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -448,7 +559,7 @@ CREATE TYPE public."TaskActivityAction" AS ENUM (
 ALTER TYPE public."TaskActivityAction" OWNER TO postgres;
 
 --
--- TOC entry 1042 (class 1247 OID 204156)
+-- TOC entry 1091 (class 1247 OID 204156)
 -- Name: TaskNotificationType; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -461,7 +572,7 @@ CREATE TYPE public."TaskNotificationType" AS ENUM (
 ALTER TYPE public."TaskNotificationType" OWNER TO postgres;
 
 --
--- TOC entry 1033 (class 1247 OID 204118)
+-- TOC entry 1082 (class 1247 OID 204118)
 -- Name: TaskPriority; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -476,7 +587,7 @@ CREATE TYPE public."TaskPriority" AS ENUM (
 ALTER TYPE public."TaskPriority" OWNER TO postgres;
 
 --
--- TOC entry 1036 (class 1247 OID 204128)
+-- TOC entry 1085 (class 1247 OID 204128)
 -- Name: TaskStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -491,7 +602,7 @@ CREATE TYPE public."TaskStatus" AS ENUM (
 ALTER TYPE public."TaskStatus" OWNER TO postgres;
 
 --
--- TOC entry 1030 (class 1247 OID 204106)
+-- TOC entry 1079 (class 1247 OID 204106)
 -- Name: TaskType; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -507,7 +618,7 @@ CREATE TYPE public."TaskType" AS ENUM (
 ALTER TYPE public."TaskType" OWNER TO postgres;
 
 --
--- TOC entry 958 (class 1247 OID 203670)
+-- TOC entry 1007 (class 1247 OID 203670)
 -- Name: TaxType; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -520,7 +631,7 @@ CREATE TYPE public."TaxType" AS ENUM (
 ALTER TYPE public."TaxType" OWNER TO postgres;
 
 --
--- TOC entry 934 (class 1247 OID 203585)
+-- TOC entry 983 (class 1247 OID 203585)
 -- Name: UserRole; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -596,6 +707,32 @@ CREATE TABLE public.accounting_periods (
 ALTER TABLE public.accounting_periods OWNER TO postgres;
 
 --
+-- TOC entry 285 (class 1259 OID 276523)
+-- Name: ai_suggestions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.ai_suggestions (
+    id text NOT NULL,
+    type public."AISuggestionType" NOT NULL,
+    status public."AISuggestionStatus" DEFAULT 'PENDING'::public."AISuggestionStatus" NOT NULL,
+    confidence numeric(5,4) NOT NULL,
+    "sourceEntityType" text NOT NULL,
+    "sourceEntityId" text NOT NULL,
+    "targetEntityType" text,
+    "targetEntityId" text,
+    reasoning text,
+    "metaJson" jsonb,
+    "resolvedAt" timestamp(3) without time zone,
+    "resolvedByUserId" text,
+    "ownerCompanyName" text,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public.ai_suggestions OWNER TO postgres;
+
+--
 -- TOC entry 274 (class 1259 OID 204862)
 -- Name: audit_logs; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -615,6 +752,31 @@ CREATE TABLE public.audit_logs (
 
 
 ALTER TABLE public.audit_logs OWNER TO postgres;
+
+--
+-- TOC entry 286 (class 1259 OID 276530)
+-- Name: automation_rules; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.automation_rules (
+    id text NOT NULL,
+    name text NOT NULL,
+    description text,
+    "isActive" boolean DEFAULT true NOT NULL,
+    priority integer DEFAULT 0 NOT NULL,
+    action public."AutomationRuleAction" NOT NULL,
+    "conditionsJson" jsonb NOT NULL,
+    "actionParamsJson" jsonb,
+    "timesApplied" integer DEFAULT 0 NOT NULL,
+    "lastAppliedAt" timestamp(3) without time zone,
+    "createdByUserId" text NOT NULL,
+    "ownerCompanyName" text,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public.automation_rules OWNER TO postgres;
 
 --
 -- TOC entry 268 (class 1259 OID 204756)
@@ -746,7 +908,7 @@ CREATE SEQUENCE public."bills_billNumber_seq"
 ALTER SEQUENCE public."bills_billNumber_seq" OWNER TO postgres;
 
 --
--- TOC entry 5831 (class 0 OID 0)
+-- TOC entry 5952 (class 0 OID 0)
 -- Dependencies: 243
 -- Name: bills_billNumber_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -778,6 +940,37 @@ CREATE TABLE public.business_bank_accounts (
 
 
 ALTER TABLE public.business_bank_accounts OWNER TO postgres;
+
+--
+-- TOC entry 287 (class 1259 OID 276539)
+-- Name: client_network_links; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.client_network_links (
+    id text NOT NULL,
+    "clientId" text NOT NULL,
+    "deviceId" text,
+    "servicePlanId" text,
+    "serviceStatus" public."ClientServiceStatus" DEFAULT 'PENDING'::public."ClientServiceStatus" NOT NULL,
+    "ipAddress" text,
+    "macAddress" text,
+    "pppoeUsername" text,
+    "installationDate" timestamp(3) without time zone,
+    "suspendedAt" timestamp(3) without time zone,
+    "suspendReason" text,
+    "terminatedAt" timestamp(3) without time zone,
+    "billingDay" integer DEFAULT 1 NOT NULL,
+    "autoBilling" boolean DEFAULT true NOT NULL,
+    "lastBilledAt" timestamp(3) without time zone,
+    "nextBillDate" timestamp(3) without time zone,
+    notes text,
+    "ownerCompanyName" text,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public.client_network_links OWNER TO postgres;
 
 --
 -- TOC entry 219 (class 1259 OID 203685)
@@ -833,7 +1026,7 @@ CREATE SEQUENCE public."clients_clientSeq_seq"
 ALTER SEQUENCE public."clients_clientSeq_seq" OWNER TO postgres;
 
 --
--- TOC entry 5832 (class 0 OID 0)
+-- TOC entry 5953 (class 0 OID 0)
 -- Dependencies: 235
 -- Name: clients_clientSeq_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -854,7 +1047,7 @@ CREATE TABLE public.companies (
     "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updatedAt" timestamp(3) without time zone NOT NULL,
     "baseCurrencyCode" text DEFAULT 'ZAR'::text NOT NULL,
-    "stripeCustomerId" character varying(255)
+    "stripeCustomerId" text
 );
 
 
@@ -936,8 +1129,8 @@ CREATE TABLE public.customer_documents (
     size integer NOT NULL,
     "storageKey" text NOT NULL,
     "uploadedByUserId" text,
-    "createdAt" timestamp with time zone DEFAULT now() NOT NULL,
-    "updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL,
     description text
 );
 
@@ -1040,7 +1233,7 @@ CREATE SEQUENCE public."employees_employeeNumber_seq"
 ALTER SEQUENCE public."employees_employeeNumber_seq" OWNER TO postgres;
 
 --
--- TOC entry 5833 (class 0 OID 0)
+-- TOC entry 5954 (class 0 OID 0)
 -- Dependencies: 239
 -- Name: employees_employeeNumber_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1128,7 +1321,7 @@ CREATE SEQUENCE public."expenses_expenseSeq_seq"
 ALTER SEQUENCE public."expenses_expenseSeq_seq" OWNER TO postgres;
 
 --
--- TOC entry 5834 (class 0 OID 0)
+-- TOC entry 5955 (class 0 OID 0)
 -- Dependencies: 258
 -- Name: expenses_expenseSeq_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1252,7 +1445,7 @@ CREATE SEQUENCE public."invoices_invoiceSeq_seq"
 ALTER SEQUENCE public."invoices_invoiceSeq_seq" OWNER TO postgres;
 
 --
--- TOC entry 5835 (class 0 OID 0)
+-- TOC entry 5956 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: invoices_invoiceSeq_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1377,13 +1570,91 @@ CREATE TABLE public.loans (
     "ownerCompanyName" text,
     "createdById" text NOT NULL,
     "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updatedAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL,
     "customerId" text,
     "journalEntryId" text
 );
 
 
 ALTER TABLE public.loans OWNER TO postgres;
+
+--
+-- TOC entry 288 (class 1259 OID 276548)
+-- Name: network_alerts; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.network_alerts (
+    id text NOT NULL,
+    "deviceId" text NOT NULL,
+    severity public."NetworkAlertSeverity" NOT NULL,
+    message text NOT NULL,
+    "isResolved" boolean DEFAULT false NOT NULL,
+    "resolvedAt" timestamp(3) without time zone,
+    "resolvedByUserId" text,
+    "ownerCompanyName" text,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.network_alerts OWNER TO postgres;
+
+--
+-- TOC entry 289 (class 1259 OID 276555)
+-- Name: network_devices; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.network_devices (
+    id text NOT NULL,
+    name text NOT NULL,
+    type public."NetworkDeviceType" NOT NULL,
+    status public."NetworkDeviceStatus" DEFAULT 'OFFLINE'::public."NetworkDeviceStatus" NOT NULL,
+    "ipAddress" text,
+    "macAddress" text,
+    location text,
+    model text,
+    "serialNumber" text,
+    "firmwareVersion" text,
+    "parentDeviceId" text,
+    "snmpCommunity" text,
+    "managementUrl" text,
+    "uptimeSeconds" integer,
+    "cpuPercent" numeric(5,2),
+    "memoryPercent" numeric(5,2),
+    "lastSeenAt" timestamp(3) without time zone,
+    notes text,
+    "ownerCompanyName" text,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public.network_devices OWNER TO postgres;
+
+--
+-- TOC entry 290 (class 1259 OID 276562)
+-- Name: network_interfaces; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.network_interfaces (
+    id text NOT NULL,
+    "deviceId" text NOT NULL,
+    name text NOT NULL,
+    "ifIndex" integer,
+    speed text,
+    "macAddress" text,
+    "ipAddress" text,
+    "isUp" boolean DEFAULT false NOT NULL,
+    "rxBytes" bigint DEFAULT 0 NOT NULL,
+    "txBytes" bigint DEFAULT 0 NOT NULL,
+    "rxErrors" integer DEFAULT 0 NOT NULL,
+    "txErrors" integer DEFAULT 0 NOT NULL,
+    "lastPolledAt" timestamp(3) without time zone,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public.network_interfaces OWNER TO postgres;
 
 --
 -- TOC entry 236 (class 1259 OID 204029)
@@ -1568,7 +1839,7 @@ CREATE SEQUENCE public."projects_projectNumber_seq"
 ALTER SEQUENCE public."projects_projectNumber_seq" OWNER TO postgres;
 
 --
--- TOC entry 5836 (class 0 OID 0)
+-- TOC entry 5957 (class 0 OID 0)
 -- Dependencies: 241
 -- Name: projects_projectNumber_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1638,7 +1909,7 @@ CREATE SEQUENCE public."quotes_quoteSeq_seq"
 ALTER SEQUENCE public."quotes_quoteSeq_seq" OWNER TO postgres;
 
 --
--- TOC entry 5837 (class 0 OID 0)
+-- TOC entry 5958 (class 0 OID 0)
 -- Dependencies: 233
 -- Name: quotes_quoteSeq_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1765,6 +2036,28 @@ CREATE TABLE public.roles (
 ALTER TABLE public.roles OWNER TO postgres;
 
 --
+-- TOC entry 291 (class 1259 OID 276573)
+-- Name: service_plans; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.service_plans (
+    id text NOT NULL,
+    name text NOT NULL,
+    description text,
+    "downloadSpeed" text NOT NULL,
+    "uploadSpeed" text NOT NULL,
+    "monthlyPrice" numeric(10,2) NOT NULL,
+    "dataCapGb" integer,
+    "isActive" boolean DEFAULT true NOT NULL,
+    "ownerCompanyName" text,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public.service_plans OWNER TO postgres;
+
+--
 -- TOC entry 264 (class 1259 OID 204654)
 -- Name: subscription_plans; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -1778,7 +2071,7 @@ CREATE TABLE public.subscription_plans (
     "isActive" boolean DEFAULT true NOT NULL,
     "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updatedAt" timestamp(3) without time zone NOT NULL,
-    "stripePriceId" character varying(255)
+    "stripePriceId" text
 );
 
 
@@ -1875,7 +2168,7 @@ CREATE SEQUENCE public."suppliers_supplierSeq_seq"
 ALTER SEQUENCE public."suppliers_supplierSeq_seq" OWNER TO postgres;
 
 --
--- TOC entry 5838 (class 0 OID 0)
+-- TOC entry 5959 (class 0 OID 0)
 -- Dependencies: 250
 -- Name: suppliers_supplierSeq_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1995,7 +2288,7 @@ CREATE SEQUENCE public."tasks_taskSeq_seq"
 ALTER SEQUENCE public."tasks_taskSeq_seq" OWNER TO postgres;
 
 --
--- TOC entry 5839 (class 0 OID 0)
+-- TOC entry 5960 (class 0 OID 0)
 -- Dependencies: 246
 -- Name: tasks_taskSeq_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -2046,7 +2339,7 @@ CREATE SEQUENCE public."users_userNumber_seq"
 ALTER SEQUENCE public."users_userNumber_seq" OWNER TO postgres;
 
 --
--- TOC entry 5840 (class 0 OID 0)
+-- TOC entry 5961 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: users_userNumber_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -2055,7 +2348,7 @@ ALTER SEQUENCE public."users_userNumber_seq" OWNED BY public.users."userNumber";
 
 
 --
--- TOC entry 5146 (class 2604 OID 204187)
+-- TOC entry 5195 (class 2604 OID 276680)
 -- Name: bills billNumber; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2063,7 +2356,7 @@ ALTER TABLE ONLY public.bills ALTER COLUMN "billNumber" SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 5095 (class 2604 OID 204017)
+-- TOC entry 5144 (class 2604 OID 276681)
 -- Name: customers clientSeq; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2071,7 +2364,7 @@ ALTER TABLE ONLY public.customers ALTER COLUMN "clientSeq" SET DEFAULT nextval('
 
 
 --
--- TOC entry 5140 (class 2604 OID 204165)
+-- TOC entry 5189 (class 2604 OID 276682)
 -- Name: employees employeeNumber; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2079,7 +2372,7 @@ ALTER TABLE ONLY public.employees ALTER COLUMN "employeeNumber" SET DEFAULT next
 
 
 --
--- TOC entry 5189 (class 2604 OID 204562)
+-- TOC entry 5238 (class 2604 OID 276683)
 -- Name: expenses expenseSeq; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2087,7 +2380,7 @@ ALTER TABLE ONLY public.expenses ALTER COLUMN "expenseSeq" SET DEFAULT nextval('
 
 
 --
--- TOC entry 5115 (class 2604 OID 203979)
+-- TOC entry 5164 (class 2604 OID 276684)
 -- Name: invoices invoiceSeq; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2095,7 +2388,7 @@ ALTER TABLE ONLY public.invoices ALTER COLUMN "invoiceSeq" SET DEFAULT nextval('
 
 
 --
--- TOC entry 5143 (class 2604 OID 204176)
+-- TOC entry 5192 (class 2604 OID 276685)
 -- Name: projects projectNumber; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2103,7 +2396,7 @@ ALTER TABLE ONLY public.projects ALTER COLUMN "projectNumber" SET DEFAULT nextva
 
 
 --
--- TOC entry 5107 (class 2604 OID 203992)
+-- TOC entry 5156 (class 2604 OID 276686)
 -- Name: quotes quoteSeq; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2111,7 +2404,7 @@ ALTER TABLE ONLY public.quotes ALTER COLUMN "quoteSeq" SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 5165 (class 2604 OID 204363)
+-- TOC entry 5214 (class 2604 OID 276687)
 -- Name: suppliers supplierSeq; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2119,7 +2412,7 @@ ALTER TABLE ONLY public.suppliers ALTER COLUMN "supplierSeq" SET DEFAULT nextval
 
 
 --
--- TOC entry 5155 (class 2604 OID 204209)
+-- TOC entry 5204 (class 2604 OID 276688)
 -- Name: tasks taskSeq; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2127,7 +2420,7 @@ ALTER TABLE ONLY public.tasks ALTER COLUMN "taskSeq" SET DEFAULT nextval('public
 
 
 --
--- TOC entry 5083 (class 2604 OID 204003)
+-- TOC entry 5132 (class 2604 OID 276689)
 -- Name: users userNumber; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2135,7 +2428,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN "userNumber" SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 5756 (class 0 OID 203575)
+-- TOC entry 5870 (class 0 OID 203575)
 -- Dependencies: 217
 -- Data for Name: _prisma_migrations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -2179,7 +2472,7 @@ c90dfd5b-a10d-4e48-9c2e-cb09c0173f5e	manually-applied	2026-03-09 13:40:36.016653
 
 
 --
--- TOC entry 5810 (class 0 OID 204816)
+-- TOC entry 5924 (class 0 OID 204816)
 -- Dependencies: 271
 -- Data for Name: accounting_entities; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -2189,7 +2482,7 @@ COPY public.accounting_entities (id, "companyId", code, name, "baseCurrencyCode"
 
 
 --
--- TOC entry 5808 (class 0 OID 204764)
+-- TOC entry 5922 (class 0 OID 204764)
 -- Dependencies: 269
 -- Data for Name: accounting_periods; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -2199,7 +2492,19 @@ COPY public.accounting_periods (id, "startDate", "endDate", status, "closedAt", 
 
 
 --
--- TOC entry 5813 (class 0 OID 204862)
+-- TOC entry 5938 (class 0 OID 276523)
+-- Dependencies: 285
+-- Data for Name: ai_suggestions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.ai_suggestions (id, type, status, confidence, "sourceEntityType", "sourceEntityId", "targetEntityType", "targetEntityId", reasoning, "metaJson", "resolvedAt", "resolvedByUserId", "ownerCompanyName", "createdAt", "updatedAt") FROM stdin;
+cmmv4fro90002daz7b2n78u4f	DUPLICATE_INVOICE	ACCEPTED	0.9172	invoice	cmmaeu6iz002kkgp40387fpce	invoice	cmmaerbl20020kgp46yapihs9	Invoice #INV-043 and #INV-042 for Fortune Matenda have similar amounts (500.00 vs 580.00) within 0 days	{"invoiceA": {"id": "cmmaeu6iz002kkgp40387fpce", "amount": 500, "number": "INV-043"}, "invoiceB": {"id": "cmmaerbl20020kgp46yapihs9", "amount": 580, "number": "INV-042"}}	2026-03-17 21:26:08.427	cmm47pax500048s6ob25tkito	Bretune Technologies	2026-03-17 21:25:27.129	2026-03-17 21:26:08.428
+cmmv4frnw0001daz7e1jp5xur	DUPLICATE_INVOICE	ACCEPTED	0.7600	invoice	cmmv3g1y300i314c1stlqlwv2	invoice	cmmfdycnu00ushwgvl4d5twun	Invoice #INV-047 and #INV-045 for Murdock Valley NHW have similar amounts (500.00 vs 500.00) within 13 days	{"invoiceA": {"id": "cmmv3g1y300i314c1stlqlwv2", "amount": 500, "number": "INV-047"}, "invoiceB": {"id": "cmmfdycnu00ushwgvl4d5twun", "amount": 500, "number": "INV-045"}}	2026-03-17 21:26:12.281	cmm47pax500048s6ob25tkito	Bretune Technologies	2026-03-17 21:25:27.117	2026-03-17 21:26:12.282
+\.
+
+
+--
+-- TOC entry 5927 (class 0 OID 204862)
 -- Dependencies: 274
 -- Data for Name: audit_logs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -2209,7 +2514,17 @@ COPY public.audit_logs (id, "entityType", "entityId", action, "userId", "changed
 
 
 --
--- TOC entry 5807 (class 0 OID 204756)
+-- TOC entry 5939 (class 0 OID 276530)
+-- Dependencies: 286
+-- Data for Name: automation_rules; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.automation_rules (id, name, description, "isActive", priority, action, "conditionsJson", "actionParamsJson", "timesApplied", "lastAppliedAt", "createdByUserId", "ownerCompanyName", "createdAt", "updatedAt") FROM stdin;
+\.
+
+
+--
+-- TOC entry 5921 (class 0 OID 204756)
 -- Dependencies: 268
 -- Data for Name: bank_reconciliation_matches; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -2225,7 +2540,7 @@ cmm6qtydt000bsth2pw1da3cc	cmm6q8fz80002j1gfi80d1db4	cmm6q8g0a0008j1gf4mlyu35i	cm
 
 
 --
--- TOC entry 5805 (class 0 OID 204739)
+-- TOC entry 5919 (class 0 OID 204739)
 -- Dependencies: 266
 -- Data for Name: bank_reconciliations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -2251,7 +2566,7 @@ cmm6uywgm0002twnatsns630r	1000	2026-02-28 00:00:00	1.00	0.00	DRAFT	\N	\N	cmm47pa
 
 
 --
--- TOC entry 5806 (class 0 OID 204748)
+-- TOC entry 5920 (class 0 OID 204748)
 -- Dependencies: 267
 -- Data for Name: bank_statement_lines; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -5877,7 +6192,7 @@ cmm6uywha00butwnahyf56xi4	cmm6uywgm0002twnatsns630r	2026-10-01 00:00:00	LOTTERY 
 
 
 --
--- TOC entry 5820 (class 0 OID 221837)
+-- TOC entry 5934 (class 0 OID 221837)
 -- Dependencies: 281
 -- Data for Name: bank_transactions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -5887,7 +6202,7 @@ COPY public.bank_transactions (id, "bankAccountId", "transactionDate", descripti
 
 
 --
--- TOC entry 5783 (class 0 OID 204184)
+-- TOC entry 5897 (class 0 OID 204184)
 -- Dependencies: 244
 -- Data for Name: bills; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -5898,7 +6213,7 @@ cmm6nj44n00ed1klqdm4z3naf	1	INV0069080	Get Wiza	{"memo":"","items":[{"descriptio
 
 
 --
--- TOC entry 5819 (class 0 OID 221812)
+-- TOC entry 5933 (class 0 OID 221812)
 -- Dependencies: 280
 -- Data for Name: business_bank_accounts; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -5910,7 +6225,17 @@ cmm6r6sr9003khg423c9qkayp	Standard Bank	FORTUNE MATENDA	1016 918 218 3	FORTUNE M
 
 
 --
--- TOC entry 5802 (class 0 OID 204645)
+-- TOC entry 5940 (class 0 OID 276539)
+-- Dependencies: 287
+-- Data for Name: client_network_links; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.client_network_links (id, "clientId", "deviceId", "servicePlanId", "serviceStatus", "ipAddress", "macAddress", "pppoeUsername", "installationDate", "suspendedAt", "suspendReason", "terminatedAt", "billingDay", "autoBilling", "lastBilledAt", "nextBillDate", notes, "ownerCompanyName", "createdAt", "updatedAt") FROM stdin;
+\.
+
+
+--
+-- TOC entry 5916 (class 0 OID 204645)
 -- Dependencies: 263
 -- Data for Name: companies; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -5918,12 +6243,12 @@ cmm6r6sr9003khg423c9qkayp	Standard Bank	FORTUNE MATENDA	1016 918 218 3	FORTUNE M
 COPY public.companies (id, name, "trialEndsAt", "subscriptionStatus", "createdAt", "updatedAt", "baseCurrencyCode", "stripeCustomerId") FROM stdin;
 cmm4zhe3b01361vs3dxk98b9o	Dziva T	\N	ACTIVE	2026-02-27 14:24:44.182	2026-02-27 19:26:20.12	ZAR	\N
 cmmael1we0001kgp4revaocoi	Bluedog Technologies	\N	ACTIVE	2026-03-03 09:26:20.127	2026-03-03 09:32:40.217	ZAR	\N
-cmm47pawm00008s6o8eq8i8y7	Bretune Technologies	\N	ACTIVE	2026-02-27 01:27:04.054	2026-03-09 23:01:51.655	ZAR	cus_U7RhGVw2L0WOzA
+cmm47pawm00008s6o8eq8i8y7	Bretune Technologies	\N	ACTIVE	2026-02-27 01:27:04.054	2026-03-19 11:52:49.253	ZAR	cus_U7RhGVw2L0WOzA
 \.
 
 
 --
--- TOC entry 5776 (class 0 OID 204045)
+-- TOC entry 5890 (class 0 OID 204045)
 -- Dependencies: 237
 -- Data for Name: company_settings; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -5934,7 +6259,7 @@ default	fortunematenda@gmail.com	+27612685933	134 kommitjie road Fishhoek	Fish H
 
 
 --
--- TOC entry 5804 (class 0 OID 204664)
+-- TOC entry 5918 (class 0 OID 204664)
 -- Dependencies: 265
 -- Data for Name: company_subscriptions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -5942,12 +6267,12 @@ default	fortunematenda@gmail.com	+27612685933	134 kommitjie road Fishhoek	Fish H
 COPY public.company_subscriptions (id, "companyId", "planId", status, "trialEndsAt", "subscriptionEndsAt", "createdAt", "updatedAt") FROM stdin;
 cmm4zhe4l01381vs35dhr3f04	cmm4zhe3b01361vs3dxk98b9o	cmm47ndah001jfkjog4mkq1cp	ACTIVE	\N	2026-03-27 19:26:20.073	2026-02-27 14:24:44.212	2026-02-27 19:26:20.12
 cmmael1wy0003kgp4ysbh1g0w	cmmael1we0001kgp4revaocoi	cmm47ndah001jfkjog4mkq1cp	ACTIVE	\N	2026-04-03 09:32:40.213	2026-03-03 09:26:20.145	2026-03-03 09:32:40.217
-cmm47paww00028s6ouqlfmn6k	cmm47pawm00008s6o8eq8i8y7	cmm47ndaa001hfkjop6um0l8u	ACTIVE	\N	2026-04-09 21:05:07.587	2026-02-27 01:27:04.063	2026-03-09 21:05:07.618
+cmm47paww00028s6ouqlfmn6k	cmm47pawm00008s6o8eq8i8y7	cmm47ndah001jfkjog4mkq1cp	ACTIVE	\N	2026-04-19 11:52:49.171	2026-02-27 01:27:04.063	2026-03-19 11:52:49.253
 \.
 
 
 --
--- TOC entry 5811 (class 0 OID 204832)
+-- TOC entry 5925 (class 0 OID 204832)
 -- Dependencies: 272
 -- Data for Name: currencies; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -5987,79 +6312,81 @@ ZAR	South African Rand	R	2	t	2026-02-27 03:25:30.119	2026-02-27 01:25:33.71
 
 
 --
--- TOC entry 5821 (class 0 OID 240478)
+-- TOC entry 5935 (class 0 OID 240478)
 -- Dependencies: 282
 -- Data for Name: customer_documents; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.customer_documents (id, "clientId", "originalName", "mimeType", size, "storageKey", "uploadedByUserId", "createdAt", "updatedAt", description) FROM stdin;
-cmmj26khv0002cliy46fi6nhf	cmm551ver006ls8x65km4hqtw	bretune-accounting-invoice-INV-045.pdf	application/pdf	34596	cmm551ver006ls8x65km4hqtw/3bfacea1-f0b9-4d2b-9545-88a266e978f4.pdf	cmm47pax500048s6ob25tkito	2026-03-09 12:49:04.549+02	2026-03-09 12:49:04.549+02	\N
-cmmj2mya30001wj7gkaopoi9i	cmm551ver006ls8x65km4hqtw	bretune-accounting-quote-Q-001.pdf	application/pdf	34683	cmm551ver006ls8x65km4hqtw/bacbe7e2-1fca-4b23-a2e3-b7a5c58a85a3.pdf	cmm47pax500048s6ob25tkito	2026-03-09 13:01:48.939+02	2026-03-09 13:01:48.939+02	Bank statement
-cmmj2nbnp0003wj7gdqfbbs9s	cmm551ver006ls8x65km4hqtw	bretune-accounting-invoice-INV-045.pdf	application/pdf	34596	cmm551ver006ls8x65km4hqtw/4447684a-61b0-483f-9f53-fd73700cc250.pdf	cmm47pax500048s6ob25tkito	2026-03-09 13:02:06.277+02	2026-03-09 13:02:06.277+02	\N
-cmmj2o8gn0005wj7g23kmjnvg	cmm551ver006ls8x65km4hqtw	632864681_25982782708079147_976482211840312184_n.jpg	image/jpeg	779147	cmm551ver006ls8x65km4hqtw/82fddccc-8e68-493c-b474-8a74541663f7.jpg	cmm47pax500048s6ob25tkito	2026-03-09 13:02:48.792+02	2026-03-09 13:02:48.792+02	\N
+cmmj26khv0002cliy46fi6nhf	cmm551ver006ls8x65km4hqtw	bretune-accounting-invoice-INV-045.pdf	application/pdf	34596	cmm551ver006ls8x65km4hqtw/3bfacea1-f0b9-4d2b-9545-88a266e978f4.pdf	cmm47pax500048s6ob25tkito	2026-03-09 12:49:04.549	2026-03-09 12:49:04.549	\N
+cmmj2mya30001wj7gkaopoi9i	cmm551ver006ls8x65km4hqtw	bretune-accounting-quote-Q-001.pdf	application/pdf	34683	cmm551ver006ls8x65km4hqtw/bacbe7e2-1fca-4b23-a2e3-b7a5c58a85a3.pdf	cmm47pax500048s6ob25tkito	2026-03-09 13:01:48.939	2026-03-09 13:01:48.939	Bank statement
+cmmj2nbnp0003wj7gdqfbbs9s	cmm551ver006ls8x65km4hqtw	bretune-accounting-invoice-INV-045.pdf	application/pdf	34596	cmm551ver006ls8x65km4hqtw/4447684a-61b0-483f-9f53-fd73700cc250.pdf	cmm47pax500048s6ob25tkito	2026-03-09 13:02:06.277	2026-03-09 13:02:06.277	\N
+cmmj2o8gn0005wj7g23kmjnvg	cmm551ver006ls8x65km4hqtw	632864681_25982782708079147_976482211840312184_n.jpg	image/jpeg	779147	cmm551ver006ls8x65km4hqtw/82fddccc-8e68-493c-b474-8a74541663f7.jpg	cmm47pax500048s6ob25tkito	2026-03-09 13:02:48.792	2026-03-09 13:02:48.792	\N
 \.
 
 
 --
--- TOC entry 5758 (class 0 OID 203685)
+-- TOC entry 5872 (class 0 OID 203685)
 -- Dependencies: 219
 -- Data for Name: customers; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.customers (id, type, "companyName", "contactName", email, phone, address, city, state, country, "postalCode", status, "paymentTermsDays", notes, "createdAt", "updatedAt", "openingBalance", balance, "creditLimit", "totalInvoiced", "totalPaid", "creditBalance", "taxNumber", "taxType", "clientSeq", "ownerCompanyName") FROM stdin;
 cmm4zirod013c1vs3xdf1z699	INDIVIDUAL	Bretune Technologies	Somuzi	fortunematenda@gmail.com	0612685931	134 kommitjie road Fishhoek	Fish Hoek Capetown	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 14:25:48.444	2026-02-27 14:25:48.444	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	2	Dziva T
-cmm47x6lz0039pdmhlznggcdn	COMPANY	Bluedog Technology	Chris Hendricks	cbhendrikz@gmail.com	+27 21 300 3408	Unit 102, Solaris Business Park, 2 Lekkerwater Rd, Sunnydale	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 01:33:11.736	2026-02-28 14:47:15.45	0.00	0.00	0.00	0.00	6695.57	0.00	\N	NONE	1	Bretune Technologies
-cmm54kjqp003ds8x67pxwkczp	INDIVIDUAL	\N	Blessing Kaitano	\N	+27 68 270 4763	5578 Vanya Street, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 16:47:09.553	2026-02-27 16:47:09.553	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	5	Bretune Technologies
-cmm55cbe3008us8x6p33kz5mb	INDIVIDUAL	\N	Scolastic Zingwe	\N	+27 62 154 4046	27 Luntu Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:08:45.099	2026-02-27 17:08:45.099	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	11	Bretune Technologies
+cmm55wz4x00bos8x6nnrkl8re	INDIVIDUAL	\N	Margaret Zingwe	\N	+27 74 488 2300	150 Ntantala Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:24:48.993	2026-03-18 21:11:32.947	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	17	Bretune Technologies
+cmm540m4p001os8x6km8cvelc	INDIVIDUAL	\N	Florence Saidi	florecesaidi12@gmail.com	+27 73 942 4347	Flat H24 Makhayangokhu flats Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 16:31:39.529	2026-04-02 18:20:07.366	0.00	0.00	0.00	0.00	540.00	0.00		NONE	3	Bretune Technologies
+cmm54kjqp003ds8x67pxwkczp	INDIVIDUAL	\N	Blessing Kaitano	\N	+27 68 270 4763	5578 Vanya Street, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 16:47:09.553	2026-03-18 21:11:48.056	0.00	0.00	0.00	0.00	300.00	0.00	\N	NONE	5	Bretune Technologies
+cmm6m2n1z00721klq0sctxew0	INDIVIDUAL	\N	Elikanos Matenda	\N	+27 74 437 0740	83 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:44:53.304	2026-03-18 21:12:47.277	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	30	Bretune Technologies
 cmm55nh8g00a2s8x6rvry714w	COMPANY	Tshisa Nyama	Mighty Mwatsika	\N	+27 84 410 4690	51 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:17:25.888	2026-02-27 17:19:21.946	0.00	0.00	0.00	0.00	0.00	0.00		NONE	14	Bretune Technologies
-cmm55wz4x00bos8x6nnrkl8re	INDIVIDUAL	\N	Margaret Zingwe	\N	+27 74 488 2300	150 Ntantala Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:24:48.993	2026-02-27 17:24:48.993	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	17	Bretune Technologies
-cmm6lh7k3002n1klq8jh12onn	INDIVIDUAL	\N	Winnet Gwese	\N	+27 61 200 5396	30 Masebulele Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:28:13.443	2026-02-28 17:28:13.443	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	21	Bretune Technologies
-cmm55a6s8008bs8x6h6fnp5yd	INDIVIDUAL	\N	Nangamaso Beza	\N	+27 73 402 9058	37 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:07:05.816	2026-03-06 21:18:51.214	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	10	Bretune Technologies
-cmm6ljd7h00361klqff2544qa	INDIVIDUAL	\N	Mike Mwiwa	\N	+27 67 726 7410	97 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:29:54.077	2026-02-28 17:29:54.077	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	22	Bretune Technologies
-cmm55j1sz009fs8x62nkk3wym	INDIVIDUAL	\N	Elikanos Matenda	\N	+27 74 437 0740	2987 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:13:59.267	2026-03-09 20:19:28.518	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	13	Bretune Technologies
-cmm6llpqi003q1klqf1ejb34c	INDIVIDUAL	\N	Sethu Williams	\N	+27 68 178 9932	6555 Binga St, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:31:43.626	2026-02-28 17:31:43.626	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	23	Bretune Technologies
+cmm55f2iq008ws8x6c9k8kvpl	COMPANY	Sinovuyo Spaza	Abdi Kadere	\N	+27 64 138 7159	64 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:10:53.57	2026-04-02 18:21:46.59	0.00	0.00	0.00	0.00	665.00	0.00	\N	NONE	12	Bretune Technologies
 cmm6lo0qh00491klq27bc8r58	INDIVIDUAL	\N	Nolulamo Njoli	\N	+27 69 331 0388	126 Ntantala Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:33:31.194	2026-02-28 17:33:31.194	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	24	Bretune Technologies
 cmm6lqnd2004b1klqtzti29rl	INDIVIDUAL	\N	Aaron Mauwo	\N	+27 67 719 7340	3 Sisulu Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:35:33.83	2026-02-28 17:35:33.83	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	25	Bretune Technologies
-cmm6m2n1z00721klq0sctxew0	INDIVIDUAL	\N	Elikanos Matenda	\N	+27 74 437 0740	83 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:44:53.304	2026-02-28 17:44:53.304	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	30	Bretune Technologies
-cmm551ver006ls8x65km4hqtw	INDIVIDUAL	\N	Auxilia Ndaradzi	\N	+27 61 645 7610	56 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:00:37.827	2026-03-06 21:11:46.472	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	7	Bretune Technologies
-cmm554muh0074s8x6hn9a7048	COMPANY	Happy Place	Andrew Manuel	\N	+27 81 303 6400	161 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:02:46.697	2026-03-06 21:14:32.759	0.00	0.00	0.00	0.00	600.00	0.00	\N	NONE	8	Bretune Technologies
+cmm554muh0074s8x6hn9a7048	COMPANY	Happy Place	Andrew Manuel	\N	+27 81 303 6400	161 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:02:46.697	2026-04-02 18:20:37.031	0.00	0.00	0.00	0.00	1200.00	0.00	\N	NONE	8	Bretune Technologies
+cmm55a6s8008bs8x6h6fnp5yd	INDIVIDUAL	\N	Nangamaso Beza	\N	+27 73 402 9058	37 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:07:05.816	2026-04-02 18:20:56.253	0.00	0.00	0.00	0.00	730.00	0.00	\N	NONE	10	Bretune Technologies
 cmm557419007os8x6nailjge0	INDIVIDUAL	\N	Andisiwe Mvubu	\N	+27 79 021 6003	9 Masakane Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:04:42.285	2026-03-06 21:18:26.141	0.00	0.00	0.00	0.00	350.00	0.00		NONE	9	Bretune Technologies
 cmm54ohzw003xs8x6p4nhgv8l	INDIVIDUAL	\N	Masibulele Msweli	\N	+27 84 055 6286	5618 Vanya Street, Masiphumelele	Capetown	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 16:50:13.917	2026-03-09 20:24:24.7	0.00	0.00	0.00	0.00	460.00	0.00	\N	NONE	6	Bretune Technologies
 cmm55r8pq00ams8x6i0lchg3w	COMPANY	\N	Phillip Manunure	\N	+27 74 266 8491	51 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:20:21.47	2026-03-06 21:19:37.097	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	15	Bretune Technologies
-cmm55uhcv00b5s8x6xh6qqij3	INDIVIDUAL	\N	Sebele Tsoloane	\N	+27 72 885 9697	5534 Vanya Street Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:22:52.639	2026-03-06 21:19:57.762	0.00	0.00	0.00	0.00	465.00	0.00	\N	NONE	16	Bretune Technologies
+cmm6llpqi003q1klqf1ejb34c	INDIVIDUAL	\N	Sethu Williams	\N	+27 68 178 9932	6555 Binga St, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:31:43.626	2026-04-02 18:54:11.562	0.00	365.00	0.00	0.00	365.00	0.00	\N	NONE	23	Bretune Technologies
 cmm6fuy5g000q1klqcvvtfvcr	INDIVIDUAL	\N	Juliet Dzumbira	\N	+27 84 826 2329	55 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 14:50:56.74	2026-03-06 21:20:16.96	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	19	Bretune Technologies
-cmm6ltyls004u1klq3s6arqce	INDIVIDUAL	\N	Maikolo Jera	\N	+27 69 484 5973	110 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:38:08.368	2026-03-06 21:21:21.833	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	26	Bretune Technologies
+cmm6ly0d0005x1klqmrye4jav	INDIVIDUAL	\N	Previous Ndlovu	\N	+27 65 246 7731	56 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:41:17.269	2026-04-02 18:22:43.301	0.00	0.00	0.00	0.00	700.00	0.00	\N	NONE	28	Bretune Technologies
 cmm6lvyqs005d1klqltorxkd7	INDIVIDUAL	\N	Grace Laisi	\N	+27 78 787 4042	78 Pokela Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:39:41.86	2026-03-06 21:21:43.403	0.00	0.00	0.00	0.00	465.00	0.00	\N	NONE	27	Bretune Technologies
-cmm6ly0d0005x1klqmrye4jav	INDIVIDUAL	\N	Previous Ndlovu	\N	+27 65 246 7731	56 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:41:17.269	2026-03-06 21:22:06.565	0.00	0.00	0.00	0.00	350.00	0.00	\N	NONE	28	Bretune Technologies
+cmmxgm46l01k5ccostk54flk0	COMPANY	The Schuyler Group (Pty) Ltd	Faith	\N	+27683223802	2 Main Rd,Kalk Bay	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-03-19 12:41:51.017	2026-04-02 18:34:22.117	0.00	0.00	0.00	0.00	3150.00	0.00	\N	NONE	49	Bretune Technologies
 cmm6lzufz006g1klqacvd1c71	INDIVIDUAL	\N	Adrian Samuel Kamenya	\N	+27 62 864 8270	73 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:42:42.911	2026-03-09 07:34:40.946	0.00	0.00	0.00	0.00	550.00	0.00	\N	NONE	29	Bretune Technologies
-cmm540m4p001os8x6km8cvelc	INDIVIDUAL	\N	Florence Saidi	florecesaidi12@gmail.com	+27 73 942 4347	Flat H24 Makhayangokhu flats Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 16:31:39.529	2026-03-09 09:37:59.964	0.00	0.00	0.00	0.00	270.00	0.00		NONE	3	Bretune Technologies
-cmm54h217002ts8x6qs5irdmh	INDIVIDUAL	Shela	Shella Ndhlovu	\N	+27 74 053 4348	67 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 16:44:26.635	2026-03-09 17:54:46.275	0.00	-5.00	0.00	0.00	370.00	5.00	\N	NONE	4	Bretune Technologies
-cmm55f2iq008ws8x6c9k8kvpl	COMPANY	Sinovuyo Spaza	Abdi Kadere	\N	+27 64 138 7159	64 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:10:53.57	2026-03-09 20:22:14.485	0.00	0.00	0.00	0.00	300.00	0.00	\N	NONE	12	Bretune Technologies
-cmm6m7zmc00851klqhgp4clh1	INDIVIDUAL	\N	Brendon Mafukidze	\N	+27 84 615 5236	5600 Vanya Street, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:49:02.869	2026-02-28 17:49:02.869	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	32	Bretune Technologies
-cmm6mcin600981klqhytyq4gf	INDIVIDUAL	\N	Mighty Mwatsika	\N	+27 84 410 4690	68 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:52:34.146	2026-02-28 17:52:34.146	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	34	Bretune Technologies
+cmm551ver006ls8x65km4hqtw	INDIVIDUAL	\N	Auxilia Ndaradzi	\N	+27 61 645 7610	56 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:00:37.827	2026-04-02 18:20:21.913	0.00	0.00	0.00	0.00	730.00	0.00	\N	NONE	7	Bretune Technologies
+cmm54h217002ts8x6qs5irdmh	INDIVIDUAL	Shela	Shella Ndhlovu	\N	+27 74 053 4348	67 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 16:44:26.635	2026-04-02 18:19:40.959	0.00	-5.00	0.00	0.00	735.00	5.00	\N	NONE	4	Bretune Technologies
+cmm6ljd7h00361klqff2544qa	INDIVIDUAL	\N	Mike Mwiwa	\N	+27 67 726 7410	97 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:29:54.077	2026-04-02 18:22:16.421	0.00	0.00	0.00	0.00	730.00	0.00	\N	NONE	22	Bretune Technologies
+cmm6ltyls004u1klq3s6arqce	INDIVIDUAL	\N	Maikolo Jera	\N	+27 69 484 5973	110 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:38:08.368	2026-04-02 18:22:30.951	0.00	0.00	0.00	0.00	730.00	0.00	\N	NONE	26	Bretune Technologies
+cmm6lh7k3002n1klq8jh12onn	INDIVIDUAL	\N	Winnet Gwese	\N	+27 61 200 5396	30 Masebulele Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:28:13.443	2026-04-02 18:16:53.035	0.00	365.00	0.00	0.00	365.00	0.00	\N	NONE	21	Bretune Technologies
+cmm55cbe3008us8x6p33kz5mb	INDIVIDUAL	\N	Scolastic Zingwe	\N	+27 62 154 4046	27 Luntu Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:08:45.099	2026-04-02 18:18:12.686	0.00	0.00	0.00	0.00	730.00	0.00	\N	NONE	11	Bretune Technologies
+cmm47x6lz0039pdmhlznggcdn	COMPANY	Bluedog Technology	Chris Hendricks	cbhendrikz@gmail.com	+27 21 300 3408	Unit 102, Solaris Business Park, 2 Lekkerwater Rd, Sunnydale	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 01:33:11.736	2026-04-02 18:19:00.074	0.00	0.00	0.00	0.00	7145.57	0.00	\N	NONE	1	Bretune Technologies
+cmnhthwx70127il5gouii1ay9	COMPANY	Scarborough Nature Lodge	Janis Corr	janiscorr@gmail.com	+27 71 828 2704	80 Mountain Rise, Scarborough	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-04-02 18:37:53.516	2026-04-02 18:37:53.516	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	50	Bretune Technologies
+cmm55j1sz009fs8x62nkk3wym	INDIVIDUAL	\N	Elikanos Matenda	\N	+27 74 437 0740	2987 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:13:59.267	2026-04-02 18:55:15.413	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	13	Bretune Technologies
 cmm6mrbxw00bx1klq6snmtbyb	INDIVIDUAL	\N	Stuart Urayai	\N	+27 61 672 6611	4 Mbekweni Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 18:04:05.3	2026-03-09 07:37:24.292	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	39	Bretune Technologies
-cmm6mvjxx00d01klqrij7sk43	INDIVIDUAL	\N	Sam Nzvimbo	\N	+27 61 258 8319	F26 Makhayangoku Flats,79 Myeza Rd, Masiphumelele, Cape Town, 7975	Fish Hoek Capetown	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 18:07:22.294	2026-03-09 07:37:50.51	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	41	Bretune Technologies
 cmm6f2oi90000zvp15rcvh9dq	INDIVIDUAL	\N	Wesley Gwamuri	Wesleygwamuri1@gmail.com	+27 67 636 2683	22 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 14:28:57.874	2026-02-28 17:56:51.264	0.00	0.00	0.00	0.00	350.00	0.00		NONE	18	Bretune Technologies
-cmm6mtbuc00ch1klq0odakxsn	INDIVIDUAL	\N	Menias Masike	\N	+27 67 585 2595	96 Ntantala Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 18:05:38.484	2026-02-28 18:05:38.484	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	40	Bretune Technologies
 cmm6mxq5300dj1klqc9puunxp	INDIVIDUAL	\N	Stella Makarutse	\N	+27 62 156 0083	G19 Makhayangoku Flats,79 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 18:09:03.639	2026-02-28 18:09:03.639	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	42	Bretune Technologies
 cmm6mzr7n00dl1klq82kb03x5	INDIVIDUAL	\N	Tamsanqa Jebetwane	\N	+27 69 871 5121	73 Myeza Rd Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 18:10:38.339	2026-02-28 18:10:38.339	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	43	Bretune Technologies
 cmm6n19ne00dm1klqau4zc8bp	INDIVIDUAL	\N	Patience Zulu	\N	+27 73 154 5344	60 Ntantala Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 18:11:48.891	2026-02-28 18:11:48.891	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	44	Bretune Technologies
-cmm6fwzea00191klqx8mfarvz	INDIVIDUAL	\N	Isaac Mugwagwa	\N	+27 74 051 7349	24 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 14:52:31.666	2026-02-28 22:03:50.459	0.00	-5.00	0.00	0.00	370.00	5.00	\N	NONE	20	Bretune Technologies
 cmmaen5i90006kgp431o5gmfv	INDIVIDUAL	\N	Fortune Matenda	fortunematenda@gmail.com	0612685933	134 kommitjie road Fishhoek	Fish Hoek Capetown	Western Cape	South Africa	7975	ACTIVE	30		2026-03-03 09:27:58.114	2026-03-03 09:27:58.114	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	45	Bluedog Technologies
-cmmfdvvyl00uphwgvtz36zuym	COMPANY	Murdock Valley NHW	Peter Turvey	peter.turvey@gmail.com	+27825515600	Murdock Valley	Cape Town	\N	South Africa	7975	ACTIVE	30		2026-03-06 21:05:36.909	2026-03-06 21:05:36.909	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	47	Bretune Technologies
-cmmfdly1z00shhwgvwpnfvclv	COMPANY	Makapa Lodge	Anna	\N	+27828208735	18 Java Close, Capri	Cape Town	\N	South Africa	7975	ACTIVE	30		2026-03-06 20:57:53.063	2026-03-09 07:33:26.213	0.00	0.00	0.00	0.00	1500.00	0.00	\N	NONE	46	Bretune Technologies
-cmm6m4kb2007m1klquhr4s41u	INDIVIDUAL	\N	Ziviso Mapfumo	\N	+27 68 052 6966	31 Nonkqubela Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:46:23.055	2026-03-09 07:35:04.928	0.00	30.00	0.00	0.00	200.00	0.00	\N	NONE	31	Bretune Technologies
-cmm6maqjf008p1klq0iyvmq8j	COMPANY	New York Spaza	Ousmane Baharu	fortunematenda@gmail.com	+27 67 647 7020	152 Ntantala Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:51:11.067	2026-03-09 07:35:22.743	0.00	0.00	0.00	0.00	365.00	0.00		NONE	33	Bretune Technologies
+cmm6mvjxx00d01klqrij7sk43	INDIVIDUAL	\N	Sam Nzvimbo	\N	+27 61 258 8319	F26 Makhayangoku Flats,79 Myeza Rd, Masiphumelele, Cape Town, 7975	Fish Hoek Capetown	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 18:07:22.294	2026-04-02 18:25:47.959	0.00	0.00	0.00	0.00	730.00	0.00	\N	NONE	41	Bretune Technologies
+cmmfdly1z00shhwgvwpnfvclv	COMPANY	Makapa Lodge	Anna	\N	+27828208735	18 Java Close, Capri	Cape Town	\N	South Africa	7975	ACTIVE	30		2026-03-06 20:57:53.063	2026-04-02 18:33:52.96	0.00	0.00	0.00	0.00	2500.00	0.00	\N	NONE	46	Bretune Technologies
 cmm6me5qh009r1klq9lfn2jhx	INDIVIDUAL	\N	Philip Manunure	\N	+27 74 266 8491	51 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:53:50.729	2026-03-09 07:35:39.888	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	35	Bretune Technologies
-cmm6mglj9009t1klqm9q1uznw	INDIVIDUAL	\N	Auxilia Ndaradza	\N	+27 61 645 7610	56 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:55:44.517	2026-03-09 07:36:06.823	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	36	Bretune Technologies
+cmmfdvvyl00uphwgvtz36zuym	COMPANY	Murdock Valley NHW	Peter Turvey	peter.turvey@gmail.com	+27825515600	Murdock Valley	Cape Town	\N	South Africa	7975	ACTIVE	30		2026-03-06 21:05:36.909	2026-04-02 18:34:38.07	0.00	0.00	0.00	0.00	1000.00	0.00	\N	NONE	47	Bretune Technologies
 cmm6mjll100au1klqlwbnnjp9	INDIVIDUAL	\N	David Naki	\N	+27 71 000 8874	21 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:58:04.549	2026-03-09 07:36:32.291	0.00	0.00	0.00	0.00	230.00	0.00	\N	NONE	37	Bretune Technologies
-cmm6movbm00be1klqnc8pn4f6	INDIVIDUAL	\N	Patricia Kumpemba	\N	+27 61 382 9352	61 Ntantala Rd, Masiphumelele	Cape Town	\N	\N	\N	ACTIVE	30		2026-02-28 18:02:10.45	2026-03-09 07:37:02.176	0.00	0.00	0.00	0.00	300.00	0.00	\N	NONE	38	Bretune Technologies
+cmm55uhcv00b5s8x6xh6qqij3	INDIVIDUAL	\N	Sebele Tsoloane	\N	+27 72 885 9697	5534 Vanya Street Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-27 17:22:52.639	2026-04-02 18:53:06.805	0.00	465.00	0.00	0.00	465.00	0.00	\N	NONE	16	Bretune Technologies
 cmmj6vu5s001nk0xm42z0d6r8	COMPANY	\N	Tenda Fuma	\N	+27742754404	\N	\N	\N	\N	\N	ACTIVE	30	\N	2026-03-09 13:00:41.968	2026-03-09 13:00:41.968	0.00	0.00	0.00	0.00	0.00	0.00	\N	NONE	48	Bretune Technologies
+cmm6mtbuc00ch1klq0odakxsn	INDIVIDUAL	\N	Menias Masike	\N	+27 67 585 2595	96 Ntantala Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 18:05:38.484	2026-03-18 21:12:20.952	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	40	Bretune Technologies
+cmm6mcin600981klqhytyq4gf	INDIVIDUAL	\N	Mighty Mwatsika	\N	+27 84 410 4690	68 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:52:34.146	2026-03-19 12:45:32.509	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	34	Bretune Technologies
+cmm6m7zmc00851klqhgp4clh1	INDIVIDUAL	\N	Brendon Mafukidze	\N	+27 84 615 5236	5600 Vanya Street, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:49:02.869	2026-04-02 18:16:33.905	0.00	365.00	0.00	0.00	365.00	0.00	\N	NONE	32	Bretune Technologies
+cmm6fwzea00191klqx8mfarvz	INDIVIDUAL	\N	Isaac Mugwagwa	\N	+27 74 051 7349	24 Masonwabe Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 14:52:31.666	2026-04-02 18:22:03.988	0.00	-5.00	0.00	0.00	735.00	5.00	\N	NONE	20	Bretune Technologies
+cmm6m4kb2007m1klquhr4s41u	INDIVIDUAL	\N	Ziviso Mapfumo	\N	+27 68 052 6966	31 Nonkqubela Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:46:23.055	2026-04-02 18:22:56.963	0.00	30.00	0.00	0.00	430.00	0.00	\N	NONE	31	Bretune Technologies
+cmm6maqjf008p1klq0iyvmq8j	COMPANY	New York Spaza	Ousmane Baharu	fortunematenda@gmail.com	+27 67 647 7020	152 Ntantala Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:51:11.067	2026-04-02 18:23:13.695	0.00	0.00	0.00	0.00	730.00	0.00		NONE	33	Bretune Technologies
+cmm6mglj9009t1klqm9q1uznw	INDIVIDUAL	\N	Auxilia Ndaradza	\N	+27 61 645 7610	56 Myeza Rd, Masiphumelele	Cape Town	Western Cape	South Africa	7975	ACTIVE	30		2026-02-28 17:55:44.517	2026-04-02 18:25:20.195	0.00	0.00	0.00	0.00	365.00	0.00	\N	NONE	36	Bretune Technologies
+cmm6movbm00be1klqnc8pn4f6	INDIVIDUAL	\N	Patricia Kumpemba	\N	+27 61 382 9352	61 Ntantala Rd, Masiphumelele	Cape Town	\N	\N	\N	ACTIVE	30		2026-02-28 18:02:10.45	2026-04-02 18:25:33.842	0.00	0.00	0.00	0.00	600.00	0.00	\N	NONE	38	Bretune Technologies
 \.
 
 
 --
--- TOC entry 5816 (class 0 OID 204925)
+-- TOC entry 5930 (class 0 OID 204925)
 -- Dependencies: 277
 -- Data for Name: depreciation_runs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6069,32 +6396,37 @@ COPY public.depreciation_runs (id, "assetId", "runDate", amount, "journalEntryId
 
 
 --
--- TOC entry 5770 (class 0 OID 203970)
+-- TOC entry 5884 (class 0 OID 203970)
 -- Dependencies: 231
 -- Data for Name: document_counters; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.document_counters (key, value, "updatedAt") FROM stdin;
-invoice	45	2026-03-06 21:07:31.864
+invoice	90	2026-04-02 18:41:15.822
+payment	58	2026-04-02 18:54:11.486
+creditNote	5	2026-04-02 18:55:15.362
+journal_entry	155	2026-04-02 18:56:28.655
 supplier_payment	1	2026-02-28 18:41:46.642
 quote	1	2026-03-03 09:28:42.395
-payment	30	2026-03-09 20:24:24.534
-journal_entry	77	2026-03-09 20:24:24.63
 \.
 
 
 --
--- TOC entry 5768 (class 0 OID 203912)
+-- TOC entry 5882 (class 0 OID 203912)
 -- Dependencies: 229
 -- Data for Name: email_outbox; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.email_outbox (id, "invoiceId", "to", subject, body, status, attempts, "lastError", "nextAttemptAt", "sentAt", "createdAt", "updatedAt", "clientId", "documentType", "statementFrom", "statementTo") FROM stdin;
+cmnhq019w000kil5gutqlrqj2	cmnhq019c000eil5gfozc4a8r	cbhendrikz@gmail.com	Invoice INV-052 from Bretune Accounting	<p>Hello Chris Hendricks,</p><p>Your invoice <strong>INV-052</strong> has been generated.</p><p>Total: 450</p><p>Thank you,<br/>Bretune Accounting</p>	FAILED	3	getClientAccountCode is not defined	2026-04-02 19:38:00.046	\N	2026-04-02 17:00:00.5	2026-04-02 17:38:00.059	cmm47x6lz0039pdmhlznggcdn	INVOICE	\N	\N
+cmnhq01b4000yil5gv34f383a	cmnhq01at000sil5g0n21nkd2	florecesaidi12@gmail.com	Invoice INV-054 from Bretune Accounting	<p>Hello Florence Saidi,</p><p>Your invoice <strong>INV-054</strong> has been generated.</p><p>Total: 270</p><p>Thank you,<br/>Bretune Accounting</p>	FAILED	3	getClientAccountCode is not defined	2026-04-02 19:38:00.061	\N	2026-04-02 17:00:00.544	2026-04-02 17:38:00.074	cmm540m4p001os8x6km8cvelc	INVOICE	\N	\N
+cmnhq01hq0037il5gn22ox9r1	cmnhq01hl0031il5gggsgcp9n	Wesleygwamuri1@gmail.com	Invoice INV-067 from Bretune Accounting	<p>Hello Wesley Gwamuri,</p><p>Your invoice <strong>INV-067</strong> has been generated.</p><p>Total: 350</p><p>Thank you,<br/>Bretune Accounting</p>	FAILED	3	getClientAccountCode is not defined	2026-04-02 19:38:00.075	\N	2026-04-02 17:00:00.782	2026-04-02 17:38:00.088	cmm6f2oi90000zvp15rcvh9dq	INVOICE	\N	\N
+cmnhq01p4005til5gahjl51fr	cmnhq01nm005jil5gshu2o4rf	fortunematenda@gmail.com	Invoice INV-081 from Bretune Accounting	<p>Hello Ousmane Baharu,</p><p>Your invoice <strong>INV-081</strong> has been generated.</p><p>Total: 365</p><p>Thank you,<br/>Bretune Accounting</p>	FAILED	3	getClientAccountCode is not defined	2026-04-02 19:38:00.095	\N	2026-04-02 17:00:01.048	2026-04-02 17:38:00.108	cmm6maqjf008p1klq0iyvmq8j	INVOICE	\N	\N
 \.
 
 
 --
--- TOC entry 5779 (class 0 OID 204162)
+-- TOC entry 5893 (class 0 OID 204162)
 -- Dependencies: 240
 -- Data for Name: employees; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6104,7 +6436,7 @@ COPY public.employees (id, "employeeNumber", email, "firstName", "lastName", pho
 
 
 --
--- TOC entry 5812 (class 0 OID 204843)
+-- TOC entry 5926 (class 0 OID 204843)
 -- Dependencies: 273
 -- Data for Name: exchange_rates; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6261,6 +6593,8 @@ cmmf1waut0095hwgvwstf7npf	ZAR	CHF	0.04680000	2026-03-06 00:00:00	API	2026-03-06 
 cmmf1wav9009hhwgv87vycuyr	ZAR	HKD	0.46772000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.837
 cmmf1wauy0099hwgvg2ec1op3	ZAR	CZK	1.26340000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.826
 cmmf1wav0009bhwgvy4iy04qh	ZAR	DKK	0.38653000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.829
+cmmxmmdd701vlccosrjzur60o	ZAR	CAD	0.08042000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.619
+cmmxmmddd01vpccos6e4ot2fg	ZAR	CNY	0.40427000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.626
 cmmjc7v5k001id8nt218f5yqv	ZAR	SGD	0.07676000	2026-03-09 00:00:00	API	2026-03-09 15:30:01.208
 cmmjc7v5m001kd8ntkm2z7ki3	ZAR	THB	1.92300000	2026-03-09 00:00:00	API	2026-03-09 15:30:01.21
 cmmf1wauo0091hwgvxcqx8b9s	ZAR	BRL	0.31562000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.816
@@ -6296,26 +6630,76 @@ cmmdmgg8u054jmbb8gfy6v6jg	ZAR	PLN	0.22284000	2026-03-05 00:00:00	API	2026-03-05 
 cmmdmgg8w054lmbb8h23ogjux	ZAR	RON	0.26565000	2026-03-05 00:00:00	API	2026-03-05 15:30:00.897
 cmmf1wavu009xhwgvkqikgpzh	ZAR	MXN	1.06390000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.858
 cmmjc7v5s001od8ntmxomkvje	ZAR	USD	0.05996000	2026-03-09 00:00:00	API	2026-03-09 15:30:01.216
+cmmw63xsy0004f6ufjw2kw1p8	ZAR	AUD	0.08448000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.6
 cmmf1wavw009zhwgvpa3tfi01	ZAR	MYR	0.23603000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.86
+cmmw63xv00006f6uftl6ci0ow	ZAR	BRL	0.31268000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.684
+cmmw63xv20008f6ufoooouhp3	ZAR	CAD	0.08227000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.687
+cmmw63xv5000af6ufzk7bjc6z	ZAR	CHF	0.04721000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.689
 cmmf1wavy00a1hwgv4fkh0589	ZAR	NOK	0.57806000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.862
+cmmw63xv7000cf6uf0x7ujvd7	ZAR	CNY	0.41341000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.692
+cmmw63xv9000ef6ufatxs2cau	ZAR	CZK	1.27220000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.694
+cmmw63xvc000gf6uf8hjvtkwr	ZAR	DKK	0.38897000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.696
 cmmf1waw200a3hwgvjm7k8m4a	ZAR	NZD	0.10186000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.866
 cmmc836c502rrmbb8fbj7e905	ZAR	AUD	0.08681000	2026-03-04 00:00:00	API	2026-03-04 16:00:00.725
 cmmc836cl02rxmbb8enlqz0fs	ZAR	CHF	0.04778000	2026-03-04 00:00:00	API	2026-03-04 16:00:00.742
+cmmw63xve000if6ufyelghmaw	ZAR	EUR	0.05206000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.698
 cmmf1waw500a5hwgv4qq73ab2	ZAR	PHP	3.54540000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.869
 cmmf1waw600a7hwgv96ivtvj2	ZAR	PLN	0.22183000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.871
 cmmf1waw800a9hwgvaft34qhl	ZAR	RON	0.26362000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.873
 cmmf1wawa00abhwgvf431d8xw	ZAR	SEK	0.55325000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.875
 cmmf1wawc00adhwgv9noin3um	ZAR	SGD	0.07663000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.877
+cmmw63xvg000kf6ufz4uzik1y	ZAR	GBP	0.04499000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.7
 cmmf1wawe00afhwgv9ikjuxtu	ZAR	THB	1.91260000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.879
 cmmf1wawh00ahhwgv4zd285an	ZAR	TRY	2.63630000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.881
 cmmf1wawl00ajhwgvudonuaag	ZAR	USD	0.05982000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.885
+cmmw63xvi000mf6ufsprddq3v	ZAR	HKD	0.47037000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.702
+cmmw63xvk000of6ufjj3ek8rk	ZAR	HUF	20.21600000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.704
+cmmw63xvn000qf6uf8e42n35a	ZAR	IDR	1017.95000000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.707
+cmmw63xvp000sf6uff8chq8oa	ZAR	ILS	0.18602000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.709
+cmmw63xvq000uf6ufsseq5fd3	ZAR	INR	5.54470000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.711
+cmmw63xvt000wf6ufo2ek4wah	ZAR	ISK	7.47560000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.713
+cmmw63xvv000yf6uf6rm50c1l	ZAR	JPY	9.54180000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.715
+cmmw63xvx0010f6ufojiz7pu5	ZAR	KRW	89.27000000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.717
+cmmw63xvz0012f6ufa3nddnen	ZAR	MXN	1.06020000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.719
+cmmw63xw10014f6uf79zipww6	ZAR	MYR	0.23519000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.721
 cmmjc7v5h001gd8nth8dgub77	ZAR	SEK	0.55498000	2026-03-09 00:00:00	API	2026-03-09 15:30:01.205
+cmmw63xw30016f6ufsi1k0ryr	ZAR	NOK	0.57644000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.724
+cmmw63xw50018f6uf5pmiob1s	ZAR	NZD	0.10252000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.726
+cmmw63xw7001af6uffa5w5t5e	ZAR	PHP	3.57520000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.727
+cmmw63xw9001cf6ufyqhuyi42	ZAR	PLN	0.22173000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.73
+cmmw63xwb001ef6ufn4lzd83b	ZAR	RON	0.26506000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.731
+cmmw63xwd001gf6ufx851tyog	ZAR	SEK	0.55731000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.733
+cmmw63xwe001if6ufhnn6hed1	ZAR	SGD	0.07665000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.735
+cmmxmmddi01vtccosymqwal8x	ZAR	DKK	0.38100000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.63
+cmmxmmddn01vxccosbs78r1re	ZAR	GBP	0.04405000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.636
+cmmxmmddr01vzccossmoh1ook	ZAR	HKD	0.45876000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.639
 cmmjc7v5e001ed8ntz7ppbqxe	ZAR	RON	0.26455000	2026-03-09 00:00:00	API	2026-03-09 15:30:01.202
 cmmdmgg8y054nmbb8sfrnu8ns	ZAR	SEK	0.55748000	2026-03-05 00:00:00	API	2026-03-05 15:30:00.898
 cmmdmgg90054pmbb8hi258o5b	ZAR	SGD	0.07740000	2026-03-05 00:00:00	API	2026-03-05 15:30:00.9
 cmmdmgg92054rmbb80s3tj5uu	ZAR	THB	1.91870000	2026-03-05 00:00:00	API	2026-03-05 15:30:00.902
 cmmdmgg93054tmbb8oejj0bbh	ZAR	TRY	2.66580000	2026-03-05 00:00:00	API	2026-03-05 15:30:00.904
 cmmdmgg95054vmbb84gxddosx	ZAR	USD	0.06060000	2026-03-05 00:00:00	API	2026-03-05 15:30:00.906
+cmmxmmde601wbccoszdcwua2d	ZAR	JPY	9.30420000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.655
+cmnhq01np005nil5g07in9p27	ZAR	CAD	0.08176000	2026-04-02 00:00:00	API	2026-04-02 17:00:00.997
+cmmxmmde801wdccosgiwmk5mj	ZAR	KRW	87.97000000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.657
+cmnhq01pl005xil5gq622wa8i	ZAR	CZK	1.25170000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.065
+cmnhq01pv0065il5gdjy5qlzk	ZAR	DKK	0.38112000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.076
+cmnhq01pz0067il5gvsrjwxvi	ZAR	EUR	0.05100000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.079
+cmnhq01q3006dil5g6w6n8u5i	ZAR	GBP	0.04450000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.084
+cmnhq01qa006hil5go7i61c9t	ZAR	HKD	0.46070000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.09
+cmnhq01qd006jil5gvae4v0s3	ZAR	HUF	19.58220000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.093
+cmnhq01qg006lil5g32ejp6le	ZAR	IDR	999.94000000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.096
+cmnhq01qi006ril5g6pta8vs6	ZAR	ILS	0.18536000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.099
+cmnhq01qn006til5g6pqvliq5	ZAR	INR	5.47280000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.103
+cmnhq01qs006xil5ga9fgqhyu	ZAR	ISK	7.36510000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.109
+cmnhq01qv006zil5gch7ebcur	ZAR	JPY	9.38180000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.112
+cmnhq01rq007til5gdp4xdpuq	ZAR	SEK	0.55840000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.142
+cmnhq01rs007vil5ghrkf2m0h	ZAR	SGD	0.07566000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.144
+cmmxmmdda01vnccosoovghudp	ZAR	CHF	0.04651000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.623
+cmmxmmddt01w1ccosrm2yd54i	ZAR	HUF	20.10700000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.642
+cmmxmmddw01w3ccos548zr9wi	ZAR	IDR	993.65000000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.644
+cmmxmmddz01w5ccosn3mtksow	ZAR	ILS	0.18356000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.647
+cmmxmmde101w7ccosikb81dvn	ZAR	INR	5.46290000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.649
 cmmf1wau9008zhwgvfwb2oepg	ZAR	AUD	0.08537000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.801
 cmmf1waur0093hwgvbqjbpce2	ZAR	CAD	0.08165000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.819
 cmmf1wav3009dhwgv2njnnnu9	ZAR	EUR	0.05174000	2026-03-06 00:00:00	API	2026-03-06 15:30:00.831
@@ -6342,11 +6726,104 @@ cmmjc7v540016d8nt2jwzrz8e	ZAR	NOK	0.57885000	2026-03-09 00:00:00	API	2026-03-09 
 cmmjc7v560018d8ntac8id00u	ZAR	NZD	0.10152000	2026-03-09 00:00:00	API	2026-03-09 15:30:01.194
 cmmjc7v58001ad8ntxgltnngs	ZAR	PHP	3.56920000	2026-03-09 00:00:00	API	2026-03-09 15:30:01.196
 cmmjc7v5b001cd8ntsmh8vfmp	ZAR	PLN	0.22203000	2026-03-09 00:00:00	API	2026-03-09 15:30:01.2
+cmmxmmdeb01wfccos4rk1bkqc	ZAR	MXN	1.04970000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.659
+cmmxmmdec01whccosnvuitd9c	ZAR	MYR	0.23079000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.661
+cmmxmmdee01wjccosxjie4tk1	ZAR	NOK	0.56072000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.663
+cmmxmmdeg01wlccoswmavimlu	ZAR	NZD	0.10097000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.664
+cmmxmmdei01wnccos2inia4oq	ZAR	PHP	3.52420000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.666
+cmmxmmdek01wpccosq8k0b6mp	ZAR	PLN	0.21852000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.668
+cmmxmmdem01wrccosbkq6kjbx	ZAR	RON	0.25992000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.67
+cmmxmmdeo01wtccos2to258dw	ZAR	SEK	0.55106000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.672
+cmmxmmder01wvccos7h9gusuh	ZAR	SGD	0.07518000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.676
+cmmxmmdeu01wxccosk4zavo1d	ZAR	THB	1.92780000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.678
+cmmxmmdez01wzccosj2gqj7jl	ZAR	TRY	2.59660000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.684
+cmmxmmdf201x1ccosvunmu78k	ZAR	USD	0.05859000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.686
+cmmxmmde401w9ccos0h848gk3	ZAR	ISK	7.31240000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.652
+cmmw63xwh001kf6uf0ej4y6lq	ZAR	THB	1.94010000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.737
+cmmw63xwk001mf6ufthp11j7v	ZAR	TRY	2.65360000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.74
+cmmw63xwm001of6uf2ddw075v	ZAR	USD	0.06003000	2026-03-17 00:00:00	API	2026-03-18 15:00:00.742
+cmmw76ipj0034f6ufzvdnvfin	ZAR	PLN	0.21997000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.631
+cmmw76ipl0036f6uf271eql9a	ZAR	RON	0.26233000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.633
+cmmw76ipm0038f6ufz6v1x0w2	ZAR	SEK	0.55506000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.635
+cmmw76ipp003af6ufpbtdvspy	ZAR	SGD	0.07588000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.637
+cmmw76ipr003cf6uft5eyp3na	ZAR	THB	1.93460000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.639
+cmmw76ips003ef6ufgwq4eth5	ZAR	TRY	2.61900000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.641
+cmmw76ipv003gf6ufcts81wnt	ZAR	USD	0.05923000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.643
+cmmxmmdd001vjccosyr3tmc48	ZAR	BRL	0.31043000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.612
+cmmxmmddf01vrccosoy7kvzss	ZAR	CZK	1.25020000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.627
+cmmxmmddl01vvccosgexdtyzi	ZAR	EUR	0.05099000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.633
+cmmw76io1001wf6uf4exmce92	ZAR	AUD	0.08397000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.577
+cmmw76io8001yf6ufqg6d3idz	ZAR	BRL	0.30941000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.585
+cmmw76iob0020f6ufcr7fr5mt	ZAR	CAD	0.08124000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.587
+cmmw76iod0022f6ufmbonf0jh	ZAR	CHF	0.04673000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.589
+cmmw76iog0024f6ufqdmq6bez	ZAR	CNY	0.40795000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.592
+cmmw76ioi0026f6uf1143rc2y	ZAR	CZK	1.26010000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.594
+cmmw76iok0028f6ufwc1q0wxr	ZAR	DKK	0.38481000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.597
+cmmw76ion002af6uf1rxt7xgk	ZAR	EUR	0.05150000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.599
+cmmw76iop002cf6ufsj4751tw	ZAR	GBP	0.04449000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.601
+cmmw76ioq002ef6ufge2xjql5	ZAR	HKD	0.46420000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.603
+cmmw76iot002gf6ufn58a2n05	ZAR	HUF	20.23100000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.605
+cmmw76iov002if6ufd1ntyme2	ZAR	IDR	1006.47000000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.608
+cmmw76ioy002kf6uf9iigqe95	ZAR	ILS	0.18375000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.61
+cmmw76ip0002mf6uf1blpztfb	ZAR	INR	5.50180000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.613
+cmmw76ip2002of6ufntuu5n46	ZAR	ISK	7.39540000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.615
+cmmw76ip4002qf6ufcgs4qqc0	ZAR	JPY	9.44980000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.617
+cmmw76ip6002sf6ufumln7k5p	ZAR	KRW	89.05000000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.618
+cmmw76ip8002uf6ufcu8n75et	ZAR	MXN	1.05030000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.62
+cmmw76ipa002wf6uff8zi0ny7	ZAR	MYR	0.23196000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.623
+cmmw76ipc002yf6ufy8fw41ol	ZAR	NOK	0.56756000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.625
+cmmw76ipf0030f6ufuddy70bi	ZAR	NZD	0.10178000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.627
+cmmw76iph0032f6uf7h9apx9h	ZAR	PHP	3.55360000	2026-03-18 00:00:00	API	2026-03-18 15:30:00.629
+cmn4dw4i7000edxamktcgajo1	ZAR	DKK	0.38291000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.383
+cmn4dw4i9000gdxam2rch1cde	ZAR	EUR	0.05125000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.385
+cmn4dw4ib000idxami5bzjjyw	ZAR	GBP	0.04430000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.388
+cmn4dw4id000kdxamzsba5j85	ZAR	HKD	0.46405000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.39
+cmn4dw4ig000mdxamks608lsp	ZAR	HUF	20.11500000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.392
+cmn4dw4ik000odxamais2ouig	ZAR	IDR	1002.32000000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.397
+cmn4dw4ip000sdxamf8262lkg	ZAR	INR	5.54440000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.402
+cmn4dw4is000udxamqp0ln8hl	ZAR	ISK	7.36990000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.404
+cmmxmmdc401vhccosn7z9wq9n	ZAR	AUD	0.08364000	2026-03-19 00:00:00	API	2026-03-19 15:30:00.58
+cmn4dw4iu000wdxamh3jax965	ZAR	JPY	9.40260000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.407
+cmn4dw4ix000ydxambcts6yh3	ZAR	KRW	88.88000000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.409
+cmn4dw4j10010dxamujzxwaxq	ZAR	MXN	1.05520000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.413
+cmn4dw4j30012dxam0klljgw0	ZAR	MYR	0.23330000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.415
+cmn4dw4j60014dxam47erq2ub	ZAR	NOK	0.56525000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.418
+cmn4dw4j80016dxamdgcccjy7	ZAR	NZD	0.10108000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.42
+cmn4dw4ja0018dxamkcdib0md	ZAR	PHP	3.54560000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.422
+cmn4dw4jd001adxam9l71cafn	ZAR	PLN	0.21927000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.425
+cmn4dw4jg001cdxamlqtne4mg	ZAR	RON	0.26118000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.428
+cmn4dw4ji001edxamktlgtht0	ZAR	SEK	0.55262000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.431
+cmn4dw4jl001gdxam133kzaja	ZAR	SGD	0.07582000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.433
+cmn4dw4jn001idxamd6wo85jt	ZAR	THB	1.94010000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.436
+cmn4dw4jp001kdxamc8s8n04j	ZAR	TRY	2.62390000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.438
+cmn4dw4js001mdxam31gx7t6e	ZAR	USD	0.05922000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.441
+cmnhq01mb0053il5gc903uapo	ZAR	AUD	0.08554000	2026-04-02 00:00:00	API	2026-04-02 17:00:00.948
+cmnhq01nl005hil5gggy746e9	ZAR	BRL	0.30460000	2026-04-02 00:00:00	API	2026-04-02 17:00:00.993
+cmn4dw3qr0002dxamnl7yhfwl	ZAR	AUD	0.08380000	2026-03-20 00:00:00	API	2026-03-24 09:00:00.93
+cmn4dw4hr0004dxame14xx3h6	ZAR	BRL	0.31122000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.367
+cmn4dw4ht0006dxamwhd6v6jl	ZAR	CAD	0.08123000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.37
+cmn4dw4hw0008dxaml3w6wbw6	ZAR	CHF	0.04662000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.372
+cmn4dw4hz000adxam8jt20q0h	ZAR	CNY	0.40829000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.375
+cmn4dw4i4000cdxam3yp4mget	ZAR	CZK	1.25590000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.381
+cmn4dw4in000qdxam8i6tmu5b	ZAR	ILS	0.18393000	2026-03-20 00:00:00	API	2026-03-24 09:00:02.399
+cmnhq01p2005ril5gsqnzfz0v	ZAR	CHF	0.04699000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.046
+cmnhq01pg005vil5g4oum03cq	ZAR	CNY	0.40546000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.06
+cmnhq01qy0071il5glcaa2z2o	ZAR	KRW	89.15000000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.114
+cmnhq01r10077il5g7lr6495u	ZAR	MXN	1.05450000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.117
+cmnhq01r60079il5g0fx5zl4v	ZAR	MYR	0.23742000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.122
+cmnhq01ra007dil5gmj8gsqyg	ZAR	NOK	0.57270000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.126
+cmnhq01rc007fil5gmnvlyzkh	ZAR	NZD	0.10298000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.129
+cmnhq01rf007hil5getv9ixkv	ZAR	PHP	3.56320000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.131
+cmnhq01rj007nil5geqs44shm	ZAR	PLN	0.21858000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.135
+cmnhq01rn007ril5g4sd70i8r	ZAR	RON	0.26004000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.139
+cmnhq01rv0081il5g9qofzio8	ZAR	THB	1.92600000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.147
+cmnhq01rz0085il5gkltbudqm	ZAR	TRY	2.61550000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.151
+cmnhq01s30087il5ge00pvdjv	ZAR	USD	0.05878000	2026-04-02 00:00:00	API	2026-04-02 17:00:01.155
 \.
 
 
 --
--- TOC entry 5796 (class 0 OID 204549)
+-- TOC entry 5910 (class 0 OID 204549)
 -- Dependencies: 257
 -- Data for Name: expense_categories; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6356,7 +6833,7 @@ COPY public.expense_categories (id, name, "defaultTaxRate", "ledgerAccount", "cr
 
 
 --
--- TOC entry 5798 (class 0 OID 204559)
+-- TOC entry 5912 (class 0 OID 204559)
 -- Dependencies: 259
 -- Data for Name: expenses; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6366,7 +6843,7 @@ COPY public.expenses (id, "expenseSeq", "expenseDate", description, amount, "tax
 
 
 --
--- TOC entry 5815 (class 0 OID 204911)
+-- TOC entry 5929 (class 0 OID 204911)
 -- Dependencies: 276
 -- Data for Name: fixed_assets; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6376,7 +6853,7 @@ COPY public.fixed_assets (id, name, description, "assetCode", "purchaseDate", co
 
 
 --
--- TOC entry 5814 (class 0 OID 204891)
+-- TOC entry 5928 (class 0 OID 204891)
 -- Dependencies: 275
 -- Data for Name: inventory_movements; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6386,7 +6863,7 @@ COPY public.inventory_movements (id, "productId", type, quantity, "unitCost", re
 
 
 --
--- TOC entry 5763 (class 0 OID 203744)
+-- TOC entry 5877 (class 0 OID 203744)
 -- Dependencies: 224
 -- Data for Name: invoice_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6396,6 +6873,7 @@ cmm484z9p0006945q3la9gbxf	cmm484z9o0004945q204d0y5y	cmm481oue0000945q6qksiu1f	Mo
 cmm484z9p0007945qkesakur6	cmm484z9o0004945q204d0y5y	\N	Please find Spreadsheet attached	1.00	0.00	0.00	0.0000	0.00
 cmm49246v0006trwpcthb3fk0	cmm49246v0004trwpp9wrybt5	cmm490rip0000trwp9q09xvmz	Newe Wireless Installation(New installation for client 7855)	1.00	450.00	0.00	0.0000	450.00
 cmm4zkavw013g1vs3dakf57ij	cmm4zkavv013f1vs3ahwucert	\N	test	1.00	600.00	0.00	0.0000	600.00
+cmmxezaf501fqccos2dpeu0wf	cmmxezaf501foccosseep05jt	cmmfdptf800u5hwgvt7p1cjul	Technical Callout Fee(80 Afrikander firmware update on NVR and Camera	1.00	500.00	0.00	0.0000	500.00
 cmm54hd9b002ys8x6alpcvxd9	cmm54hd9b002ws8x6k997r60l	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
 cmm54ku0a003is8x6pt2xgbqh	cmm54ku0a003gs8x6m3nypblo	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	300.00	0.00	0.0000	300.00
 cmm54qdc40042s8x6nro4hz56	cmm54qdc40040s8x6dokn666t	cmm5457tx001ss8x60i50m2fr	20/10Mbps-Premium	1.00	465.00	0.00	0.0000	465.00
@@ -6405,11 +6883,13 @@ cmm5555sn007as8x6ys175gmb	cmm5555sn0077s8x665dh6i2c	cmm5457tx001ss8x60i50m2fr	20
 cmm557l3x008as8x6mzswmj3p	cmm557ctw007rs8x6k4c62o5h	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	350.00	0.00	0.0000	350.00
 cmm55abru008gs8x68j1sehys	cmm55abru008es8x6xzq5jayq	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
 cmm55f9mw0091s8x6lopjgi0e	cmm55f9mw008zs8x6gg4khx43	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmmxgp1al01kbccosx0w434il	cmmxgp1al01k9ccos546ajwxb	cmmfdptf800u5hwgvt7p1cjul	Maintenance of the internal network, including setting up, configuring, and updating access points.	1.00	2500.00	0.00	0.0000	2500.00
 cmm55jsa100a0s8x6493v0jho	cmm55jlrg009is8x6pcjr9ir9	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	350.00	0.00	0.0000	350.00
 cmm55ocu400a7s8x6yroszscz	cmm55ocu400a5s8x6a664jzkn	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
 cmm55rguz00ars8x6z50ouvyz	cmm55rguz00aps8x6ugt2sshx	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
 cmm55uyy700bas8x67wxq0jr6	cmm55uyy700b8s8x6qanzofol	cmm5457tx001ss8x60i50m2fr	20/10Mbps-Premium	1.00	465.00	0.00	0.0000	465.00
 cmm55x5y900bts8x65c0kqbht	cmm55x5y900brs8x6p43fnlw6	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmmxgp1al01kcccos0784z1h2	cmmxgp1al01k9ccos546ajwxb	cmmxgnxsj01k6ccos5vsjo60j	Cat5e Network Cable (30mx Cat5e outdoor cable(Cable run from switch to the Room 5 Access Point ) 	1.00	650.00	0.00	0.0000	650.00
 cmm6f4hav002pzvp1qeywolwd	cmm6f30wa0003zvp1hl7kvrhv	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	350.00	0.00	0.0000	350.00
 cmm6fvdpv000v1klqour30g7c	cmm6fvdpv000t1klq3zsyw54w	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
 cmm6fxar1001e1klqihe3bt23	cmm6fxar1001c1klqu51c1exl	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
@@ -6439,18 +6919,74 @@ cmmaeu6iz002mkgp4flvculmp	cmmaeu6iz002kkgp40387fpce	cmmaetrg2002hkgp4oa536vjo	hy
 cmmfdqtbg00uahwgv0vyu3947	cmmfdqtbg00u8hwgv3u8kb8su	cmmfdptf800u5hwgvt7p1cjul	Technical Callout Fee(Fix broken fibre cable)	1.00	1500.00	0.00	0.0000	1500.00
 cmmfdycnu00uuhwgvqfxiztup	cmmfdycnu00ushwgvl4d5twun	cmmfdptf800u5hwgvt7p1cjul	Technical Callout Fee(Dish alignment-61 Freezia)	1.00	500.00	0.00	0.0000	500.00
 cmmizkjxb00dnkem8fbg12013	cmm548jid001vs8x6ip7s3bpi	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	270.00	0.00	0.0000	270.00
+cmmxgpq7h01kwccoslu9jtse3	cmmxf1pel01g7ccosq3diypp8	cmmfdptf800u5hwgvt7p1cjul	Technical Callout Fee for Splicing and Repair of Fibre Cable Damaged by Contractors During Wall Construction	1.00	1000.00	0.00	0.0000	1000.00
+cmmxgt6a601m2ccosjq25a5my	cmmxgt6a601m0ccosdah4sodh	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq014a0004il5gkdft0pos	cmnhq014a0002il5g8x6qzmpb	\N	Monthly susbcription	1.00	465.00	0.00	0.0000	465.00
+cmnhq0187000ail5ghvek3nxl	cmnhq01870008il5g9f0gk02x	\N	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq019d000gil5ge3y7ersa	cmnhq019c000eil5gfozc4a8r	cmm490rip0000trwp9q09xvmz	Newe Wireless Installation(New installation for client 7855)	1.00	450.00	0.00	0.0000	450.00
+cmnhq01ab000oil5grq3fndg7	cmnhq01ab000mil5ggf2upb40	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01at000uil5g8zxvm55y	cmnhq01at000sil5g0n21nkd2	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	270.00	0.00	0.0000	270.00
+cmnhq01bm0012il5g6o4pmlqi	cmnhq01bm0010il5g699bq3wh	cmm5457tx001ss8x60i50m2fr	20/10Mbps-Premium	1.00	465.00	0.00	0.0000	465.00
+cmnhq01c10018il5gfwlv4bsi	cmnhq01c10016il5gdspjhxm4	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	300.00	0.00	0.0000	300.00
+cmnhq01cd001eil5ghifv6cx5	cmnhq01cd001cil5g1m8u2g2v	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01co001kil5g7zk5eagx	cmnhq01co001iil5gn7ozjtd4	cmm5457tx001ss8x60i50m2fr	20/10Mbps-Premium	1.00	300.00	0.00	0.0000	300.00
+cmnhq01co001lil5g01nfpy4u	cmnhq01co001iil5gn7ozjtd4	cmm5457tx001ss8x60i50m2fr	20/10Mbps-Premium	1.00	300.00	0.00	0.0000	300.00
+cmnhq01en001ril5goxjtov0f	cmnhq01en001pil5gi1vc6sfj	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	350.00	0.00	0.0000	350.00
+cmnhq01ey001xil5gwwnagnuo	cmnhq01ey001vil5gwx5dp4ad	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01fe0023il5g8g6fqzoz	cmnhq01fe0021il5gu4slheky	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	350.00	0.00	0.0000	350.00
+cmnhq01fs0029il5gqf5t7f5o	cmnhq01fs0027il5gnd8o0rz7	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01g6002fil5gsaoxyk5q	cmnhq01g5002dil5gb3d6zax8	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01gi002lil5gj43qi3iq	cmnhq01gi002jil5gllim8wr2	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01gt002ril5gaqr1lwtq	cmnhq01gt002pil5gddd7qcmo	cmm5457tx001ss8x60i50m2fr	20/10Mbps-Premium	1.00	465.00	0.00	0.0000	465.00
+cmnhq01h7002xil5ge484ypln	cmnhq01h7002vil5g6hon7p0k	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01hl0033il5girf26wo4	cmnhq01hl0031il5gggsgcp9n	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	350.00	0.00	0.0000	350.00
+cmnhq01i1003bil5gwufpciim	cmnhq01i10039il5ga38l4cst	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01if003hil5g88y5sbvv	cmnhq01if003fil5g0jdvy4l2	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01io003nil5g389n8e2s	cmnhq01io003lil5gxnh50ht7	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01j3003til5gby2tgopq	cmnhq01j3003ril5giatnc40g	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01jf003zil5g9ccanv4s	cmnhq01jf003xil5g4gjodk7r	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01jq0045il5gitcwapl2	cmnhq01jq0043il5guu3cnbg8	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01k1004bil5g33os3vzt	cmnhq01k10049il5gamnrycij	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01ke004hil5gqmsd6sn2	cmnhq01ke004fil5gsqlatwhb	cmm5457tx001ss8x60i50m2fr	20/10Mbps-Premium	1.00	465.00	0.00	0.0000	465.00
+cmnhq01kq004nil5galofk1bj	cmnhq01kp004lil5gkguig1dn	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	350.00	0.00	0.0000	350.00
+cmnhq01ld004zil5g2m2n4fk4	cmnhq01ld004xil5g6g4m0ds0	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	350.00	0.00	0.0000	350.00
+cmnhq01md0057il5gi8vjkzdg	cmnhq01md0055il5g8evc6smq	cmm5423ac001ps8x6egch0lss	5/5Mbps Lite	1.00	230.00	0.00	0.0000	230.00
+cmnhq01n3005dil5gez0njvc2	cmnhq01n3005bil5gor68ssc5	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01nm005lil5g47pghzhb	cmnhq01nm005jil5gshu2o4rf	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01pm0061il5gt21n6gdp	cmnhq01pl005zil5gk3fovhc8	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01q2006bil5gyzi6871w	cmnhq01q20069il5gsrm6b0pc	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01qi006pil5gxx8ye3j7	cmnhq01qi006nil5g2f0e69j1	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01r00075il5ga8tkp4ba	cmnhq01r00073il5g3dqgocst	cmm5423ac001ps8x6egch0lss	5/5Mbps Lite	1.00	230.00	0.00	0.0000	230.00
+cmnhq01rg007lil5gxpa4errg	cmnhq01rg007jil5gwlqndpz8	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	300.00	0.00	0.0000	300.00
+cmnhq01ru007zil5g3l1kp49c	cmnhq01ru007xil5gxpxlxc4a	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01s9008bil5ghke9v6f2	cmnhq01s80089il5guiuv4e6d	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq01sk008hil5gz95dlof7	cmnhq01sk008fil5g02c48kal	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhq5p1e00imil5gd9obb5gu	cmnhq01l0004ril5ggwi170gk	cmm5449x9001qs8x6mft6pcmt	10/5Mbps Home	1.00	365.00	0.00	0.0000	365.00
+cmnhtszbl012yil5gcddmitj1	cmnhtm90y012bil5gl3exhy1n	cmmfdptf800u5hwgvt7p1cjul	Technical Callout Fee(Setup and configuration for the  Smart TV)	1.00	400.00	0.00	0.0000	400.00
 \.
 
 
 --
--- TOC entry 5762 (class 0 OID 203732)
+-- TOC entry 5876 (class 0 OID 203732)
 -- Dependencies: 223
 -- Data for Name: invoices; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.invoices (id, "invoiceNumber", "clientId", "userId", "quoteId", "recurringInvoiceId", status, "issueDate", "dueDate", "paidDate", notes, subtotal, "taxAmount", "totalAmount", "amountPaid", "balanceDue", "createdAt", "updatedAt", "invoiceSeq", "journalEntryId") FROM stdin;
+cmm54ku0a003gs8x6m3nypblo	INV-006	cmm54kjqp003ds8x67pxwkczp	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-18 21:11:48.042		300.00	0.00	300.00	300.00	0.00	2026-02-27 16:47:22.859	2026-03-18 21:11:48.043	6	cmm54ku1d003ss8x6etbmrlfa
+cmmxezaf501foccosseep05jt	INV-046	cmmfdvvyl00uphwgvtz36zuym	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-03-17 00:00:00	2026-03-23 00:00:00	2026-04-02 18:34:38.052		500.00	0.00	500.00	500.00	0.00	2026-03-19 11:56:06.401	2026-04-02 18:34:38.06	48	cmmxezajf01g1ccosi40z1k92
+cmnhq01fe0021il5gu4slheky	INV-061	cmm55j1sz009fs8x62nkk3wym	cmm47pax500048s6ob25tkito	\N	cmmj89u6500ejzyd2gfpga3fs	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:55:15.402	\N	350.00	0.00	350.00	350.00	0.00	2026-04-02 17:00:00.698	2026-04-02 18:55:15.404	63	cmnhq3orm00d1il5gy8u87wsi
 cmm4zkavv013f1vs3ahwucert	INV-003	cmm4zirod013c1vs3xdf1z699	cmm4zhe5z013a1vs3vdkx1i3f	\N	\N	SENT	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		600.00	0.00	600.00	0.00	600.00	2026-02-27 14:26:59.996	2026-02-27 14:27:00.085	3	cmm4zkaxs013q1vs3bis8us2q
 cmm55abru008es8x6xzq5jayq	INV-011	cmm55a6s8008bs8x6h6fnp5yd	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-06 21:18:51.199		365.00	0.00	365.00	365.00	0.00	2026-02-27 17:07:12.282	2026-03-06 21:18:51.201	11	cmm55absq008qs8x6u093kfez
+cmnhq01bm0010il5g699bq3wh	INV-055	cmm54ohzw003xs8x6p4nhgv8l	cmm47pax500048s6ob25tkito	\N	cmmj89tz900dezyd2k56h2kq3	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	465.00	0.00	465.00	0.00	465.00	2026-04-02 17:00:00.562	2026-04-02 17:02:29.7	57	cmnhq38e600ajil5gdnn9s43b
+cmnhq01c10016il5gdspjhxm4	INV-056	cmm54kjqp003ds8x67pxwkczp	cmm47pax500048s6ob25tkito	\N	cmmj89tzs00dszyd2hogf7b6f	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	300.00	0.00	300.00	0.00	300.00	2026-04-02 17:00:00.577	2026-04-02 17:02:33.043	58	cmnhq3az100ayil5gb2kmnuhf
+cmnhq01en001pil5gi1vc6sfj	INV-059	cmm557419007os8x6nailjge0	cmm47pax500048s6ob25tkito	\N	cmmj89u5z00e9zyd24jrdes3g	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	350.00	0.00	350.00	0.00	350.00	2026-04-02 17:00:00.671	2026-04-02 17:02:43.503	61	cmnhq3j1m00c7il5gw5yu9f75
+cmmxgt6a601m0ccosdah4sodh	INV-049	cmm55cbe3008us8x6p33kz5mb	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-25 00:00:00	2026-03-03 00:00:00	2026-04-02 18:18:12.669		365.00	0.00	365.00	730.00	0.00	2026-03-19 12:47:20.334	2026-04-02 18:18:12.677	51	cmmxgt6b501mdccosgm0upgff
+cmnhq01870008il5g9f0gk02x	INV-051	cmm54h217002ts8x6qs5irdmh	cmm47pax500048s6ob25tkito	\N	cmm6xrdbu001s13hmewcees78	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:19:15.914	\N	365.00	0.00	365.00	365.00	0.00	2026-04-02 17:00:00.44	2026-04-02 18:19:15.923	53	cmnhq27ae009ail5gwajihmdz
+cmnhq01ab000mil5ggf2upb40	INV-053	cmm54h217002ts8x6qs5irdmh	cmm47pax500048s6ob25tkito	\N	cmmj89tz900ddzyd2ullx18vg	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:19:40.943	\N	365.00	0.00	365.00	365.00	0.00	2026-04-02 17:00:00.515	2026-04-02 18:19:40.952	55	cmnhq2z4b009pil5gp9e1i0qu
+cmnhq01cd001cil5g1m8u2g2v	INV-057	cmm551ver006ls8x65km4hqtw	cmm47pax500048s6ob25tkito	\N	cmmj89u5j00dyzyd2t7ahgotx	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:20:21.9	\N	365.00	0.00	365.00	365.00	0.00	2026-04-02 17:00:00.59	2026-04-02 18:20:21.904	59	cmnhq3d7g00bdil5gtmydevmg
+cmnhq01co001iil5gn7ozjtd4	INV-058	cmm554muh0074s8x6hn9a7048	cmm47pax500048s6ob25tkito	\N	cmmj89u5r00e2zyd29vk7ahn4	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:20:37.018	\N	600.00	0.00	600.00	600.00	0.00	2026-04-02 17:00:00.6	2026-04-02 18:20:37.022	60	cmnhq3gj500bsil5g8m93lymh
+cmnhq01ey001vil5gwx5dp4ad	INV-060	cmm55a6s8008bs8x6h6fnp5yd	cmm47pax500048s6ob25tkito	\N	cmmj89u6000eezyd2fpcvgxdr	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:20:56.241	\N	365.00	0.00	365.00	365.00	0.00	2026-04-02 17:00:00.683	2026-04-02 18:20:56.244	62	cmnhq3lcm00cmil5gy1jqpxd8
 cmm6f30wa0003zvp1hl7kvrhv	INV-018	cmm6f2oi90000zvp15rcvh9dq	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-02-28 14:30:44.858		350.00	0.00	350.00	350.00	0.00	2026-02-28 14:29:13.931	2026-02-28 14:30:44.859	18	cmm6f30ya000fzvp1f7iwteof
 cmm54hd9b002ws8x6k997r60l	INV-005	cmm54h217002ts8x6qs5irdmh	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-02-28 14:39:11.295		365.00	0.00	365.00	365.00	0.00	2026-02-27 16:44:41.183	2026-02-28 14:39:11.299	5	cmm54hdae0038s8x6u12tkmfs
 cmm484z9o0004945q204d0y5y	INV-001	cmm47x6lz0039pdmhlznggcdn	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-02-28 14:47:15.429		6245.57	0.00	6245.57	6245.57	0.00	2026-02-27 01:39:15.457	2026-02-28 14:47:15.431	1	cmm484zck000h945qaml29rrg
@@ -6468,11 +7004,19 @@ cmm6m031l006j1klqoadqlc6z	INV-028	cmm6lzufz006g1klqacvd1c71	cmm47pax500048s6ob25
 cmm6maz3e008s1klqij3xvbtd	INV-032	cmm6maqjf008p1klq0iyvmq8j	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-09 07:35:22.733		365.00	0.00	365.00	365.00	0.00	2026-02-28 17:51:22.155	2026-03-09 07:35:22.734	32	cmm6maz4b00941klqf775dkvj
 cmm6mgxu6009w1klqd03montw	INV-034	cmm6me5qh009r1klq9lfn2jhx	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-09 07:35:39.877		365.00	0.00	365.00	365.00	0.00	2026-02-28 17:56:00.462	2026-03-09 07:35:39.878	34	cmm6mgxv800a81klq4gcb31dm
 cmm6mh8ez00ae1klqkzkqpyuo	INV-035	cmm6mglj9009t1klqm9q1uznw	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-09 07:36:06.811		365.00	0.00	365.00	365.00	0.00	2026-02-28 17:56:14.172	2026-03-09 07:36:06.812	35	cmm6mh8g400aq1klq7y7k0gxb
-cmm54ku0a003gs8x6m3nypblo	INV-006	cmm54kjqp003ds8x67pxwkczp	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		300.00	0.00	300.00	0.00	300.00	2026-02-27 16:47:22.859	2026-03-09 09:57:48.854	6	cmm54ku1d003ss8x6etbmrlfa
 cmm548jid001vs8x6ip7s3bpi	INV-004	cmm540m4p001os8x6km8cvelc	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-09 09:37:59.945		270.00	0.00	270.00	270.00	0.00	2026-02-27 16:37:49.381	2026-03-09 09:37:59.949	4	cmm548jk60027s8x6726531zw
+cmmxf1pel01g7ccosq3diypp8	INV-047	cmmfdly1z00shhwgvwpnfvclv	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-03-16 00:00:00	2026-03-22 00:00:00	2026-04-02 18:33:52.951		1000.00	0.00	1000.00	1000.00	0.00	2026-03-19 11:57:59.133	2026-04-02 18:33:52.952	49	cmmxf1pgw01gkccos9a48w8lc
+cmmfdycnu00ushwgvl4d5twun	INV-045	cmmfdvvyl00uphwgvtz36zuym	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-03-04 00:00:00	2026-03-10 00:00:00	2026-03-18 21:11:03.675		500.00	0.00	500.00	500.00	0.00	2026-03-06 21:07:31.866	2026-03-18 21:11:03.676	45	cmmfdycp200v4hwgvmt4e6w55
+cmm55x5y900brs8x6p43fnlw6	INV-017	cmm55wz4x00bos8x6nnrkl8re	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-18 21:11:32.935		365.00	0.00	365.00	365.00	0.00	2026-02-27 17:24:57.826	2026-03-18 21:11:32.936	17	cmm55x5zb00c3s8x6yhbidzgw
+cmm6mtjg800ck1klq2tjwvvq4	INV-039	cmm6mtbuc00ch1klq0odakxsn	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-18 21:12:20.939		365.00	0.00	365.00	365.00	0.00	2026-02-28 18:05:48.345	2026-03-18 21:12:20.94	39	cmm6mtjhc00cw1klqkvlrc1qu
+cmm6m2wd500761klqjgzyw96v	INV-029	cmm6m2n1z00721klq0sctxew0	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-18 21:12:47.263		350.00	0.00	350.00	350.00	0.00	2026-02-28 17:45:05.369	2026-03-18 21:12:47.266	29	cmm6m2we3007i1klqouvksxgl
+cmm6lm10m003t1klqh30komsw	INV-023	cmm6llpqi003q1klqf1ejb34c	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-04-02 18:54:11.551		365.00	0.00	365.00	365.00	0.00	2026-02-28 17:31:58.246	2026-04-02 18:54:11.552	23	cmm6lm11q00451klq2qavgnk2
+cmm6ljq8v003a1klq6tth9275	INV-022	cmm6ljd7h00361klqff2544qa	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-19 12:45:56.612		365.00	0.00	365.00	365.00	0.00	2026-02-28 17:30:10.975	2026-03-19 12:45:56.613	22	cmm6ljq9x003m1klqs8uel32h
+cmnhtm90y012bil5gl3exhy1n	INV-090	cmnhthwx70127il5gouii1ay9	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-03-20 00:00:00	2026-03-26 00:00:00	\N		400.00	0.00	400.00	0.00	400.00	2026-04-02 18:41:15.826	2026-04-02 18:46:29.841	92	cmnhtm9bu012oil5g29i8lr4u
+cmm6mcqa1009b1klqtr8yxhic	INV-033	cmm6mcin600981klqhytyq4gf	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-19 12:45:32.5		365.00	0.00	365.00	365.00	0.00	2026-02-28 17:52:44.041	2026-03-19 12:45:32.501	33	cmm6mcqb5009n1klqqlhgdsfm
 cmmaerbl20020kgp46yapihs9	INV-042	cmmaen5i90006kgp431o5gmfv	cmmael1y10005kgp4vea5fi0c	cmmaeo3qw0009kgp4bq57q611	\N	SENT	2026-03-03 09:31:12.608	2026-04-02 09:31:12.608	\N	gfgfxabhjxdhkxd	580.00	0.00	580.00	0.00	580.00	2026-03-03 09:31:12.614	2026-03-03 09:31:18.806	42	cmmaergad002dkgp447ykk2ba
+cmnhq01g5002dil5gb3d6zax8	INV-063	cmm55nh8g00a2s8x6rvry714w	cmm47pax500048s6ob25tkito	\N	cmmj89u7h00eszyd24v63u1fh	DRAFT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:00.726	2026-04-02 17:00:00.726	65	\N
 cmmaeu6iz002kkgp40387fpce	INV-043	cmmaen5i90006kgp431o5gmfv	cmmael1y10005kgp4vea5fi0c	\N	\N	SENT	2026-03-03 00:00:00	2026-03-09 00:00:00	\N		500.00	0.00	500.00	0.00	500.00	2026-03-03 09:33:26.028	2026-03-03 09:33:26.08	43	cmmaeu6k1002wkgp4jsh1ov2s
-cmmfdycnu00ushwgvl4d5twun	INV-045	cmmfdvvyl00uphwgvtz36zuym	cmm47pax500048s6ob25tkito	\N	\N	SENT	2026-03-04 00:00:00	2026-03-10 00:00:00	\N		500.00	0.00	500.00	0.00	500.00	2026-03-06 21:07:31.866	2026-03-06 21:07:31.926	45	cmmfdycp200v4hwgvmt4e6w55
 cmm5555sn0077s8x665dh6i2c	INV-009	cmm554muh0074s8x6hn9a7048	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-06 21:14:32.747		600.00	0.00	600.00	600.00	0.00	2026-02-27 17:03:11.255	2026-03-06 21:14:32.749	9	cmm5555ub007ks8x6r98ibxni
 cmmfdqtbg00u8hwgv3u8kb8su	INV-044	cmmfdly1z00shhwgvwpnfvclv	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-03-06 00:00:00	2026-03-12 00:00:00	2026-03-09 07:33:26.2		1500.00	0.00	1500.00	1500.00	0.00	2026-03-06 21:01:40.205	2026-03-09 07:33:26.201	44	cmmfdqtf500ukhwgv6ytruiiq
 cmm6mjsoh00ax1klqu3xvzif4	INV-036	cmm6mjll100au1klqlwbnnjp9	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-09 07:36:32.282		230.00	0.00	230.00	230.00	0.00	2026-02-28 17:58:13.746	2026-03-09 07:36:32.284	36	cmm6mjspq00b91klq7p5g1tgn
@@ -6480,25 +7024,50 @@ cmm6mp6l100bh1klqc1xu49bj	INV-037	cmm6movbm00be1klqnc8pn4f6	cmm47pax500048s6ob25
 cmm6mrryx00c01klq9xnd2vf1	INV-038	cmm6mrbxw00bx1klq6snmtbyb	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-09 07:37:24.281		365.00	0.00	365.00	365.00	0.00	2026-02-28 18:04:26.073	2026-03-09 07:37:24.283	38	cmm6mrrzt00cc1klqakrif1b5
 cmm6mvsqa00d31klqpyyztysa	INV-040	cmm6mvjxx00d01klqrij7sk43	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-09 07:37:50.499		365.00	0.00	365.00	365.00	0.00	2026-02-28 18:07:33.683	2026-03-09 07:37:50.501	40	cmm6mvsre00df1klqcy2yxa24
 cmm55ocu400a5s8x6a664jzkn	INV-014	cmm55nh8g00a2s8x6rvry714w	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		365.00	0.00	365.00	0.00	365.00	2026-02-27 17:18:06.844	2026-03-09 09:57:48.854	14	cmm55ocv800ahs8x6unb7aqac
-cmm55x5y900brs8x6p43fnlw6	INV-017	cmm55wz4x00bos8x6nnrkl8re	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		365.00	0.00	365.00	0.00	365.00	2026-02-27 17:24:57.826	2026-03-09 09:57:48.854	17	cmm55x5zb00c3s8x6yhbidzgw
-cmm6lhr9t002q1klqio5407zy	INV-021	cmm6lh7k3002n1klq8jh12onn	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		365.00	0.00	365.00	0.00	365.00	2026-02-28 17:28:38.993	2026-03-09 09:57:48.854	21	cmm6lhray00321klqf0ffivyb
-cmm6ljq8v003a1klq6tth9275	INV-022	cmm6ljd7h00361klqff2544qa	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		365.00	0.00	365.00	0.00	365.00	2026-02-28 17:30:10.975	2026-03-09 09:57:48.854	22	cmm6ljq9x003m1klqs8uel32h
-cmm6lm10m003t1klqh30komsw	INV-023	cmm6llpqi003q1klqf1ejb34c	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		365.00	0.00	365.00	0.00	365.00	2026-02-28 17:31:58.246	2026-03-09 09:57:48.854	23	cmm6lm11q00451klq2qavgnk2
 cmm6lqx1h004e1klq1yk3qy3r	INV-024	cmm6lqnd2004b1klqtzti29rl	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		365.00	0.00	365.00	0.00	365.00	2026-02-28 17:35:46.373	2026-03-09 09:57:48.854	24	cmm6lqx30004q1klqussgct95
 cmm6m4thj007p1klqng8ppg7p	INV-030	cmm6m4kb2007m1klquhr4s41u	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		230.00	0.00	230.00	200.00	30.00	2026-02-28 17:46:34.951	2026-03-09 09:57:48.854	30	cmm6m4tih00811klqthr3uzcr
-cmm6m2wd500761klqjgzyw96v	INV-029	cmm6m2n1z00721klq0sctxew0	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		350.00	0.00	350.00	0.00	350.00	2026-02-28 17:45:05.369	2026-03-09 09:57:48.854	29	cmm6m2we3007i1klqouvksxgl
-cmm6m86yb00881klqd917funl	INV-031	cmm6m7zmc00851klqhgp4clh1	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		365.00	0.00	365.00	0.00	365.00	2026-02-28 17:49:12.371	2026-03-09 09:57:48.854	31	cmm6m86zc008k1klqf9ij776t
-cmm6mcqa1009b1klqtr8yxhic	INV-033	cmm6mcin600981klqhytyq4gf	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		365.00	0.00	365.00	0.00	365.00	2026-02-28 17:52:44.041	2026-03-09 09:57:48.854	33	cmm6mcqb5009n1klqqlhgdsfm
-cmm6mtjg800ck1klq2tjwvvq4	INV-039	cmm6mtbuc00ch1klq0odakxsn	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		365.00	0.00	365.00	0.00	365.00	2026-02-28 18:05:48.345	2026-03-09 09:57:48.854	39	cmm6mtjhc00cw1klqkvlrc1qu
 cmm6n1ox100dp1klqwofjz9nl	INV-041	cmm6n19ne00dm1klqau4zc8bp	cmm47pax500048s6ob25tkito	\N	\N	OVERDUE	2026-02-27 00:00:00	2026-03-05 00:00:00	\N		300.00	0.00	300.00	0.00	300.00	2026-02-28 18:12:08.677	2026-03-09 09:57:48.854	41	cmm6n1oy900e11klq104bn873
 cmm55jlrg009is8x6pcjr9ir9	INV-013	cmm55j1sz009fs8x62nkk3wym	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-09 20:19:28.501		350.00	0.00	350.00	350.00	0.00	2026-02-27 17:14:25.132	2026-03-09 20:19:28.503	13	cmm55jlso009us8x6cbwa9gek
 cmm54qdc40040s8x6dokn666t	INV-007	cmm54ohzw003xs8x6p4nhgv8l	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-09 20:24:24.687		465.00	0.00	465.00	465.00	0.00	2026-02-27 16:51:41.188	2026-03-09 20:24:24.689	7	cmm54qdd7004cs8x6oa60pgc4
+cmnhq01jq0043il5guu3cnbg8	INV-073	cmm6lqnd2004b1klqtzti29rl	cmm47pax500048s6ob25tkito	\N	cmmj8beac00g8zyd2n02ez2fw	DRAFT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:00.854	2026-04-02 17:00:00.854	75	\N
+cmnhq01gi002jil5gllim8wr2	INV-064	cmm55r8pq00ams8x6i0lchg3w	cmm47pax500048s6ob25tkito	\N	cmmj89u8000exzyd28gqlpptp	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:00.738	2026-04-02 17:03:15.05	66	cmnhq47dn00dvil5gfdx819t2
+cmnhq01hl0031il5gggsgcp9n	INV-067	cmm6f2oi90000zvp15rcvh9dq	cmm47pax500048s6ob25tkito	\N	cmmj89u9000fdzyd248rf2vdw	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	350.00	0.00	350.00	0.00	350.00	2026-04-02 17:00:00.777	2026-04-02 17:03:27.101	69	cmnhq4gom00f4il5g3i19fyri
+cmnhq01i10039il5ga38l4cst	INV-068	cmm6fuy5g000q1klqcvvtfvcr	cmm47pax500048s6ob25tkito	\N	cmmj89u9500fhzyd2h7wek72w	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:00.794	2026-04-02 17:03:29.449	70	cmnhq4ihv00fjil5g0n5wpcw3
+cmnhq01io003lil5gxnh50ht7	INV-070	cmm6lh7k3002n1klq8jh12onn	cmm47pax500048s6ob25tkito	\N	cmmj89u9z00frzyd2sezhyu3v	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:00.817	2026-04-02 17:03:35.587	72	cmnhq4n8e00gdil5gxf2wbw3z
+cmnhq01jf003xil5g4gjodk7r	INV-072	cmm6llpqi003q1klqf1ejb34c	cmm47pax500048s6ob25tkito	\N	cmmj8bea100g4zyd2n5ld0rcu	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:00.843	2026-04-02 17:04:00.065	74	cmnhq564b00h7il5gwaa7sqqv
+cmm6m86yb00881klqd917funl	INV-031	cmm6m7zmc00851klqhgp4clh1	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-04-02 18:16:33.896		365.00	0.00	365.00	365.00	0.00	2026-02-28 17:49:12.371	2026-04-02 18:16:33.897	31	cmm6m86zc008k1klqf9ij776t
+cmm6lhr9t002q1klqio5407zy	INV-021	cmm6lh7k3002n1klq8jh12onn	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-04-02 18:16:53.026		365.00	0.00	365.00	365.00	0.00	2026-02-28 17:28:38.993	2026-04-02 18:16:53.027	21	cmm6lhray00321klqf0ffivyb
+cmnhq01j3003ril5giatnc40g	INV-071	cmm6ljd7h00361klqff2544qa	cmm47pax500048s6ob25tkito	\N	cmmj8be9k00fyzyd2icx3ls9k	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:22:16.409	\N	365.00	0.00	365.00	365.00	0.00	2026-04-02 17:00:00.831	2026-04-02 18:22:16.411	73	cmnhq54as00gsil5gpz1ig1mt
+cmnhq01kp004lil5gkguig1dn	INV-076	cmm6ly0d0005x1klqmrye4jav	cmm47pax500048s6ob25tkito	\N	cmmj8beal00gnzyd2zd79wttj	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:22:43.289	\N	350.00	0.00	350.00	350.00	0.00	2026-04-02 17:00:00.89	2026-04-02 18:22:43.291	78	cmnhq5f2000igil5g2n2rh62p
 cmm55f9mw008zs8x6gg4khx43	INV-012	cmm55f2iq008ws8x6c9k8kvpl	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-02-27 00:00:00	2026-03-05 00:00:00	2026-03-09 20:22:14.474		365.00	0.00	365.00	365.00	0.00	2026-02-27 17:11:02.792	2026-03-09 20:22:14.476	12	cmm55f9ny009bs8x6b7b0y6fm
+cmnhq01md0055il5g8evc6smq	INV-079	cmm6m4kb2007m1klquhr4s41u	cmm47pax500048s6ob25tkito	\N	cmmj8beck00h3zyd2eihljyqw	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:22:56.954	\N	230.00	0.00	230.00	230.00	0.00	2026-04-02 17:00:00.949	2026-04-02 18:22:56.956	81	cmnhq5z1r00jsil5gd9f6rwuy
+cmnhq01nm005jil5gshu2o4rf	INV-081	cmm6maqjf008p1klq0iyvmq8j	cmm47pax500048s6ob25tkito	\N	cmmj8becx00hdzyd27nueb0wz	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:23:13.686	\N	365.00	0.00	365.00	365.00	0.00	2026-04-02 17:00:00.994	2026-04-02 18:23:13.687	83	cmnhq639w00kmil5gg77jmx44
+cmnhq01q20069il5gsrm6b0pc	INV-083	cmm6me5qh009r1klq9lfn2jhx	cmm47pax500048s6ob25tkito	\N	cmmj8bee500hmzyd2qzbu29ma	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:01.082	2026-04-02 18:23:56.884	85	cmnhszzd300xeil5gyd4dcjbm
+cmnhq01qi006nil5g2f0e69j1	INV-084	cmm6mglj9009t1klqm9q1uznw	cmm47pax500048s6ob25tkito	\N	cmmj8beeq00htzyd2bwso0i75	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:25:20.184	\N	365.00	0.00	365.00	365.00	0.00	2026-04-02 17:00:01.099	2026-04-02 18:25:20.186	86	cmnhsnuy800luil5guu911463
+cmnhq01rg007jil5gwlqndpz8	INV-086	cmm6movbm00be1klqnc8pn4f6	cmm47pax500048s6ob25tkito	\N	cmmj8beew00i1zyd26iazc9z5	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:25:33.833	\N	300.00	0.00	300.00	300.00	0.00	2026-04-02 17:00:01.132	2026-04-02 18:25:33.834	88	cmnhsnz3x00moil5gljo6nakr
+cmnhq01sk008fil5g02c48kal	INV-089	cmm6mvjxx00d01klqrij7sk43	cmm47pax500048s6ob25tkito	\N	cmmj8beg400ihzyd2w9tmk3cp	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:25:47.949	\N	365.00	0.00	365.00	365.00	0.00	2026-04-02 17:00:01.173	2026-04-02 18:25:47.95	91	cmnhso5kh00nxil5gkcg6k1sn
+cmmxgp1al01k9ccos546ajwxb	INV-048	cmmxgm46l01k5ccostk54flk0	cmm47pax500048s6ob25tkito	\N	\N	PAID	2026-03-14 00:00:00	2026-03-20 00:00:00	2026-04-02 18:34:22.099		3150.00	0.00	3150.00	3150.00	0.00	2026-03-19 12:44:07.245	2026-04-02 18:34:22.107	50	cmmxgp1f801knccosncgjl14j
+cmnhq01gt002pil5gddd7qcmo	INV-065	cmm55uhcv00b5s8x6xh6qqij3	cmm47pax500048s6ob25tkito	\N	cmmj89u8n00f3zyd2rrx5bm41	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:53:06.795	\N	465.00	0.00	465.00	465.00	0.00	2026-04-02 17:00:00.749	2026-04-02 18:53:06.796	67	cmnhq4cjy00eail5g8fhorfxd
+cmnhq014a0002il5g8x6qzmpb	INV-050	cmm55uhcv00b5s8x6xh6qqij3	cmm47pax500048s6ob25tkito	\N	cmm6fingm00021klq7j0gp2lx	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	465.00	0.00	465.00	0.00	465.00	2026-04-02 17:00:00.298	2026-04-02 17:01:35.486	52	cmnhq22j0008vil5g4j3bawt1
+cmnhq01h7002vil5g6hon7p0k	INV-066	cmm55wz4x00bos8x6nnrkl8re	cmm47pax500048s6ob25tkito	\N	cmmj89u8r00f8zyd2yff3gz36	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:00.764	2026-04-02 17:03:24.059	68	cmnhq4ec500epil5gptgjfi3q
+cmnhq01ke004fil5gsqlatwhb	INV-075	cmm6lvyqs005d1klqltorxkd7	cmm47pax500048s6ob25tkito	\N	cmmj8beah00gjzyd291o41dqy	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	465.00	0.00	465.00	0.00	465.00	2026-04-02 17:00:00.879	2026-04-02 17:04:08.689	77	cmnhq5crw00i1il5gvyzq38yx
+cmnhq01l0004ril5ggwi170gk	INV-077	cmm6lzufz006g1klqacvd1c71	cmm47pax500048s6ob25tkito	\N	cmmj8bec300gszyd2jjpi5hpb	SENT	2026-04-02 00:00:00	2026-05-02 00:00:00	\N		365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:00.9	2026-04-02 17:04:32.113	79	cmnhq5uua00iyil5gjpompm8l
+cmnhq01ld004xil5g6g4m0ds0	INV-078	cmm6m2n1z00721klq0sctxew0	cmm47pax500048s6ob25tkito	\N	cmmj8becf00gyzyd2mi1f0u91	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	350.00	0.00	350.00	0.00	350.00	2026-04-02 17:00:00.913	2026-04-02 17:04:34.571	80	cmnhq5wqk00jdil5g2v0z4kq6
+cmnhq01n3005bil5gor68ssc5	INV-080	cmm6m7zmc00851klqhgp4clh1	cmm47pax500048s6ob25tkito	\N	cmmj8becu00h8zyd230u3a52m	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:00.976	2026-04-02 17:04:39.916	82	cmnhq60va00k7il5gl50o2g6h
+cmnhq01pl005zil5gk3fovhc8	INV-082	cmm6mcin600981klqhytyq4gf	cmm47pax500048s6ob25tkito	\N	cmmj8bed500hhzyd2dodpoaq5	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:01.066	2026-04-02 17:04:46.521	84	cmnhq65ys00l1il5gt3jnql3f
+cmnhq01r00073il5g3dqgocst	INV-085	cmm6mjll100au1klqlwbnnjp9	cmm47pax500048s6ob25tkito	\N	cmmj8beeq00hxzyd2hqri1d4t	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	230.00	0.00	230.00	0.00	230.00	2026-04-02 17:00:01.116	2026-04-02 18:14:34.408	87	cmnhsnxcr00m9il5gwz4xzzv3
+cmnhq01ru007xil5gxpxlxc4a	INV-087	cmm6mtbuc00ch1klq0odakxsn	cmm47pax500048s6ob25tkito	\N	cmmj8bef500i7zyd2sa79lqbl	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:01.146	2026-04-02 18:14:39.665	89	cmnhso1f100n3il5gpnzlg6ot
+cmnhq01s80089il5guiuv4e6d	INV-088	cmm6mrbxw00bx1klq6snmtbyb	cmm47pax500048s6ob25tkito	\N	cmmj8bef700ibzyd2jappjex2	SENT	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	\N	\N	365.00	0.00	365.00	0.00	365.00	2026-04-02 17:00:01.161	2026-04-02 18:14:41.895	90	cmnhso34w00niil5gufo0kpiq
+cmnhq019c000eil5gfozc4a8r	INV-052	cmm47x6lz0039pdmhlznggcdn	cmm47pax500048s6ob25tkito	\N	cmmj89tzm00dpzyd2jguoni3b	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:19:00.059	\N	450.00	0.00	450.00	450.00	0.00	2026-04-02 17:00:00.48	2026-04-02 18:19:00.067	54	cmnhstdvn00pxil5g10wt9awj
+cmnhq01at000sil5g0n21nkd2	INV-054	cmm540m4p001os8x6km8cvelc	cmm47pax500048s6ob25tkito	\N	cmmj89tz900dczyd2c1txdl3n	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:20:07.352	\N	270.00	0.00	270.00	270.00	0.00	2026-04-02 17:00:00.533	2026-04-02 18:20:07.356	56	cmnhq35v400a4il5gdpv2evxh
+cmnhq01fs0027il5gnd8o0rz7	INV-062	cmm55f2iq008ws8x6c9k8kvpl	cmm47pax500048s6ob25tkito	\N	cmmj89u6700enzyd2u5ze7bfm	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:21:46.578	\N	365.00	0.00	365.00	365.00	0.00	2026-04-02 17:00:00.712	2026-04-02 18:21:46.581	64	cmnhq3rat00dgil5gaerdw7mo
+cmnhq01if003fil5g0jdvy4l2	INV-069	cmm6fwzea00191klqx8mfarvz	cmm47pax500048s6ob25tkito	\N	cmmj89u9w00fnzyd2j3l5j6ov	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:22:03.979	\N	365.00	0.00	365.00	365.00	0.00	2026-04-02 17:00:00.807	2026-04-02 18:22:03.98	71	cmnhq4kxh00fyil5g4h9nt2ba
+cmnhq01k10049il5gamnrycij	INV-074	cmm6ltyls004u1klq3s6arqce	cmm47pax500048s6ob25tkito	\N	cmmj8beag00gfzyd2tanq0a6n	PAID	2026-04-02 17:00:00.047	2026-05-02 17:00:00.047	2026-04-02 18:22:30.941	\N	365.00	0.00	365.00	365.00	0.00	2026-04-02 17:00:00.866	2026-04-02 18:22:30.943	76	cmnhq5aiw00hmil5g0v8s4gaw
 \.
 
 
 --
--- TOC entry 5769 (class 0 OID 203923)
+-- TOC entry 5883 (class 0 OID 203923)
 -- Dependencies: 230
 -- Data for Name: job_locks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6508,7 +7077,7 @@ COPY public.job_locks (name, "lockedAt", "lockedBy", "ttlMs") FROM stdin;
 
 
 --
--- TOC entry 5794 (class 0 OID 204442)
+-- TOC entry 5908 (class 0 OID 204442)
 -- Dependencies: 255
 -- Data for Name: journal_entries; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6561,6 +7130,9 @@ cmm6mtjhc00cw1klqkvlrc1qu	JE-000044	2026-02-27 00:00:00	Invoice INV-039	INVOICE	
 cmm6mvsre00df1klqcy2yxa24	JE-000045	2026-02-27 00:00:00	Invoice INV-040	INVOICE	cmm6mvsqa00d31klqpyyztysa	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-02-28 18:07:33.722	2026-02-28 18:07:33.722	\N	\N
 cmm6n1oy900e11klq104bn873	JE-000046	2026-02-27 00:00:00	Invoice INV-041	INVOICE	cmm6n1ox100dp1klqwofjz9nl	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-02-28 18:12:08.722	2026-02-28 18:12:08.722	\N	\N
 cmm6nj47n00en1klqmo0p4dwi	JE-000047	2026-02-28 00:00:00	Bill 1	BILL	cmm6nj44n00ed1klqdm4z3naf	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-02-28 18:25:41.651	2026-02-28 18:25:41.651	\N	\N
+cmmwjd42a000g23rfbmbpcze4	JE-000078	2026-03-18 21:11:03.586	Payment PAY-031	PAYMENT	cmmwjd40e000423rf3j1x8gi2	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-18 21:11:03.634	2026-03-18 21:11:03.634	\N	\N
+cmmwjdqnd000y23rf369a9xmq	JE-000079	2026-03-18 21:11:32.86	Payment PAY-032	PAYMENT	cmmwjdqly000m23rfhqlo9nw8	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-18 21:11:32.905	2026-03-18 21:11:32.905	\N	\N
+cmmwje2b8001g23rfmw3i4gle	JE-000080	2026-03-18 21:11:47.976	Payment PAY-033	PAYMENT	cmmwje29v001423rf0jxrbew5	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-18 21:11:48.021	2026-03-18 21:11:48.021	\N	\N
 cmm6o3sui000d8nod9c1zg6ff	JE-000048	2026-02-28 18:41:46.652	Supplier payment SPAY-001	SUPPLIER_PAYMENT	cmm6o3st700028nodwk3gwk7c	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-02-28 18:41:46.699	2026-02-28 18:41:46.699	\N	\N
 cmm6vbnjh00dwtwnagurzi7u7	JE-000049	2026-02-28 22:03:50.318	Payment PAY-006	PAYMENT	cmm6vbnfn00dltwnajm5k7tlk	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-02-28 22:03:50.381	2026-02-28 22:03:50.381	\N	\N
 cmmaergad002dkgp447ykk2ba	JE-000050	2026-03-03 09:31:12.608	Invoice INV-042	INVOICE	cmmaerbl20020kgp46yapihs9	POSTED	\N	\N	cmmael1y10005kgp4vea5fi0c	2026-03-03 09:31:18.709	2026-03-03 09:31:18.709	\N	\N
@@ -6591,11 +7163,86 @@ cmmivcn0u006akem85di11qfe	JE-000074	2026-03-09 07:37:50.448	Payment PAY-027	PAYM
 cmmjmk3rq00608moikx3xt9tj	JE-000075	2026-03-09 20:19:28.33	Payment PAY-028	PAYMENT	cmmjmk3nd005o8moimp8fzq1h	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-09 20:19:28.406	2026-03-09 20:19:28.406	\N	\N
 cmmjmnnw3006j8moictf8cxtc	JE-000076	2026-03-09 20:22:14.42	Payment PAY-029	PAYMENT	cmmjmnnv100678moivckbrch1	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-09 20:22:14.451	2026-03-09 20:22:14.451	\N	\N
 cmmjmqgcf000exm2pvzy17iuo	JE-000077	2026-03-09 20:24:24.589	Payment PAY-030	PAYMENT	cmmjmqgad0002xm2pqbfe3z4c	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-09 20:24:24.64	2026-03-09 20:24:24.64	\N	\N
+cmmwjerou001y23rf8bz63xvh	JE-000081	2026-03-18 21:12:20.873	Payment PAY-034	PAYMENT	cmmwjernm001m23rfxrgnzty1	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-18 21:12:20.91	2026-03-18 21:12:20.91	\N	\N
+cmmwjfc0i002g23rfvos7y0h2	JE-000082	2026-03-18 00:00:00	Payment CR-001	PAYMENT	cmmwjfbzf002423rff1h46ptz	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-18 21:12:47.25	2026-03-18 21:12:47.25	\N	\N
+cmmxezajf01g1ccosi40z1k92	JE-000083	2026-03-17 00:00:00	Invoice INV-046	INVOICE	cmmxezaf501foccosseep05jt	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-19 11:56:06.555	2026-03-19 11:56:06.555	\N	\N
+cmmxf1pgw01gkccos9a48w8lc	JE-000084	2026-03-16 00:00:00	Invoice INV-047	INVOICE	cmmxf1pel01g7ccosq3diypp8	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-19 11:57:59.216	2026-03-19 11:57:59.216	\N	\N
+cmmxgp1f801knccosncgjl14j	JE-000085	2026-03-14 00:00:00	Invoice INV-048	INVOICE	cmmxgp1al01k9ccos546ajwxb	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-19 12:44:07.412	2026-03-19 12:44:07.412	\N	\N
+cmmxgqv2201lcccos1effdqsw	JE-000086	2026-03-19 12:45:32.449	Payment PAY-035	PAYMENT	cmmxgqv0a01l0ccos7xcz4ahn	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-19 12:45:32.474	2026-03-19 12:45:32.474	\N	\N
+cmmxgrdnz01luccos2zckudc3	JE-000087	2026-03-19 12:45:56.566	Payment PAY-036	PAYMENT	cmmxgrdn301liccosuazllx95	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-19 12:45:56.592	2026-03-19 12:45:56.592	\N	\N
+cmmxgt6b501mdccosgm0upgff	JE-000088	2026-02-25 00:00:00	Invoice INV-049	INVOICE	cmmxgt6a601m0ccosdah4sodh	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-03-19 12:47:20.369	2026-03-19 12:47:20.369	\N	\N
+cmnhq22j0008vil5g4j3bawt1	JE-000089	2026-04-02 17:00:00.047	Invoice INV-050	INVOICE	cmnhq014a0002il5g8x6qzmpb	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:01:35.436	2026-04-02 17:01:35.436	\N	\N
+cmnhq27ae009ail5gwajihmdz	JE-000090	2026-04-02 17:00:00.047	Invoice INV-051	INVOICE	cmnhq01870008il5g9f0gk02x	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:01:41.607	2026-04-02 17:01:41.607	\N	\N
+cmnhq2z4b009pil5gp9e1i0qu	JE-000091	2026-04-02 17:00:00.047	Invoice INV-053	INVOICE	cmnhq01ab000mil5ggf2upb40	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:02:17.676	2026-04-02 17:02:17.676	\N	\N
+cmnhq35v400a4il5gdpv2evxh	JE-000092	2026-04-02 17:00:00.047	Invoice INV-054	INVOICE	cmnhq01at000sil5g0n21nkd2	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:02:26.416	2026-04-02 17:02:26.416	\N	\N
+cmnhq38e600ajil5gdnn9s43b	JE-000093	2026-04-02 17:00:00.047	Invoice INV-055	INVOICE	cmnhq01bm0010il5g699bq3wh	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:02:29.694	2026-04-02 17:02:29.694	\N	\N
+cmnhq3az100ayil5gb2kmnuhf	JE-000094	2026-04-02 17:00:00.047	Invoice INV-056	INVOICE	cmnhq01c10016il5gdspjhxm4	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:02:33.037	2026-04-02 17:02:33.037	\N	\N
+cmnhq3d7g00bdil5gtmydevmg	JE-000095	2026-04-02 17:00:00.047	Invoice INV-057	INVOICE	cmnhq01cd001cil5g1m8u2g2v	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:02:35.932	2026-04-02 17:02:35.932	\N	\N
+cmnhq3gj500bsil5g8m93lymh	JE-000096	2026-04-02 17:00:00.047	Invoice INV-058	INVOICE	cmnhq01co001iil5gn7ozjtd4	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:02:40.241	2026-04-02 17:02:40.241	\N	\N
+cmnhq3j1m00c7il5gw5yu9f75	JE-000097	2026-04-02 17:00:00.047	Invoice INV-059	INVOICE	cmnhq01en001pil5gi1vc6sfj	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:02:43.498	2026-04-02 17:02:43.498	\N	\N
+cmnhq3lcm00cmil5gy1jqpxd8	JE-000098	2026-04-02 17:00:00.047	Invoice INV-060	INVOICE	cmnhq01ey001vil5gwx5dp4ad	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:02:46.487	2026-04-02 17:02:46.487	\N	\N
+cmnhq3orm00d1il5gy8u87wsi	JE-000099	2026-04-02 17:00:00.047	Invoice INV-061	INVOICE	cmnhq01fe0021il5gu4slheky	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:02:50.914	2026-04-02 17:02:50.914	\N	\N
+cmnhq3rat00dgil5gaerdw7mo	JE-000100	2026-04-02 17:00:00.047	Invoice INV-062	INVOICE	cmnhq01fs0027il5gnd8o0rz7	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:02:54.197	2026-04-02 17:02:54.197	\N	\N
+cmnhq47dn00dvil5gfdx819t2	JE-000101	2026-04-02 17:00:00.047	Invoice INV-064	INVOICE	cmnhq01gi002jil5gllim8wr2	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:03:15.035	2026-04-02 17:03:15.035	\N	\N
+cmnhq4cjy00eail5g8fhorfxd	JE-000102	2026-04-02 17:00:00.047	Invoice INV-065	INVOICE	cmnhq01gt002pil5gddd7qcmo	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:03:21.742	2026-04-02 17:03:21.742	\N	\N
+cmnhq4gom00f4il5g3i19fyri	JE-000104	2026-04-02 17:00:00.047	Invoice INV-067	INVOICE	cmnhq01hl0031il5gggsgcp9n	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:03:27.094	2026-04-02 17:03:27.094	\N	\N
+cmnhq4kxh00fyil5g4h9nt2ba	JE-000106	2026-04-02 17:00:00.047	Invoice INV-069	INVOICE	cmnhq01if003fil5g0jdvy4l2	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:03:32.598	2026-04-02 17:03:32.598	\N	\N
+cmnhq54as00gsil5gpz1ig1mt	JE-000108	2026-04-02 17:00:00.047	Invoice INV-071	INVOICE	cmnhq01j3003ril5giatnc40g	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:03:57.7	2026-04-02 17:03:57.7	\N	\N
+cmnhq4ec500epil5gptgjfi3q	JE-000103	2026-04-02 17:00:00.047	Invoice INV-066	INVOICE	cmnhq01h7002vil5g6hon7p0k	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:03:24.053	2026-04-02 17:03:24.053	\N	\N
+cmnhq4ihv00fjil5g0n5wpcw3	JE-000105	2026-04-02 17:00:00.047	Invoice INV-068	INVOICE	cmnhq01i10039il5ga38l4cst	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:03:29.444	2026-04-02 17:03:29.444	\N	\N
+cmnhq4n8e00gdil5gxf2wbw3z	JE-000107	2026-04-02 17:00:00.047	Invoice INV-070	INVOICE	cmnhq01io003lil5gxnh50ht7	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:03:35.583	2026-04-02 17:03:35.583	\N	\N
+cmnhq564b00h7il5gwaa7sqqv	JE-000109	2026-04-02 17:00:00.047	Invoice INV-072	INVOICE	cmnhq01jf003xil5g4gjodk7r	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:04:00.059	2026-04-02 17:04:00.059	\N	\N
+cmnhq5aiw00hmil5g0v8s4gaw	JE-000110	2026-04-02 17:00:00.047	Invoice INV-074	INVOICE	cmnhq01k10049il5gamnrycij	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:04:05.768	2026-04-02 17:04:05.768	\N	\N
+cmnhq5crw00i1il5gvyzq38yx	JE-000111	2026-04-02 17:00:00.047	Invoice INV-075	INVOICE	cmnhq01ke004fil5gsqlatwhb	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:04:08.684	2026-04-02 17:04:08.684	\N	\N
+cmnhq5f2000igil5g2n2rh62p	JE-000112	2026-04-02 17:00:00.047	Invoice INV-076	INVOICE	cmnhq01kp004lil5gkguig1dn	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:04:11.64	2026-04-02 17:04:11.64	\N	\N
+cmnhq5uua00iyil5gjpompm8l	JE-000113	2026-04-02 00:00:00	Invoice INV-077	INVOICE	cmnhq01l0004ril5ggwi170gk	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:04:32.098	2026-04-02 17:04:32.098	\N	\N
+cmnhq5wqk00jdil5g2v0z4kq6	JE-000114	2026-04-02 17:00:00.047	Invoice INV-078	INVOICE	cmnhq01ld004xil5g6g4m0ds0	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:04:34.556	2026-04-02 17:04:34.556	\N	\N
+cmnhq5z1r00jsil5gd9f6rwuy	JE-000115	2026-04-02 17:00:00.047	Invoice INV-079	INVOICE	cmnhq01md0055il5g8evc6smq	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:04:37.551	2026-04-02 17:04:37.551	\N	\N
+cmnhq60va00k7il5gl50o2g6h	JE-000116	2026-04-02 17:00:00.047	Invoice INV-080	INVOICE	cmnhq01n3005bil5gor68ssc5	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:04:39.91	2026-04-02 17:04:39.91	\N	\N
+cmnhq639w00kmil5gg77jmx44	JE-000117	2026-04-02 17:00:00.047	Invoice INV-081	INVOICE	cmnhq01nm005jil5gshu2o4rf	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:04:43.029	2026-04-02 17:04:43.029	\N	\N
+cmnhq65ys00l1il5gt3jnql3f	JE-000118	2026-04-02 17:00:00.047	Invoice INV-082	INVOICE	cmnhq01pl005zil5gk3fovhc8	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 17:04:46.517	2026-04-02 17:04:46.517	\N	\N
+cmnhsnuy800luil5guu911463	JE-000119	2026-04-02 17:00:00.047	Invoice INV-084	INVOICE	cmnhq01qi006nil5g2f0e69j1	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:14:31.28	2026-04-02 18:14:31.28	\N	\N
+cmnhsnxcr00m9il5gwz4xzzv3	JE-000120	2026-04-02 17:00:00.047	Invoice INV-085	INVOICE	cmnhq01r00073il5g3dqgocst	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:14:34.396	2026-04-02 18:14:34.396	\N	\N
+cmnhsnz3x00moil5gljo6nakr	JE-000121	2026-04-02 17:00:00.047	Invoice INV-086	INVOICE	cmnhq01rg007jil5gwlqndpz8	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:14:36.669	2026-04-02 18:14:36.669	\N	\N
+cmnhso1f100n3il5gpnzlg6ot	JE-000122	2026-04-02 17:00:00.047	Invoice INV-087	INVOICE	cmnhq01ru007xil5gxpxlxc4a	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:14:39.661	2026-04-02 18:14:39.661	\N	\N
+cmnhso34w00niil5gufo0kpiq	JE-000123	2026-04-02 17:00:00.047	Invoice INV-088	INVOICE	cmnhq01s80089il5guiuv4e6d	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:14:41.888	2026-04-02 18:14:41.888	\N	\N
+cmnhso5kh00nxil5gkcg6k1sn	JE-000124	2026-04-02 17:00:00.047	Invoice INV-089	INVOICE	cmnhq01sk008fil5g02c48kal	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:14:45.042	2026-04-02 18:14:45.042	\N	\N
+cmnhsqhjk00ogil5g68l9s7dl	JE-000125	2026-04-02 18:16:33.843	Payment PAY-037	PAYMENT	cmnhsqhi200o4il5g8zlws1eq	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:16:33.872	2026-04-02 18:16:33.872	\N	\N
+cmnhsqwb200oyil5giwymytn5	JE-000126	2026-04-02 18:16:52.978	Payment PAY-038	PAYMENT	cmnhsqwa400omil5gp706cm82	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:16:53.006	2026-04-02 18:16:53.006	\N	\N
+cmnhsslrj00phil5grmrzg0f8	JE-000127	2026-04-02 18:18:12.622	Payment PAY-039	PAYMENT	cmnhsslqj00p4il5gs4951e8l	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:18:12.656	2026-04-02 18:18:12.656	\N	\N
+cmnhstdvn00pxil5g10wt9awj	JE-000128	2026-04-02 17:00:00.047	Invoice INV-052	INVOICE	cmnhq019c000eil5gfozc4a8r	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:18:49.091	2026-04-02 18:18:49.091	\N	\N
+cmnhstmc800qfil5gj66rwc60	JE-000129	2026-04-02 18:19:00.025	Payment PAY-040	PAYMENT	cmnhstmbf00q3il5g65d5ao86	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:19:00.056	2026-04-02 18:19:00.056	\N	\N
+cmnhstyko00qxil5g6q608gel	JE-000130	2026-04-02 18:19:15.877	Payment PAY-041	PAYMENT	cmnhstyju00qlil5g9f6f3r7g	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:19:15.912	2026-04-02 18:19:15.912	\N	\N
+cmnhsuhvv00rfil5g5yrfduxu	JE-000131	2026-04-02 00:00:00	Payment CR-002	PAYMENT	cmnhsuhv300r3il5gq795293a	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:19:40.94	2026-04-02 18:19:40.94	\N	\N
+cmnhsv29200ryil5gu0gn1r8y	JE-000132	2026-04-02 18:20:07.302	Payment PAY-042	PAYMENT	cmnhsv28300rmil5gu9l8ys8e	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:20:07.334	2026-04-02 18:20:07.334	\N	\N
+cmnhsvdh900sgil5gfpjo3kpg	JE-000133	2026-04-02 18:20:21.856	Payment PAY-043	PAYMENT	cmnhsvdge00s4il5ghtapvnw1	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:20:21.885	2026-04-02 18:20:21.885	\N	\N
+cmnhsvp5600syil5gq0nfsf5o	JE-000134	2026-04-02 18:20:36.97	Payment PAY-044	PAYMENT	cmnhsvp4800smil5g6fzmaau5	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:20:37.002	2026-04-02 18:20:37.002	\N	\N
+cmnhsw3zf00tgil5g4rwhne3g	JE-000135	2026-04-02 18:20:56.209	Payment PAY-045	PAYMENT	cmnhsw3yo00t4il5gseiq6v1r	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:20:56.236	2026-04-02 18:20:56.236	\N	\N
+cmnhsx6tb00tzil5gtwr0nkm8	JE-000136	2026-04-02 18:21:46.534	Payment PAY-046	PAYMENT	cmnhsx6sh00tnil5gzhjujasd	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:21:46.559	2026-04-02 18:21:46.559	\N	\N
+cmnhsxk8y00uhil5gziiu62r9	JE-000137	2026-04-02 18:22:03.943	Payment PAY-047	PAYMENT	cmnhsxk8400u5il5gxwenmy0x	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:22:03.97	2026-04-02 18:22:03.97	\N	\N
+cmnhsxttx00uzil5g4v8rvrdu	JE-000138	2026-04-02 18:22:16.362	Payment PAY-048	PAYMENT	cmnhsxtt200unil5gyg9zq2xb	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:22:16.39	2026-04-02 18:22:16.39	\N	\N
+cmnhsy51v00vhil5g1g58kzvl	JE-000139	2026-04-02 18:22:30.905	Payment PAY-049	PAYMENT	cmnhsy51200v5il5gjotq80n0	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:22:30.932	2026-04-02 18:22:30.932	\N	\N
+cmnhsyekk00vzil5g65f8pldp	JE-000140	2026-04-02 18:22:43.24	Payment PAY-050	PAYMENT	cmnhsyejo00vnil5gc09dpebc	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:22:43.268	2026-04-02 18:22:43.268	\N	\N
+cmnhsyp4g00whil5g1ppbjdbv	JE-000141	2026-04-02 18:22:56.919	Payment PAY-051	PAYMENT	cmnhsyp3o00w5il5gc2umr9j1	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:22:56.944	2026-04-02 18:22:56.944	\N	\N
+cmnhsz20u00wzil5gmk9a54ao	JE-000142	2026-04-02 18:23:13.635	Payment PAY-052	PAYMENT	cmnhsz1zu00wnil5g33kjk87b	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:23:13.663	2026-04-02 18:23:13.663	\N	\N
+cmnhszzd300xeil5gyd4dcjbm	JE-000143	2026-04-02 17:00:00.047	Invoice INV-083	INVOICE	cmnhq01q20069il5gsrm6b0pc	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:23:56.871	2026-04-02 18:23:56.871	\N	\N
+cmnht1rmr00xxil5gsp2evccg	JE-000144	2026-04-02 00:00:00	Payment CR-003	PAYMENT	cmnht1rlm00xlil5gnzlikxif	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:25:20.163	2026-04-02 18:25:20.163	\N	\N
+cmnht226800yfil5gsi9mqix5	JE-000145	2026-04-02 18:25:33.798	Payment PAY-053	PAYMENT	cmnht225f00y3il5gwuofdx6j	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:25:33.824	2026-04-02 18:25:33.824	\N	\N
+cmnht2d2b00yxil5gua2jyyuc	JE-000146	2026-04-02 18:25:47.913	Payment PAY-054	PAYMENT	cmnht2d1i00ylil5gb0chp3hp	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:25:47.94	2026-04-02 18:25:47.94	\N	\N
+cmnhtcra70112il5gnt2jf9dy	JE-000147	2026-04-02 18:33:52.899	Payment PAY-055	PAYMENT	cmnhtcr98010qil5gdrcwpsfj	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:33:52.927	2026-04-02 18:33:52.927	\N	\N
+cmnhtdds2011kil5gom99eq2t	JE-000148	2026-04-02 18:34:22.047	Payment PAY-056	PAYMENT	cmnhtddr20118il5g4do3k4pd	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:34:22.082	2026-04-02 18:34:22.082	\N	\N
+cmnhtdq3b0122il5gi73k9asp	JE-000149	2026-04-02 18:34:38.002	Payment PAY-057	PAYMENT	cmnhtdq2c011qil5g7na8jvvy	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:34:38.039	2026-04-02 18:34:38.039	\N	\N
+cmnhtm9bu012oil5g29i8lr4u	JE-000150	2026-03-20 00:00:00	Invoice INV-090	INVOICE	cmnhtm90y012bil5gl3exhy1n	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:41:16.219	2026-04-02 18:41:16.219	\N	\N
+cmnhu1hld013eil5glnk2kf4k	JE-000151	2026-04-02 00:00:00	Payment CR-004	PAYMENT	cmnhu1hk90132il5gx4bjhlw6	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:53:06.769	2026-04-02 18:53:06.769	\N	\N
+cmnhu2vka013wil5gxjn1z21w	JE-000152	2026-04-02 18:54:11.499	Payment PAY-058	PAYMENT	cmnhu2vj4013kil5gz2680p2f	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:54:11.53	2026-04-02 18:54:11.53	\N	\N
+cmnhu48u7014fil5g79zdwbok	JE-000153	2026-04-02 00:00:00	Payment CR-005	PAYMENT	cmnhu48tg0143il5gdhy04501	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:55:15.391	2026-04-02 18:55:15.391	\N	\N
+cmnhu5bu3014wil5glx8dxjs9	JE-000154	2026-04-02 00:00:00	Loan repayment from Tenda Fuma	LOAN_REPAYMENT	cmnhu5bsy014lil5gklmxm48e	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:56:05.931	2026-04-02 18:56:05.931	\N	\N
+cmnhu5tdg015dil5gnj7ydwgd	JE-000155	2026-04-02 00:00:00	Loan repayment from Tenda Fuma	LOAN_REPAYMENT	cmnhu5tco0152il5g0mk63cbj	POSTED	\N	\N	cmm47pax500048s6ob25tkito	2026-04-02 18:56:28.66	2026-04-02 18:56:28.66	\N	\N
 \.
 
 
 --
--- TOC entry 5795 (class 0 OID 204452)
+-- TOC entry 5909 (class 0 OID 204452)
 -- Dependencies: 256
 -- Data for Name: journal_lines; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6695,6 +7342,12 @@ cmm6n1oy900e31klqaa5dd9ks	cmm6n1oy900e11klq104bn873	cmm484zc3000a945qis85ta2o	30
 cmm6n1oy900e41klq17jm1czd	cmm6n1oy900e11klq104bn873	cmm484zc8000d945ql844ex30	0.00	300.00	\N	2026-02-28 18:12:08.722	\N	\N
 cmm6nj47n00ep1klql603i5t5	cmm6nj47n00en1klqmo0p4dwi	cmm484zcd000f945q0ycl6wap	914.25	0.00	\N	2026-02-28 18:25:41.651	\N	\N
 cmm6nj47n00eq1klqdwqw8spc	cmm6nj47n00en1klqmo0p4dwi	cmm484zc6000c945qmb23e1md	0.00	914.25	\N	2026-02-28 18:25:41.651	\N	\N
+cmmwjd42a000i23rfu897fryf	cmmwjd42a000g23rfbmbpcze4	cmm484zbn0008945qm5gzgk16	500.00	0.00	\N	2026-03-18 21:11:03.634	\N	\N
+cmmwjd42a000j23rf76d5z0za	cmmwjd42a000g23rfbmbpcze4	cmm484zc3000a945qis85ta2o	0.00	500.00	\N	2026-03-18 21:11:03.634	\N	\N
+cmmwjerou002023rfhqc3jltq	cmmwjerou001y23rf8bz63xvh	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-03-18 21:12:20.91	\N	\N
+cmmwjerou002123rfadtiolg9	cmmwjerou001y23rf8bz63xvh	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-03-18 21:12:20.91	\N	\N
+cmmwjfc0i002i23rftqpodpbu	cmmwjfc0i002g23rfvos7y0h2	cmm484zc4000b945qgjk1jffh	350.00	0.00	\N	2026-03-18 21:12:47.25	\N	\N
+cmmwjfc0i002j23rf7kybwjbi	cmmwjfc0i002g23rfvos7y0h2	cmm484zc3000a945qis85ta2o	0.00	350.00	\N	2026-03-18 21:12:47.25	\N	\N
 cmm6o3sui000f8nodp3d3i82p	cmm6o3sui000d8nod9c1zg6ff	cmm484zc6000c945qmb23e1md	914.25	0.00	\N	2026-02-28 18:41:46.699	\N	\N
 cmm6o3sui000g8nod12q4kq17	cmm6o3sui000d8nod9c1zg6ff	cmm484zbn0008945qm5gzgk16	0.00	914.25	\N	2026-02-28 18:41:46.699	\N	\N
 cmm6vbnjh00dytwnajewz4ztt	cmm6vbnjh00dwtwnagurzi7u7	cmm484zbn0008945qm5gzgk16	370.00	0.00	\N	2026-02-28 22:03:50.381	\N	\N
@@ -6727,6 +7380,57 @@ cmmfeg51i00zihwgv0va16uyb	cmmfeg51i00zghwgvr2l6k5us	cmm484zbn0008945qm5gzgk16	36
 cmmfeg51i00zjhwgva6d9bloa	cmmfeg51i00zghwgvr2l6k5us	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-03-06 21:21:21.798	\N	\N
 cmmfeglok00zzhwgvwkyzhca4	cmmfeglok00zxhwgv8x5jw3il	cmm484zbn0008945qm5gzgk16	465.00	0.00	\N	2026-03-06 21:21:43.364	\N	\N
 cmmfeglok0100hwgvs3cwi99e	cmmfeglok00zxhwgv8x5jw3il	cmm484zc3000a945qis85ta2o	0.00	465.00	\N	2026-03-06 21:21:43.364	\N	\N
+cmmwjdqnd001023rf3dezvhf1	cmmwjdqnd000y23rf369a9xmq	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-03-18 21:11:32.905	\N	\N
+cmmwjdqnd001123rfiggq8fw6	cmmwjdqnd000y23rf369a9xmq	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-03-18 21:11:32.905	\N	\N
+cmmxezajf01g3ccos3j56p62d	cmmxezajf01g1ccosi40z1k92	cmm484zc3000a945qis85ta2o	500.00	0.00	\N	2026-03-19 11:56:06.555	\N	\N
+cmmxezajf01g4ccosdibtjiyv	cmmxezajf01g1ccosi40z1k92	cmm484zc8000d945ql844ex30	0.00	500.00	\N	2026-03-19 11:56:06.555	\N	\N
+cmmxgp1f801kpccosv2xb9cgf	cmmxgp1f801knccosncgjl14j	cmm484zc3000a945qis85ta2o	3150.00	0.00	\N	2026-03-19 12:44:07.412	\N	\N
+cmmxgp1f801kqccosl71hycqw	cmmxgp1f801knccosncgjl14j	cmm484zc8000d945ql844ex30	0.00	3150.00	\N	2026-03-19 12:44:07.412	\N	\N
+cmmxgrdnz01lwccosegswgp6n	cmmxgrdnz01luccos2zckudc3	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-03-19 12:45:56.592	\N	\N
+cmmxgrdo001lxccosuv392dru	cmmxgrdnz01luccos2zckudc3	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-03-19 12:45:56.592	\N	\N
+cmnhq27ae009cil5gynnwdz0g	cmnhq27ae009ail5gwajihmdz	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:01:41.607	\N	\N
+cmnhq27ae009dil5gnd76frii	cmnhq27ae009ail5gwajihmdz	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:01:41.607	\N	\N
+cmnhq35v400a6il5glnoihapu	cmnhq35v400a4il5gdpv2evxh	cmm484zc3000a945qis85ta2o	270.00	0.00	\N	2026-04-02 17:02:26.416	\N	\N
+cmnhq35v400a7il5g78xxb8ft	cmnhq35v400a4il5gdpv2evxh	cmm484zc8000d945ql844ex30	0.00	270.00	\N	2026-04-02 17:02:26.416	\N	\N
+cmnhq3az100b0il5g2l0zhurs	cmnhq3az100ayil5gb2kmnuhf	cmm484zc3000a945qis85ta2o	300.00	0.00	\N	2026-04-02 17:02:33.037	\N	\N
+cmnhq3az100b1il5gjwx6ra89	cmnhq3az100ayil5gb2kmnuhf	cmm484zc8000d945ql844ex30	0.00	300.00	\N	2026-04-02 17:02:33.037	\N	\N
+cmnhq3gj500buil5g1aiotj6p	cmnhq3gj500bsil5g8m93lymh	cmm484zc3000a945qis85ta2o	600.00	0.00	\N	2026-04-02 17:02:40.241	\N	\N
+cmnhq3gj500bvil5gmsrl5uyz	cmnhq3gj500bsil5g8m93lymh	cmm484zc8000d945ql844ex30	0.00	600.00	\N	2026-04-02 17:02:40.241	\N	\N
+cmnhq3j1m00c9il5gacyeeh1b	cmnhq3j1m00c7il5gw5yu9f75	cmm484zc3000a945qis85ta2o	350.00	0.00	\N	2026-04-02 17:02:43.498	\N	\N
+cmnhq3j1m00cail5gamkeaqjh	cmnhq3j1m00c7il5gw5yu9f75	cmm484zc8000d945ql844ex30	0.00	350.00	\N	2026-04-02 17:02:43.498	\N	\N
+cmnhq3orm00d3il5gq32uf0n3	cmnhq3orm00d1il5gy8u87wsi	cmm484zc3000a945qis85ta2o	350.00	0.00	\N	2026-04-02 17:02:50.914	\N	\N
+cmnhq3orm00d4il5g2ici4ick	cmnhq3orm00d1il5gy8u87wsi	cmm484zc8000d945ql844ex30	0.00	350.00	\N	2026-04-02 17:02:50.914	\N	\N
+cmnhq4ec500eril5g6jsyle2c	cmnhq4ec500epil5gptgjfi3q	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:03:24.053	\N	\N
+cmnhq4ec500esil5grco2u56s	cmnhq4ec500epil5gptgjfi3q	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:03:24.053	\N	\N
+cmnhq4ihw00flil5gqypffkwk	cmnhq4ihv00fjil5g0n5wpcw3	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:03:29.444	\N	\N
+cmnhq4ihw00fmil5gfbq3huey	cmnhq4ihv00fjil5g0n5wpcw3	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:03:29.444	\N	\N
+cmnhq4n8e00gfil5g36ngsznn	cmnhq4n8e00gdil5gxf2wbw3z	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:03:35.583	\N	\N
+cmnhq4n8e00ggil5guuk0jw8a	cmnhq4n8e00gdil5gxf2wbw3z	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:03:35.583	\N	\N
+cmnhq564b00h9il5gkidkprf7	cmnhq564b00h7il5gwaa7sqqv	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:04:00.059	\N	\N
+cmnhq564b00hail5gnd1tj5sk	cmnhq564b00h7il5gwaa7sqqv	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:04:00.059	\N	\N
+cmnhq5aiw00hoil5gypw9lg69	cmnhq5aiw00hmil5g0v8s4gaw	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:04:05.768	\N	\N
+cmnhq5aiw00hpil5gowwi7cf9	cmnhq5aiw00hmil5g0v8s4gaw	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:04:05.768	\N	\N
+cmnhq5crw00i3il5gcngfdbww	cmnhq5crw00i1il5gvyzq38yx	cmm484zc3000a945qis85ta2o	465.00	0.00	\N	2026-04-02 17:04:08.684	\N	\N
+cmnhq5crw00i4il5gppifm289	cmnhq5crw00i1il5gvyzq38yx	cmm484zc8000d945ql844ex30	0.00	465.00	\N	2026-04-02 17:04:08.684	\N	\N
+cmnhq5uua00j0il5gs8hvqnev	cmnhq5uua00iyil5gjpompm8l	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:04:32.098	\N	\N
+cmnhq5uua00j1il5gn657hwdb	cmnhq5uua00iyil5gjpompm8l	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:04:32.098	\N	\N
+cmnhq5wqk00jgil5grauv272f	cmnhq5wqk00jdil5g2v0z4kq6	cmm484zc8000d945ql844ex30	0.00	350.00	\N	2026-04-02 17:04:34.556	\N	\N
+cmnhq5z1r00juil5ghmvnajqr	cmnhq5z1r00jsil5gd9f6rwuy	cmm484zc3000a945qis85ta2o	230.00	0.00	\N	2026-04-02 17:04:37.551	\N	\N
+cmnhq5z1r00jvil5gjb7ubr07	cmnhq5z1r00jsil5gd9f6rwuy	cmm484zc8000d945ql844ex30	0.00	230.00	\N	2026-04-02 17:04:37.551	\N	\N
+cmnhq60va00k9il5gn4qrcu7g	cmnhq60va00k7il5gl50o2g6h	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:04:39.91	\N	\N
+cmnhq60va00kail5gqgsqf1w7	cmnhq60va00k7il5gl50o2g6h	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:04:39.91	\N	\N
+cmnhq639w00koil5gg8h0w8oc	cmnhq639w00kmil5gg77jmx44	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:04:43.029	\N	\N
+cmnhq639w00kpil5g6t9zjto1	cmnhq639w00kmil5gg77jmx44	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:04:43.029	\N	\N
+cmnhq65ys00l3il5gbvky0i6g	cmnhq65ys00l1il5gt3jnql3f	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:04:46.517	\N	\N
+cmnhq65yt00l4il5gx7c62nt4	cmnhq65ys00l1il5gt3jnql3f	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:04:46.517	\N	\N
+cmnhsnuy800lwil5gsqviap31	cmnhsnuy800luil5guu911463	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 18:14:31.28	\N	\N
+cmnhsnuy800lxil5gyenhfh22	cmnhsnuy800luil5guu911463	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 18:14:31.28	\N	\N
+cmnhsnxcr00mbil5gm7joo3km	cmnhsnxcr00m9il5gwz4xzzv3	cmm484zc3000a945qis85ta2o	230.00	0.00	\N	2026-04-02 18:14:34.396	\N	\N
+cmnhsnxcr00mcil5gvw3bql9o	cmnhsnxcr00m9il5gwz4xzzv3	cmm484zc8000d945ql844ex30	0.00	230.00	\N	2026-04-02 18:14:34.396	\N	\N
+cmnhsnz3x00mqil5gj3hc3wdr	cmnhsnz3x00moil5gljo6nakr	cmm484zc3000a945qis85ta2o	300.00	0.00	\N	2026-04-02 18:14:36.669	\N	\N
+cmnhsnz3x00mril5gsgszrgpb	cmnhsnz3x00moil5gljo6nakr	cmm484zc8000d945ql844ex30	0.00	300.00	\N	2026-04-02 18:14:36.669	\N	\N
+cmnhso1f100n5il5g62q5nhyn	cmnhso1f100n3il5gpnzlg6ot	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 18:14:39.661	\N	\N
+cmnhso1f100n6il5g3zg6befh	cmnhso1f100n3il5gpnzlg6ot	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 18:14:39.661	\N	\N
 cmmfeh3kc010ghwgvbvrxfexw	cmmfeh3kc010ehwgvdaxp4hbh	cmm484zbn0008945qm5gzgk16	350.00	0.00	\N	2026-03-06 21:22:06.54	\N	\N
 cmmfeh3kc010hhwgvmlf9n0ey	cmmfeh3kc010ehwgvdaxp4hbh	cmm484zc3000a945qis85ta2o	0.00	350.00	\N	2026-03-06 21:22:06.54	\N	\N
 cmmiv6z220022kem8g3jnw5gb	cmmiv6z210020kem8pacoynxd	cmm484zbn0008945qm5gzgk16	1500.00	0.00	\N	2026-03-09 07:33:26.138	\N	\N
@@ -6755,52 +7459,183 @@ cmmjmnnw3006l8moi664xapav	cmmjmnnw3006j8moictf8cxtc	cmm484zc4000b945qgjk1jffh	65
 cmmjmnnw3006m8moi0o1fhqfj	cmmjmnnw3006j8moictf8cxtc	cmm484zc3000a945qis85ta2o	0.00	65.00	\N	2026-03-09 20:22:14.451	\N	\N
 cmmjmqgcg000gxm2pb79qus4b	cmmjmqgcf000exm2pvzy17iuo	cmm484zc4000b945qgjk1jffh	5.00	0.00	\N	2026-03-09 20:24:24.64	\N	\N
 cmmjmqgcg000hxm2pmaffpeac	cmmjmqgcf000exm2pvzy17iuo	cmm484zc3000a945qis85ta2o	0.00	5.00	\N	2026-03-09 20:24:24.64	\N	\N
+cmmwje2b8001i23rf7opt0jes	cmmwje2b8001g23rfmw3i4gle	cmm484zbn0008945qm5gzgk16	300.00	0.00	\N	2026-03-18 21:11:48.021	\N	\N
+cmmwje2b8001j23rfvrwoy4rv	cmmwje2b8001g23rfmw3i4gle	cmm484zc3000a945qis85ta2o	0.00	300.00	\N	2026-03-18 21:11:48.021	\N	\N
+cmmxf1pgw01gmccos94dago91	cmmxf1pgw01gkccos9a48w8lc	cmm484zc3000a945qis85ta2o	500.00	0.00	\N	2026-03-19 11:57:59.216	\N	\N
+cmmxf1pgw01gnccoshwgekj2j	cmmxf1pgw01gkccos9a48w8lc	cmm484zc8000d945ql844ex30	0.00	500.00	\N	2026-03-19 11:57:59.216	\N	\N
+cmmxgqv2201leccos49voxp1h	cmmxgqv2201lcccos1effdqsw	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-03-19 12:45:32.474	\N	\N
+cmmxgqv2201lfccos2xw8anzm	cmmxgqv2201lcccos1effdqsw	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-03-19 12:45:32.474	\N	\N
+cmmxgt6b501mfccos4i8suhe3	cmmxgt6b501mdccosgm0upgff	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-03-19 12:47:20.369	\N	\N
+cmmxgt6b501mgccosw52ixleo	cmmxgt6b501mdccosgm0upgff	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-03-19 12:47:20.369	\N	\N
+cmnhq22j0008xil5gktffioo5	cmnhq22j0008vil5g4j3bawt1	cmm484zc3000a945qis85ta2o	465.00	0.00	\N	2026-04-02 17:01:35.436	\N	\N
+cmnhq22j0008yil5gkaa08v26	cmnhq22j0008vil5g4j3bawt1	cmm484zc8000d945ql844ex30	0.00	465.00	\N	2026-04-02 17:01:35.436	\N	\N
+cmnhq2z4b009ril5gstwhhru0	cmnhq2z4b009pil5gp9e1i0qu	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:02:17.676	\N	\N
+cmnhq2z4b009sil5gmwgfnr0t	cmnhq2z4b009pil5gp9e1i0qu	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:02:17.676	\N	\N
+cmnhq38e600alil5g90z39958	cmnhq38e600ajil5gdnn9s43b	cmm484zc3000a945qis85ta2o	465.00	0.00	\N	2026-04-02 17:02:29.694	\N	\N
+cmnhq38e600amil5gsqjokomg	cmnhq38e600ajil5gdnn9s43b	cmm484zc8000d945ql844ex30	0.00	465.00	\N	2026-04-02 17:02:29.694	\N	\N
+cmnhq3d7g00bfil5g3u50kjwb	cmnhq3d7g00bdil5gtmydevmg	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:02:35.932	\N	\N
+cmnhq3d7g00bgil5gw8i29ysg	cmnhq3d7g00bdil5gtmydevmg	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:02:35.932	\N	\N
+cmnhq3lcm00coil5gyxelc8s9	cmnhq3lcm00cmil5gy1jqpxd8	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:02:46.487	\N	\N
+cmnhq3lcm00cpil5g5clzt5ss	cmnhq3lcm00cmil5gy1jqpxd8	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:02:46.487	\N	\N
+cmnhq3rat00diil5gu93yhu91	cmnhq3rat00dgil5gaerdw7mo	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:02:54.197	\N	\N
+cmnhq3rat00djil5gcjabd40t	cmnhq3rat00dgil5gaerdw7mo	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:02:54.197	\N	\N
+cmnhq47dn00dxil5gpwtfbesg	cmnhq47dn00dvil5gfdx819t2	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:03:15.035	\N	\N
+cmnhq47dn00dyil5gmc2ym5k5	cmnhq47dn00dvil5gfdx819t2	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:03:15.035	\N	\N
+cmnhq4cjy00ecil5gx6ek1cic	cmnhq4cjy00eail5g8fhorfxd	cmm484zc3000a945qis85ta2o	465.00	0.00	\N	2026-04-02 17:03:21.742	\N	\N
+cmnhq4cjy00edil5gnom6d1gd	cmnhq4cjy00eail5g8fhorfxd	cmm484zc8000d945ql844ex30	0.00	465.00	\N	2026-04-02 17:03:21.742	\N	\N
+cmnhq4gom00f6il5gu5ksqony	cmnhq4gom00f4il5g3i19fyri	cmm484zc3000a945qis85ta2o	350.00	0.00	\N	2026-04-02 17:03:27.094	\N	\N
+cmnhq4gom00f7il5gv9nnf54s	cmnhq4gom00f4il5g3i19fyri	cmm484zc8000d945ql844ex30	0.00	350.00	\N	2026-04-02 17:03:27.094	\N	\N
+cmnhq4kxi00g0il5gbtr0qq7h	cmnhq4kxh00fyil5g4h9nt2ba	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:03:32.598	\N	\N
+cmnhq4kxi00g1il5gdc3c04pn	cmnhq4kxh00fyil5g4h9nt2ba	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:03:32.598	\N	\N
+cmnhq54as00guil5g4gwow5vs	cmnhq54as00gsil5gpz1ig1mt	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 17:03:57.7	\N	\N
+cmnhq54as00gvil5g07iffjwn	cmnhq54as00gsil5gpz1ig1mt	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 17:03:57.7	\N	\N
+cmnhq5f2000iiil5g1pb9zywz	cmnhq5f2000igil5g2n2rh62p	cmm484zc3000a945qis85ta2o	350.00	0.00	\N	2026-04-02 17:04:11.64	\N	\N
+cmnhq5f2000ijil5gwvluet9b	cmnhq5f2000igil5g2n2rh62p	cmm484zc8000d945ql844ex30	0.00	350.00	\N	2026-04-02 17:04:11.64	\N	\N
+cmnhq5wqk00jfil5gidgh30pm	cmnhq5wqk00jdil5g2v0z4kq6	cmm484zc3000a945qis85ta2o	350.00	0.00	\N	2026-04-02 17:04:34.556	\N	\N
+cmnhso34w00nkil5gqja4vdyy	cmnhso34w00niil5gufo0kpiq	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 18:14:41.888	\N	\N
+cmnhso34w00nlil5gdo0g5jzx	cmnhso34w00niil5gufo0kpiq	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 18:14:41.888	\N	\N
+cmnhso5ki00nzil5gbz0rvj0e	cmnhso5kh00nxil5gkcg6k1sn	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 18:14:45.042	\N	\N
+cmnhso5ki00o0il5gysyeyyqg	cmnhso5kh00nxil5gkcg6k1sn	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 18:14:45.042	\N	\N
+cmnhsqhjk00oiil5gbulzivzx	cmnhsqhjk00ogil5g68l9s7dl	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:16:33.872	\N	\N
+cmnhsqhjk00ojil5gnpa8vu3d	cmnhsqhjk00ogil5g68l9s7dl	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:16:33.872	\N	\N
+cmnhsqwb200p0il5gj2cv83x4	cmnhsqwb200oyil5giwymytn5	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:16:53.006	\N	\N
+cmnhsqwb200p1il5gh8cfbmfj	cmnhsqwb200oyil5giwymytn5	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:16:53.006	\N	\N
+cmnhsslrj00pjil5g0xvzq8kn	cmnhsslrj00phil5grmrzg0f8	cmm484zbn0008945qm5gzgk16	730.00	0.00	\N	2026-04-02 18:18:12.656	\N	\N
+cmnhsslrj00pkil5gnxw8wcrk	cmnhsslrj00phil5grmrzg0f8	cmm484zc3000a945qis85ta2o	0.00	730.00	\N	2026-04-02 18:18:12.656	\N	\N
+cmnhstdvn00pzil5gf5vrc7hx	cmnhstdvn00pxil5g10wt9awj	cmm484zc3000a945qis85ta2o	450.00	0.00	\N	2026-04-02 18:18:49.091	\N	\N
+cmnhstdvn00q0il5gaf70k5cu	cmnhstdvn00pxil5g10wt9awj	cmm484zc8000d945ql844ex30	0.00	450.00	\N	2026-04-02 18:18:49.091	\N	\N
+cmnhstmc800qhil5g6ott5709	cmnhstmc800qfil5gj66rwc60	cmm484zbn0008945qm5gzgk16	450.00	0.00	\N	2026-04-02 18:19:00.056	\N	\N
+cmnhstmc800qiil5gze9q0w1t	cmnhstmc800qfil5gj66rwc60	cmm484zc3000a945qis85ta2o	0.00	450.00	\N	2026-04-02 18:19:00.056	\N	\N
+cmnhstyko00qzil5g5gim09yg	cmnhstyko00qxil5g6q608gel	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:19:15.912	\N	\N
+cmnhstyko00r0il5gb6suoz9a	cmnhstyko00qxil5g6q608gel	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:19:15.912	\N	\N
+cmnhsuhvv00rhil5gykkquve3	cmnhsuhvv00rfil5g5yrfduxu	cmm484zc4000b945qgjk1jffh	365.00	0.00	\N	2026-04-02 18:19:40.94	\N	\N
+cmnhsuhvv00riil5gkxt7s6zj	cmnhsuhvv00rfil5g5yrfduxu	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:19:40.94	\N	\N
+cmnhsv29200s0il5gnhp4r2sg	cmnhsv29200ryil5gu0gn1r8y	cmm484zbn0008945qm5gzgk16	270.00	0.00	\N	2026-04-02 18:20:07.334	\N	\N
+cmnhsv29200s1il5guxy3cm3p	cmnhsv29200ryil5gu0gn1r8y	cmm484zc3000a945qis85ta2o	0.00	270.00	\N	2026-04-02 18:20:07.334	\N	\N
+cmnhsvdh900siil5g6jpu1067	cmnhsvdh900sgil5gfpjo3kpg	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:20:21.885	\N	\N
+cmnhsvdh900sjil5g1rdhkw2o	cmnhsvdh900sgil5gfpjo3kpg	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:20:21.885	\N	\N
+cmnhsvp5600t0il5g1zrkdff0	cmnhsvp5600syil5gq0nfsf5o	cmm484zbn0008945qm5gzgk16	600.00	0.00	\N	2026-04-02 18:20:37.002	\N	\N
+cmnhsvp5600t1il5g27s10r20	cmnhsvp5600syil5gq0nfsf5o	cmm484zc3000a945qis85ta2o	0.00	600.00	\N	2026-04-02 18:20:37.002	\N	\N
+cmnhsw3zf00tiil5gnrsbu7wj	cmnhsw3zf00tgil5g4rwhne3g	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:20:56.236	\N	\N
+cmnhsw3zf00tjil5g1q5r8qsn	cmnhsw3zf00tgil5g4rwhne3g	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:20:56.236	\N	\N
+cmnhsx6tb00u1il5gt6042rao	cmnhsx6tb00tzil5gtwr0nkm8	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:21:46.559	\N	\N
+cmnhsx6tb00u2il5gkti9z5cq	cmnhsx6tb00tzil5gtwr0nkm8	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:21:46.559	\N	\N
+cmnhsxk8y00ujil5gyhcthagp	cmnhsxk8y00uhil5gziiu62r9	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:22:03.97	\N	\N
+cmnhsxk8y00ukil5g4oej3ekr	cmnhsxk8y00uhil5gziiu62r9	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:22:03.97	\N	\N
+cmnhsxtty00v1il5gihjw96w2	cmnhsxttx00uzil5g4v8rvrdu	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:22:16.39	\N	\N
+cmnhsxtty00v2il5gby4rsh8i	cmnhsxttx00uzil5g4v8rvrdu	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:22:16.39	\N	\N
+cmnhsy51w00vjil5glbb0ukf1	cmnhsy51v00vhil5g1g58kzvl	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:22:30.932	\N	\N
+cmnhsy51w00vkil5grp3hmxwc	cmnhsy51v00vhil5g1g58kzvl	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:22:30.932	\N	\N
+cmnhsyekk00w1il5gdri3q3o3	cmnhsyekk00vzil5g65f8pldp	cmm484zbn0008945qm5gzgk16	350.00	0.00	\N	2026-04-02 18:22:43.268	\N	\N
+cmnhsyekk00w2il5g6y6di9t0	cmnhsyekk00vzil5g65f8pldp	cmm484zc3000a945qis85ta2o	0.00	350.00	\N	2026-04-02 18:22:43.268	\N	\N
+cmnhsyp4g00wjil5gb8rjzu51	cmnhsyp4g00whil5g1ppbjdbv	cmm484zbn0008945qm5gzgk16	230.00	0.00	\N	2026-04-02 18:22:56.944	\N	\N
+cmnhsyp4g00wkil5gdmt0p6w5	cmnhsyp4g00whil5g1ppbjdbv	cmm484zc3000a945qis85ta2o	0.00	230.00	\N	2026-04-02 18:22:56.944	\N	\N
+cmnhsz20u00x1il5ga4norg56	cmnhsz20u00wzil5gmk9a54ao	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:23:13.663	\N	\N
+cmnhsz20u00x2il5g103c9crj	cmnhsz20u00wzil5gmk9a54ao	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:23:13.663	\N	\N
+cmnhszzd300xgil5gibio3jtq	cmnhszzd300xeil5gyd4dcjbm	cmm484zc3000a945qis85ta2o	365.00	0.00	\N	2026-04-02 18:23:56.871	\N	\N
+cmnhszzd300xhil5g4hwwocz6	cmnhszzd300xeil5gyd4dcjbm	cmm484zc8000d945ql844ex30	0.00	365.00	\N	2026-04-02 18:23:56.871	\N	\N
+cmnht1rmr00xzil5g0rvvmz9o	cmnht1rmr00xxil5gsp2evccg	cmm484zc4000b945qgjk1jffh	365.00	0.00	\N	2026-04-02 18:25:20.163	\N	\N
+cmnht1rmr00y0il5grx1pxgwz	cmnht1rmr00xxil5gsp2evccg	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:25:20.163	\N	\N
+cmnht226800yhil5gmy0sp3j0	cmnht226800yfil5gsi9mqix5	cmm484zbn0008945qm5gzgk16	300.00	0.00	\N	2026-04-02 18:25:33.824	\N	\N
+cmnht226800yiil5gvy86anfp	cmnht226800yfil5gsi9mqix5	cmm484zc3000a945qis85ta2o	0.00	300.00	\N	2026-04-02 18:25:33.824	\N	\N
+cmnht2d2c00yzil5gk9meerei	cmnht2d2b00yxil5gua2jyyuc	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:25:47.94	\N	\N
+cmnht2d2c00z0il5gjvrzx5ro	cmnht2d2b00yxil5gua2jyyuc	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:25:47.94	\N	\N
+cmnhtcra70114il5gel3qs159	cmnhtcra70112il5gnt2jf9dy	cmm484zbn0008945qm5gzgk16	1000.00	0.00	\N	2026-04-02 18:33:52.927	\N	\N
+cmnhtcra70115il5g8byf8nve	cmnhtcra70112il5gnt2jf9dy	cmm484zc3000a945qis85ta2o	0.00	1000.00	\N	2026-04-02 18:33:52.927	\N	\N
+cmnhtdds2011mil5gohpy6lsj	cmnhtdds2011kil5gom99eq2t	cmm484zbn0008945qm5gzgk16	3150.00	0.00	\N	2026-04-02 18:34:22.082	\N	\N
+cmnhtdds2011nil5g6qrwd9fv	cmnhtdds2011kil5gom99eq2t	cmm484zc3000a945qis85ta2o	0.00	3150.00	\N	2026-04-02 18:34:22.082	\N	\N
+cmnhtdq3b0124il5gln5kd7d9	cmnhtdq3b0122il5gi73k9asp	cmm484zbn0008945qm5gzgk16	500.00	0.00	\N	2026-04-02 18:34:38.039	\N	\N
+cmnhtdq3b0125il5gnt94murk	cmnhtdq3b0122il5gi73k9asp	cmm484zc3000a945qis85ta2o	0.00	500.00	\N	2026-04-02 18:34:38.039	\N	\N
+cmnhtm9bu012qil5glvvbctbi	cmnhtm9bu012oil5g29i8lr4u	cmm484zc3000a945qis85ta2o	500.00	0.00	\N	2026-04-02 18:41:16.219	\N	\N
+cmnhtm9bu012ril5gs0by64jf	cmnhtm9bu012oil5g29i8lr4u	cmm484zc8000d945ql844ex30	0.00	500.00	\N	2026-04-02 18:41:16.219	\N	\N
+cmnhu1hld013gil5g7gb3lxp3	cmnhu1hld013eil5glnk2kf4k	cmm484zc4000b945qgjk1jffh	465.00	0.00	\N	2026-04-02 18:53:06.769	\N	\N
+cmnhu1hld013hil5ghnsoe6ov	cmnhu1hld013eil5glnk2kf4k	cmm484zc3000a945qis85ta2o	0.00	465.00	\N	2026-04-02 18:53:06.769	\N	\N
+cmnhu2vka013yil5gz2jx7ovk	cmnhu2vka013wil5gxjn1z21w	cmm484zbn0008945qm5gzgk16	365.00	0.00	\N	2026-04-02 18:54:11.53	\N	\N
+cmnhu2vka013zil5gk369s4o2	cmnhu2vka013wil5gxjn1z21w	cmm484zc3000a945qis85ta2o	0.00	365.00	\N	2026-04-02 18:54:11.53	\N	\N
+cmnhu48u7014hil5glpjq0koc	cmnhu48u7014fil5g79zdwbok	cmm484zc4000b945qgjk1jffh	350.00	0.00	\N	2026-04-02 18:55:15.391	\N	\N
+cmnhu48u7014iil5g187t7a2d	cmnhu48u7014fil5g79zdwbok	cmm484zc3000a945qis85ta2o	0.00	350.00	\N	2026-04-02 18:55:15.391	\N	\N
+cmnhu5bu3014yil5gculzv8m9	cmnhu5bu3014wil5glx8dxjs9	cmm484zbn0008945qm5gzgk16	10000.00	0.00	\N	2026-04-02 18:56:05.931	\N	\N
+cmnhu5bu3014zil5gcs5u387h	cmnhu5bu3014wil5glx8dxjs9	cmmjmk3qf005t8moin62hihu5	0.00	10000.00	\N	2026-04-02 18:56:05.931	\N	\N
+cmnhu5tdg015fil5gt31pgkhd	cmnhu5tdg015dil5gnj7ydwgd	cmm484zbn0008945qm5gzgk16	500.00	0.00	\N	2026-04-02 18:56:28.66	\N	\N
+cmnhu5tdg015gil5gjenbnp1y	cmnhu5tdg015dil5gnj7ydwgd	cmmjmk3qf005t8moin62hihu5	0.00	500.00	\N	2026-04-02 18:56:28.66	\N	\N
 \.
 
 
 --
--- TOC entry 5793 (class 0 OID 204432)
+-- TOC entry 5907 (class 0 OID 204432)
 -- Dependencies: 254
 -- Data for Name: ledger_accounts; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.ledger_accounts (id, code, name, type, "isSystem", "isActive", "createdAt", "updatedAt") FROM stdin;
-cmm484zbn0008945qm5gzgk16	1000	Bank	ASSET	t	t	2026-02-27 01:39:15.539	2026-03-09 20:24:24.604
-cmm484zc10009945q5iez6h75	1010	Cash	ASSET	t	t	2026-02-27 01:39:15.553	2026-03-09 20:24:24.613
-cmm484zc3000a945qis85ta2o	1200	Accounts Receivable	ASSET	t	t	2026-02-27 01:39:15.555	2026-03-09 20:24:24.616
-cmmjmk3qf005t8moin62hihu5	1300	Loans Receivable	ASSET	t	t	2026-03-09 20:19:28.359	2026-03-09 20:24:24.619
-cmm484zc4000b945qgjk1jffh	1100	Supplier Credits	ASSET	t	t	2026-02-27 01:39:15.557	2026-03-09 20:24:24.621
-cmm484zc6000c945qmb23e1md	2000	Accounts Payable	LIABILITY	t	t	2026-02-27 01:39:15.558	2026-03-09 20:24:24.623
-cmm484zc8000d945ql844ex30	4000	Sales Revenue	INCOME	t	t	2026-02-27 01:39:15.56	2026-03-09 20:24:24.625
-cmm484zcb000e945q2q91843q	2100	Tax Payable	LIABILITY	t	t	2026-02-27 01:39:15.563	2026-03-09 20:24:24.626
-cmm484zcd000f945q0ycl6wap	5000	Purchases	EXPENSE	t	t	2026-02-27 01:39:15.565	2026-03-09 20:24:24.628
+cmm484zbn0008945qm5gzgk16	1000	Bank	ASSET	t	t	2026-02-27 01:39:15.539	2026-04-02 18:56:28.639
+cmm484zc10009945q5iez6h75	1010	Cash	ASSET	t	t	2026-02-27 01:39:15.553	2026-04-02 18:56:28.64
+cmm484zc3000a945qis85ta2o	1200	Accounts Receivable	ASSET	t	t	2026-02-27 01:39:15.555	2026-04-02 18:56:28.642
+cmmjmk3qf005t8moin62hihu5	1300	Loans Receivable	ASSET	t	t	2026-03-09 20:19:28.359	2026-04-02 18:56:28.643
+cmm484zc4000b945qgjk1jffh	1100	Supplier Credits	ASSET	t	t	2026-02-27 01:39:15.557	2026-04-02 18:56:28.646
+cmm484zc6000c945qmb23e1md	2000	Accounts Payable	LIABILITY	t	t	2026-02-27 01:39:15.558	2026-04-02 18:56:28.648
+cmm484zc8000d945ql844ex30	4000	Sales Revenue	INCOME	t	t	2026-02-27 01:39:15.56	2026-04-02 18:56:28.651
+cmm484zcb000e945q2q91843q	2100	Tax Payable	LIABILITY	t	t	2026-02-27 01:39:15.563	2026-04-02 18:56:28.652
+cmm484zcd000f945q0ycl6wap	5000	Purchases	EXPENSE	t	t	2026-02-27 01:39:15.565	2026-04-02 18:56:28.654
 \.
 
 
 --
--- TOC entry 5823 (class 0 OID 244943)
+-- TOC entry 5937 (class 0 OID 244943)
 -- Dependencies: 284
 -- Data for Name: loan_repayments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.loan_repayments (id, "loanId", amount, "paymentDate", notes, "createdAt", "journalEntryId") FROM stdin;
+cmnhu5bsy014lil5gklmxm48e	cmmj669bq0002ayndk0sok08v	10000.00	2026-04-02 00:00:00	Bank	2026-04-02 18:56:05.89	cmnhu5bu3014wil5glx8dxjs9
+cmnhu5tco0152il5g0mk63cbj	cmmj6vu6p001pk0xm3puwl97p	500.00	2026-04-02 00:00:00	CASH	2026-04-02 18:56:28.632	cmnhu5tdg015dil5gnj7ydwgd
 \.
 
 
 --
--- TOC entry 5822 (class 0 OID 244933)
+-- TOC entry 5936 (class 0 OID 244933)
 -- Dependencies: 283
 -- Data for Name: loans; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.loans (id, "borrowerName", "borrowerContact", amount, "outstandingBalance", "loanDate", "dueDate", "interestRate", purpose, status, notes, "ownerCompanyName", "createdById", "createdAt", "updatedAt", "customerId", "journalEntryId") FROM stdin;
-cmmj669bq0002ayndk0sok08v	Tenda Fuma	+27742754404	10000.00	10000.00	2026-03-09 00:00:00	2026-03-25 00:00:00	0.00	Business	ACTIVE	\N	Bretune Technologies	cmm47pax500048s6ob25tkito	2026-03-09 12:40:48.561	2026-03-09 12:40:48.561	\N	\N
-cmmj6vu6p001pk0xm3puwl97p	Tenda Fuma	+27742754404	700.00	700.00	2026-03-09 00:00:00	2026-03-25 00:00:00	0.00	Car repair	ACTIVE	\N	Bretune Technologies	cmm47pax500048s6ob25tkito	2026-03-09 13:00:42.001	2026-03-09 13:00:42.001	cmmj6vu5s001nk0xm42z0d6r8	\N
+cmmj669bq0002ayndk0sok08v	Tenda Fuma	+27742754404	10000.00	0.00	2026-03-09 00:00:00	2026-03-25 00:00:00	0.00	Business	REPAID	\N	Bretune Technologies	cmm47pax500048s6ob25tkito	2026-03-09 12:40:48.561	2026-04-02 18:56:05.896	\N	\N
+cmmj6vu6p001pk0xm3puwl97p	Tenda Fuma	+27742754404	700.00	200.00	2026-03-09 00:00:00	2026-03-25 00:00:00	0.00	Car repair	PARTIALLY_REPAID	\N	Bretune Technologies	cmm47pax500048s6ob25tkito	2026-03-09 13:00:42.001	2026-04-02 18:56:28.634	cmmj6vu5s001nk0xm42z0d6r8	\N
 \.
 
 
 --
--- TOC entry 5775 (class 0 OID 204029)
+-- TOC entry 5941 (class 0 OID 276548)
+-- Dependencies: 288
+-- Data for Name: network_alerts; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.network_alerts (id, "deviceId", severity, message, "isResolved", "resolvedAt", "resolvedByUserId", "ownerCompanyName", "createdAt") FROM stdin;
+\.
+
+
+--
+-- TOC entry 5942 (class 0 OID 276555)
+-- Dependencies: 289
+-- Data for Name: network_devices; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.network_devices (id, name, type, status, "ipAddress", "macAddress", location, model, "serialNumber", "firmwareVersion", "parentDeviceId", "snmpCommunity", "managementUrl", "uptimeSeconds", "cpuPercent", "memoryPercent", "lastSeenAt", notes, "ownerCompanyName", "createdAt", "updatedAt") FROM stdin;
+\.
+
+
+--
+-- TOC entry 5943 (class 0 OID 276562)
+-- Dependencies: 290
+-- Data for Name: network_interfaces; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.network_interfaces (id, "deviceId", name, "ifIndex", speed, "macAddress", "ipAddress", "isUp", "rxBytes", "txBytes", "rxErrors", "txErrors", "lastPolledAt", "createdAt", "updatedAt") FROM stdin;
+\.
+
+
+--
+-- TOC entry 5889 (class 0 OID 204029)
 -- Dependencies: 236
 -- Data for Name: password_resets; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6810,7 +7645,7 @@ COPY public.password_resets (id, "userId", token, "expiresAt", "createdAt") FROM
 
 
 --
--- TOC entry 5818 (class 0 OID 204962)
+-- TOC entry 5932 (class 0 OID 204962)
 -- Dependencies: 279
 -- Data for Name: pay_run_lines; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6820,7 +7655,7 @@ COPY public.pay_run_lines (id, "payRunId", "employeeId", "grossPay", deductions,
 
 
 --
--- TOC entry 5817 (class 0 OID 204949)
+-- TOC entry 5931 (class 0 OID 204949)
 -- Dependencies: 278
 -- Data for Name: pay_runs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6830,13 +7665,15 @@ COPY public.pay_runs (id, "payPeriodStart", "payPeriodEnd", status, "totalGross"
 
 
 --
--- TOC entry 5777 (class 0 OID 204063)
+-- TOC entry 5891 (class 0 OID 204063)
 -- Dependencies: 238
 -- Data for Name: payment_allocations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.payment_allocations (id, "paymentId", "invoiceId", amount, "createdAt") FROM stdin;
+cmmwjd40m000523rfjsr2zb0z	cmmwjd40e000423rf3j1x8gi2	cmmfdycnu00ushwgvl4d5twun	500.00	2026-03-18 21:11:03.574
 cmm54smfm004js8x6el0lns98	cmm54smfh004is8x6chyi22zf	cmm54qdc40040s8x6dokn666t	460.00	2026-02-27 16:53:26.29
+cmmwjdqm2000n23rfavop41p1	cmmwjdqly000m23rfhqlo9nw8	cmm55x5y900brs8x6p43fnlw6	365.00	2026-03-18 21:11:32.859
 cmm6f4z1p002rzvp1yvpqvnb7	cmm6f3t3f000lzvp1h8shmp29	cmm6f30wa0003zvp1hl7kvrhv	350.00	2026-02-28 14:30:44.846
 cmm6fftqo00032fmqsv300174	cmm6fftqf00022fmqdupz6ew1	cmm54hd9b002ws8x6k997r60l	365.00	2026-02-28 14:39:11.184
 cmm6fq7b1000a1klqtel0if3l	cmm6fq7ar00091klq0huyhk2a	cmm484z9o0004945q204d0y5y	6245.57	2026-02-28 14:47:15.325
@@ -6867,20 +7704,55 @@ cmmizn5u800dpkem8olihavi3	cmm54dqug002es8x6onic5950	cmm548jid001vs8x6ip7s3bpi	27
 cmmjmk3nx005p8moiklrsw4ka	cmmjmk3nd005o8moimp8fzq1h	cmm55jlrg009is8x6pcjr9ir9	350.00	2026-03-09 20:19:28.269
 cmmjmnnv600688moib8qgspqd	cmmjmnnv100678moivckbrch1	cmm55f9mw008zs8x6gg4khx43	65.00	2026-03-09 20:22:14.419
 cmmjmqgak0003xm2p4teiah3j	cmmjmqgad0002xm2pqbfe3z4c	cmm54qdc40040s8x6dokn666t	5.00	2026-03-09 20:24:24.572
+cmmwje29z001523rf147fyaf8	cmmwje29v001423rf0jxrbew5	cmm54ku0a003gs8x6m3nypblo	300.00	2026-03-18 21:11:47.975
+cmmwjerns001n23rfmrhi0ye6	cmmwjernm001m23rfxrgnzty1	cmm6mtjg800ck1klq2tjwvvq4	365.00	2026-03-18 21:12:20.872
+cmmwjfbzj002523rf8ogrj6va	cmmwjfbzf002423rff1h46ptz	cmm6m2wd500761klqjgzyw96v	350.00	2026-03-18 21:12:47.215
+cmmxgqv0z01l1ccos6r9jrqy6	cmmxgqv0a01l0ccos7xcz4ahn	cmm6mcqa1009b1klqtr8yxhic	365.00	2026-03-19 12:45:32.436
+cmmxgrdn701ljccosaqcd5dr1	cmmxgrdn301liccosuazllx95	cmm6ljq8v003a1klq6tth9275	365.00	2026-03-19 12:45:56.563
+cmnhsqhif00o5il5grcv7neqq	cmnhsqhi200o4il5g8zlws1eq	cmm6m86yb00881klqd917funl	365.00	2026-04-02 18:16:33.832
+cmnhsqwa800onil5gwdt8q8jb	cmnhsqwa400omil5gp706cm82	cmm6lhr9t002q1klqio5407zy	365.00	2026-04-02 18:16:52.977
+cmnhsslqn00p5il5gyhiiaer8	cmnhsslqj00p4il5gs4951e8l	cmmxgt6a601m0ccosdah4sodh	365.00	2026-04-02 18:18:12.624
+cmnhsslqn00p6il5gvh8vplx0	cmnhsslqj00p4il5gs4951e8l	cmmxgt6a601m0ccosdah4sodh	365.00	2026-04-02 18:18:12.624
+cmnhstmbi00q4il5gidgxbbxm	cmnhstmbf00q3il5g65d5ao86	cmnhq019c000eil5gfozc4a8r	450.00	2026-04-02 18:19:00.03
+cmnhstyjw00qmil5ggiyio5ue	cmnhstyju00qlil5g9f6f3r7g	cmnhq01870008il5g9f0gk02x	365.00	2026-04-02 18:19:15.884
+cmnhsuhv500r4il5g43rselt4	cmnhsuhv300r3il5gq795293a	cmnhq01ab000mil5ggf2upb40	365.00	2026-04-02 18:19:40.914
+cmnhsv28700rnil5gluuiodpq	cmnhsv28300rmil5gu9l8ys8e	cmnhq01at000sil5g0n21nkd2	270.00	2026-04-02 18:20:07.303
+cmnhsvdgh00s5il5gjk6ywnla	cmnhsvdge00s4il5ghtapvnw1	cmnhq01cd001cil5g1m8u2g2v	365.00	2026-04-02 18:20:21.857
+cmnhsvp4b00snil5g8ck0xw0c	cmnhsvp4800smil5g6fzmaau5	cmnhq01co001iil5gn7ozjtd4	600.00	2026-04-02 18:20:36.971
+cmnhsw3yq00t5il5gmsj96n7v	cmnhsw3yo00t4il5gseiq6v1r	cmnhq01ey001vil5gwx5dp4ad	365.00	2026-04-02 18:20:56.211
+cmnhsx6sl00toil5gtd73xxce	cmnhsx6sh00tnil5gzhjujasd	cmnhq01fs0027il5gnd8o0rz7	365.00	2026-04-02 18:21:46.534
+cmnhsxk8600u6il5gw6ihrbe5	cmnhsxk8400u5il5gxwenmy0x	cmnhq01if003fil5g0jdvy4l2	365.00	2026-04-02 18:22:03.943
+cmnhsxtt500uoil5g10rhcrx4	cmnhsxtt200unil5gyg9zq2xb	cmnhq01j3003ril5giatnc40g	365.00	2026-04-02 18:22:16.361
+cmnhsy51500v6il5grjq62jxq	cmnhsy51200v5il5gjotq80n0	cmnhq01k10049il5gamnrycij	365.00	2026-04-02 18:22:30.905
+cmnhsyejr00voil5gvn24ijf1	cmnhsyejo00vnil5gc09dpebc	cmnhq01kp004lil5gkguig1dn	350.00	2026-04-02 18:22:43.239
+cmnhsyp3r00w6il5g24bzp2ue	cmnhsyp3o00w5il5gc2umr9j1	cmnhq01md0055il5g8evc6smq	230.00	2026-04-02 18:22:56.919
+cmnhsz1zx00woil5g5b3jcxtn	cmnhsz1zu00wnil5g33kjk87b	cmnhq01nm005jil5gshu2o4rf	365.00	2026-04-02 18:23:13.63
+cmnht1rlp00xmil5gi7e1dmng	cmnht1rlm00xlil5gnzlikxif	cmnhq01qi006nil5g2f0e69j1	365.00	2026-04-02 18:25:20.126
+cmnht225h00y4il5g9winnk32	cmnht225f00y3il5gwuofdx6j	cmnhq01rg007jil5gwlqndpz8	300.00	2026-04-02 18:25:33.798
+cmnht2d1k00ymil5ghok5iiqr	cmnht2d1i00ylil5gb0chp3hp	cmnhq01sk008fil5g02c48kal	365.00	2026-04-02 18:25:47.912
+cmnhtcr9b010ril5g9380tsi7	cmnhtcr98010qil5gdrcwpsfj	cmmxf1pel01g7ccosq3diypp8	1000.00	2026-04-02 18:33:52.895
+cmnhtddr60119il5gdyxrutvq	cmnhtddr20118il5g4do3k4pd	cmmxgp1al01k9ccos546ajwxb	3150.00	2026-04-02 18:34:22.051
+cmnhtdq2f011ril5ggr9wvawb	cmnhtdq2c011qil5g7na8jvvy	cmmxezaf501foccosseep05jt	500.00	2026-04-02 18:34:38.007
+cmnhu1hkc0133il5gurd7qe6l	cmnhu1hk90132il5gx4bjhlw6	cmnhq01gt002pil5gddd7qcmo	465.00	2026-04-02 18:53:06.732
+cmnhu2vja013lil5g9qrkqizk	cmnhu2vj4013kil5gz2680p2f	cmm6lm10m003t1klqh30komsw	365.00	2026-04-02 18:54:11.495
+cmnhu48ti0144il5gblh69gym	cmnhu48tg0143il5gdhy04501	cmnhq01fe0021il5gu4slheky	350.00	2026-04-02 18:55:15.366
 \.
 
 
 --
--- TOC entry 5765 (class 0 OID 203764)
+-- TOC entry 5879 (class 0 OID 203764)
 -- Dependencies: 226
 -- Data for Name: payments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.payments (id, "paymentNumber", "invoiceId", "clientId", "userId", amount, status, method, "transactionId", notes, "paymentDate", "processedAt", "createdAt", "updatedAt", "unallocatedAmount", "voidedAt", "voidReason", "journalEntryId") FROM stdin;
+cmmwjd40e000423rf3j1x8gi2	PAY-031	cmmfdycnu00ushwgvl4d5twun	cmmfdvvyl00uphwgvtz36zuym	cmm47pax500048s6ob25tkito	500.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-03-18 21:11:03.566	\N	2026-03-18 21:11:03.566	2026-03-18 21:11:03.666	0.00	\N	\N	cmmwjd42a000g23rfbmbpcze4
 cmm54smfh004is8x6chyi22zf	PAY-002	cmm54qdc40040s8x6dokn666t	cmm54ohzw003xs8x6p4nhgv8l	cmm47pax500048s6ob25tkito	460.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-02-27 16:53:26.286	\N	2026-02-27 16:53:26.286	2026-02-27 16:53:26.376	0.00	\N	\N	cmm54smhn004ts8x65hmhtiou
 cmm6f3t3f000lzvp1h8shmp29	PAY-003	cmm6f30wa0003zvp1hl7kvrhv	cmm6f2oi90000zvp15rcvh9dq	cmm47pax500048s6ob25tkito	350.00	COMPLETED	BANK_TRANSFER	Monthly Subscription	\N	2026-02-28 14:29:50.475	\N	2026-02-28 14:29:50.475	2026-02-28 14:30:44.849	0.00	\N	\N	cmm6f3t4k000wzvp15vrbxl2c
+cmmwjdqly000m23rfhqlo9nw8	PAY-032	cmm55x5y900brs8x6p43fnlw6	cmm55wz4x00bos8x6nnrkl8re	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-03-18 21:11:32.855	\N	2026-03-18 21:11:32.855	2026-03-18 21:11:32.924	0.00	\N	\N	cmmwjdqnd000y23rf369a9xmq
 cmm6fftqf00022fmqdupz6ew1	PAY-004	cmm54hd9b002ws8x6k997r60l	cmm54h217002ts8x6qs5irdmh	cmm47pax500048s6ob25tkito	370.00	COMPLETED	BANK_TRANSFER	Monthly subscription	\N	2026-02-28 14:39:11.175	\N	2026-02-28 14:39:11.175	2026-02-28 14:39:11.286	5.00	\N	\N	cmm6fftsf000d2fmqfjpjz7dj
 cmm6fq7ar00091klq0huyhk2a	PAY-005	cmm484z9o0004945q204d0y5y	cmm47x6lz0039pdmhlznggcdn	cmm47pax500048s6ob25tkito	6695.57	COMPLETED	BANK_TRANSFER	Monthly commission	\N	2026-02-28 14:47:15.315	\N	2026-02-28 14:47:15.315	2026-02-28 14:47:15.418	0.00	\N	\N	cmm6fq7da000l1klq85ojx81z
+cmmwje29v001423rf0jxrbew5	PAY-033	cmm54ku0a003gs8x6m3nypblo	cmm54kjqp003ds8x67pxwkczp	cmm47pax500048s6ob25tkito	300.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-03-18 21:11:47.971	\N	2026-03-18 21:11:47.971	2026-03-18 21:11:48.035	0.00	\N	\N	cmmwje2b8001g23rfmw3i4gle
 cmm6vbnfn00dltwnajm5k7tlk	PAY-006	cmm6fxar1001c1klqu51c1exl	cmm6fwzea00191klqx8mfarvz	cmm47pax500048s6ob25tkito	370.00	COMPLETED	BANK_TRANSFER	Monthly subscription	\N	2026-02-28 22:03:50.244	\N	2026-02-28 22:03:50.244	2026-02-28 22:03:50.415	5.00	\N	\N	cmm6vbnjh00dwtwnagurzi7u7
 cmmfe3t1q00vbhwgvh2zylz7d	PAY-007	cmm5521qd006os8x6jss4oqbd	cmm551ver006ls8x65km4hqtw	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	Monthly Subscription	\N	2026-03-06 21:11:46.382	\N	2026-03-06 21:11:46.382	2026-03-06 21:11:46.448	0.00	\N	\N	cmmfe3t3400vmhwgvccblnrn7
 cmmfe7dd200vshwgvdp5x0iey	PAY-008	cmm5555sn0077s8x665dh6i2c	cmm554muh0074s8x6hn9a7048	cmm47pax500048s6ob25tkito	600.00	COMPLETED	CASH	sub	\N	2026-03-06 21:14:32.678	\N	2026-03-06 21:14:32.678	2026-03-06 21:14:32.737	0.00	\N	\N	cmmfe7de900w3hwgvvr6srro8
@@ -6907,11 +7779,41 @@ cmm54dqug002es8x6onic5950	PAY-001	cmm548jid001vs8x6ip7s3bpi	cmm540m4p001os8x6km8
 cmmjmk3nd005o8moimp8fzq1h	PAY-028	cmm55jlrg009is8x6pcjr9ir9	cmm55j1sz009fs8x62nkk3wym	cmm47pax500048s6ob25tkito	350.00	COMPLETED	CREDIT_NOTE	\N	Bonus 	2026-03-09 20:19:28.249	\N	2026-03-09 20:19:28.249	2026-03-09 20:19:28.477	0.00	\N	\N	cmmjmk3rq00608moikx3xt9tj
 cmmjmnnv100678moivckbrch1	PAY-029	cmm55f9mw008zs8x6gg4khx43	cmm55f2iq008ws8x6c9k8kvpl	cmm47pax500048s6ob25tkito	65.00	COMPLETED	CREDIT_NOTE	\N	Reduced package 	2026-03-09 20:22:14.414	\N	2026-03-09 20:22:14.414	2026-03-09 20:22:14.466	0.00	\N	\N	cmmjmnnw3006j8moictf8cxtc
 cmmjmqgad0002xm2pqbfe3z4c	PAY-030	cmm54qdc40040s8x6dokn666t	cmm54ohzw003xs8x6p4nhgv8l	cmm47pax500048s6ob25tkito	5.00	COMPLETED	CREDIT_NOTE	\N	Incorrect billing	2026-03-09 20:24:24.565	\N	2026-03-09 20:24:24.565	2026-03-09 20:24:24.664	0.00	\N	\N	cmmjmqgcf000exm2pvzy17iuo
+cmmwjernm001m23rfxrgnzty1	PAY-034	cmm6mtjg800ck1klq2tjwvvq4	cmm6mtbuc00ch1klq0odakxsn	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-03-18 21:12:20.866	\N	2026-03-18 21:12:20.866	2026-03-18 21:12:20.927	0.00	\N	\N	cmmwjerou001y23rf8bz63xvh
+cmmwjfbzf002423rff1h46ptz	CR-001	cmm6m2wd500761klqjgzyw96v	cmm6m2n1z00721klq0sctxew0	cmm47pax500048s6ob25tkito	350.00	COMPLETED	CREDIT_NOTE	\N	discount	2026-03-18 00:00:00	\N	2026-03-18 21:12:47.211	2026-03-18 21:12:47.257	0.00	\N	\N	cmmwjfc0i002g23rfvos7y0h2
+cmmxgqv0a01l0ccos7xcz4ahn	PAY-035	cmm6mcqa1009b1klqtr8yxhic	cmm6mcin600981klqhytyq4gf	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-03-19 12:45:32.408	\N	2026-03-19 12:45:32.408	2026-03-19 12:45:32.487	0.00	\N	\N	cmmxgqv2201lcccos1effdqsw
+cmmxgrdn301liccosuazllx95	PAY-036	cmm6ljq8v003a1klq6tth9275	cmm6ljd7h00361klqff2544qa	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-03-19 12:45:56.56	\N	2026-03-19 12:45:56.56	2026-03-19 12:45:56.604	0.00	\N	\N	cmmxgrdnz01luccos2zckudc3
+cmnhsqhi200o4il5g8zlws1eq	PAY-037	cmm6m86yb00881klqd917funl	cmm6m7zmc00851klqhgp4clh1	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:16:33.818	\N	2026-04-02 18:16:33.818	2026-04-02 18:16:33.887	0.00	\N	\N	cmnhsqhjk00ogil5g68l9s7dl
+cmnhsqwa400omil5gp706cm82	PAY-038	cmm6lhr9t002q1klqio5407zy	cmm6lh7k3002n1klq8jh12onn	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:16:52.972	\N	2026-04-02 18:16:52.972	2026-04-02 18:16:53.018	0.00	\N	\N	cmnhsqwb200oyil5giwymytn5
+cmnhsslqj00p4il5gs4951e8l	PAY-039	cmmxgt6a601m0ccosdah4sodh	cmm55cbe3008us8x6p33kz5mb	cmm47pax500048s6ob25tkito	730.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:18:12.62	\N	2026-04-02 18:18:12.62	2026-04-02 18:18:12.667	0.00	\N	\N	cmnhsslrj00phil5grmrzg0f8
+cmnhstmbf00q3il5g65d5ao86	PAY-040	cmnhq019c000eil5gfozc4a8r	cmm47x6lz0039pdmhlznggcdn	cmm47pax500048s6ob25tkito	450.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:19:00.027	\N	2026-04-02 18:19:00.027	2026-04-02 18:19:00.06	0.00	\N	\N	cmnhstmc800qfil5gj66rwc60
+cmnhstyju00qlil5g9f6f3r7g	PAY-041	cmnhq01870008il5g9f0gk02x	cmm54h217002ts8x6qs5irdmh	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:19:15.882	\N	2026-04-02 18:19:15.882	2026-04-02 18:19:15.916	0.00	\N	\N	cmnhstyko00qxil5g6q608gel
+cmnhsuhv300r3il5gq795293a	CR-002	cmnhq01ab000mil5ggf2upb40	cmm54h217002ts8x6qs5irdmh	cmm47pax500048s6ob25tkito	365.00	COMPLETED	CREDIT_NOTE	\N	Duplicate	2026-04-02 00:00:00	\N	2026-04-02 18:19:40.911	2026-04-02 18:19:40.944	0.00	\N	\N	cmnhsuhvv00rfil5g5yrfduxu
+cmnhsv28300rmil5gu9l8ys8e	PAY-042	cmnhq01at000sil5g0n21nkd2	cmm540m4p001os8x6km8cvelc	cmm47pax500048s6ob25tkito	270.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:20:07.3	\N	2026-04-02 18:20:07.3	2026-04-02 18:20:07.346	0.00	\N	\N	cmnhsv29200ryil5gu0gn1r8y
+cmnhsvdge00s4il5ghtapvnw1	PAY-043	cmnhq01cd001cil5g1m8u2g2v	cmm551ver006ls8x65km4hqtw	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:20:21.854	\N	2026-04-02 18:20:21.854	2026-04-02 18:20:21.896	0.00	\N	\N	cmnhsvdh900sgil5gfpjo3kpg
+cmnhsvp4800smil5g6fzmaau5	PAY-044	cmnhq01co001iil5gn7ozjtd4	cmm554muh0074s8x6hn9a7048	cmm47pax500048s6ob25tkito	600.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:20:36.968	\N	2026-04-02 18:20:36.968	2026-04-02 18:20:37.014	0.00	\N	\N	cmnhsvp5600syil5gq0nfsf5o
+cmnhsw3yo00t4il5gseiq6v1r	PAY-045	cmnhq01ey001vil5gwx5dp4ad	cmm55a6s8008bs8x6h6fnp5yd	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:20:56.209	\N	2026-04-02 18:20:56.209	2026-04-02 18:20:56.239	0.00	\N	\N	cmnhsw3zf00tgil5g4rwhne3g
+cmnhsx6sh00tnil5gzhjujasd	PAY-046	cmnhq01fs0027il5gnd8o0rz7	cmm55f2iq008ws8x6c9k8kvpl	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:21:46.53	\N	2026-04-02 18:21:46.53	2026-04-02 18:21:46.572	0.00	\N	\N	cmnhsx6tb00tzil5gtwr0nkm8
+cmnhsxk8400u5il5gxwenmy0x	PAY-047	cmnhq01if003fil5g0jdvy4l2	cmm6fwzea00191klqx8mfarvz	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:22:03.941	\N	2026-04-02 18:22:03.941	2026-04-02 18:22:03.974	0.00	\N	\N	cmnhsxk8y00uhil5gziiu62r9
+cmnhsxtt200unil5gyg9zq2xb	PAY-048	cmnhq01j3003ril5giatnc40g	cmm6ljd7h00361klqff2544qa	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:22:16.358	\N	2026-04-02 18:22:16.358	2026-04-02 18:22:16.403	0.00	\N	\N	cmnhsxttx00uzil5g4v8rvrdu
+cmnhsy51200v5il5gjotq80n0	PAY-049	cmnhq01k10049il5gamnrycij	cmm6ltyls004u1klq3s6arqce	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:22:30.903	\N	2026-04-02 18:22:30.903	2026-04-02 18:22:30.937	0.00	\N	\N	cmnhsy51v00vhil5g1g58kzvl
+cmnhsyejo00vnil5gc09dpebc	PAY-050	cmnhq01kp004lil5gkguig1dn	cmm6ly0d0005x1klqmrye4jav	cmm47pax500048s6ob25tkito	350.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:22:43.236	\N	2026-04-02 18:22:43.236	2026-04-02 18:22:43.28	0.00	\N	\N	cmnhsyekk00vzil5g65f8pldp
+cmnhsyp3o00w5il5gc2umr9j1	PAY-051	cmnhq01md0055il5g8evc6smq	cmm6m4kb2007m1klquhr4s41u	cmm47pax500048s6ob25tkito	230.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:22:56.916	\N	2026-04-02 18:22:56.916	2026-04-02 18:22:56.949	0.00	\N	\N	cmnhsyp4g00whil5g1ppbjdbv
+cmnhsz1zu00wnil5g33kjk87b	PAY-052	cmnhq01nm005jil5gshu2o4rf	cmm6maqjf008p1klq0iyvmq8j	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:23:13.626	\N	2026-04-02 18:23:13.626	2026-04-02 18:23:13.676	0.00	\N	\N	cmnhsz20u00wzil5gmk9a54ao
+cmnht1rlm00xlil5gnzlikxif	CR-003	cmnhq01qi006nil5g2f0e69j1	cmm6mglj9009t1klqm9q1uznw	cmm47pax500048s6ob25tkito	365.00	COMPLETED	CREDIT_NOTE	\N	Duplicate	2026-04-02 00:00:00	\N	2026-04-02 18:25:20.122	2026-04-02 18:25:20.176	0.00	\N	\N	cmnht1rmr00xxil5gsp2evccg
+cmnht225f00y3il5gwuofdx6j	PAY-053	cmnhq01rg007jil5gwlqndpz8	cmm6movbm00be1klqnc8pn4f6	cmm47pax500048s6ob25tkito	300.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:25:33.796	\N	2026-04-02 18:25:33.796	2026-04-02 18:25:33.828	0.00	\N	\N	cmnht226800yfil5gsi9mqix5
+cmnht2d1i00ylil5gb0chp3hp	PAY-054	cmnhq01sk008fil5g02c48kal	cmm6mvjxx00d01klqrij7sk43	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:25:47.91	\N	2026-04-02 18:25:47.91	2026-04-02 18:25:47.944	0.00	\N	\N	cmnht2d2b00yxil5gua2jyyuc
+cmnhtcr98010qil5gdrcwpsfj	PAY-055	cmmxf1pel01g7ccosq3diypp8	cmmfdly1z00shhwgvwpnfvclv	cmm47pax500048s6ob25tkito	1000.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:33:52.892	\N	2026-04-02 18:33:52.892	2026-04-02 18:33:52.941	0.00	\N	\N	cmnhtcra70112il5gnt2jf9dy
+cmnhtddr20118il5g4do3k4pd	PAY-056	cmmxgp1al01k9ccos546ajwxb	cmmxgm46l01k5ccostk54flk0	cmm47pax500048s6ob25tkito	3150.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:34:22.046	\N	2026-04-02 18:34:22.046	2026-04-02 18:34:22.094	0.00	\N	\N	cmnhtdds2011kil5gom99eq2t
+cmnhtdq2c011qil5g7na8jvvy	PAY-057	cmmxezaf501foccosseep05jt	cmmfdvvyl00uphwgvtz36zuym	cmm47pax500048s6ob25tkito	500.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:34:38.005	\N	2026-04-02 18:34:38.005	2026-04-02 18:34:38.052	0.00	\N	\N	cmnhtdq3b0122il5gi73k9asp
+cmnhu1hk90132il5gx4bjhlw6	CR-004	cmnhq01gt002pil5gddd7qcmo	cmm55uhcv00b5s8x6xh6qqij3	cmm47pax500048s6ob25tkito	465.00	COMPLETED	CREDIT_NOTE	\N	duplicate	2026-04-02 00:00:00	\N	2026-04-02 18:53:06.729	2026-04-02 18:53:06.784	0.00	\N	\N	cmnhu1hld013eil5glnk2kf4k
+cmnhu2vj4013kil5gz2680p2f	PAY-058	cmm6lm10m003t1klqh30komsw	cmm6llpqi003q1klqf1ejb34c	cmm47pax500048s6ob25tkito	365.00	COMPLETED	BANK_TRANSFER	\N	\N	2026-04-02 18:54:11.488	\N	2026-04-02 18:54:11.488	2026-04-02 18:54:11.54	0.00	\N	\N	cmnhu2vka013wil5gxjn1z21w
+cmnhu48tg0143il5gdhy04501	CR-005	cmnhq01fe0021il5gu4slheky	cmm55j1sz009fs8x62nkk3wym	cmm47pax500048s6ob25tkito	350.00	COMPLETED	CREDIT_NOTE	\N	Duplicate	2026-04-02 00:00:00	\N	2026-04-02 18:55:15.364	2026-04-02 18:55:15.398	0.00	\N	\N	cmnhu48u7014fil5g79zdwbok
 \.
 
 
 --
--- TOC entry 5800 (class 0 OID 204603)
+-- TOC entry 5914 (class 0 OID 204603)
 -- Dependencies: 261
 -- Data for Name: permissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6971,7 +7873,7 @@ cmm47nd8y001dfkjok2y23r2l	statements.send	Send statements	statements	2026-02-27 
 
 
 --
--- TOC entry 5759 (class 0 OID 203701)
+-- TOC entry 5873 (class 0 OID 203701)
 -- Dependencies: 220
 -- Data for Name: products; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6985,11 +7887,12 @@ cmm5449x9001qs8x6mft6pcmt	10/5Mbps	10/5Mbps Home	10/5Mbps	365.00	\N	0.0000	f	\N	
 cmm5457tx001ss8x60i50m2fr	20/10Mbps	20/10Mbps-Premium	20/10Mbps	465.00	\N	0.0000	f	\N	t	2026-02-27 16:35:14.277	2026-02-27 16:35:14.277	f	0.0000	\N	Bretune Technologies	PRODUCT
 cmmaetrg2002hkgp4oa536vjo	tswfst	hyswfhx	yuss	500.00	\N	0.0000	f	\N	t	2026-03-03 09:33:06.483	2026-03-03 09:33:11.462	f	0.0000	\N	Bluedog Technologies	PRODUCT
 cmmfdptf800u5hwgvt7p1cjul	Callout	Technical Callout Fee	Callout	500.00	\N	0.0000	f	\N	t	2026-03-06 21:00:53.684	2026-03-06 21:00:53.684	f	0.0000	\N	Bretune Technologies	PRODUCT
+cmmxgnxsj01k6ccos5vsjo60j	Cat5e	Cat5e Network Cable	\N	9.50	\N	0.0000	f	\N	t	2026-03-19 12:43:16.047	2026-03-19 12:43:16.047	f	0.0000	\N	Bretune Technologies	PRODUCT
 \.
 
 
 --
--- TOC entry 5781 (class 0 OID 204173)
+-- TOC entry 5895 (class 0 OID 204173)
 -- Dependencies: 242
 -- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -6999,7 +7902,7 @@ COPY public.projects (id, "projectNumber", name, description, status, "startDate
 
 
 --
--- TOC entry 5761 (class 0 OID 203723)
+-- TOC entry 5875 (class 0 OID 203723)
 -- Dependencies: 222
 -- Data for Name: quote_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7010,7 +7913,7 @@ cmmaeo3qw000akgp40i3owioz	cmmaeo3qw0009kgp4bq57q611	\N	test	1.00	580.00	0.00	0.0
 
 
 --
--- TOC entry 5760 (class 0 OID 203712)
+-- TOC entry 5874 (class 0 OID 203712)
 -- Dependencies: 221
 -- Data for Name: quotes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7021,7 +7924,7 @@ cmmaeo3qw0009kgp4bq57q611	Q-001	cmmaen5i90006kgp431o5gmfv	cmmael1y10005kgp4vea5f
 
 
 --
--- TOC entry 5766 (class 0 OID 203864)
+-- TOC entry 5880 (class 0 OID 203864)
 -- Dependencies: 227
 -- Data for Name: recurring_invoice_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7072,67 +7975,107 @@ cmmj8beg400ijzyd2ixctsfnl	cmmj8beg400ihzyd2w9tmk3cp	cmm5449x9001qs8x6mft6pcmt	10
 
 
 --
--- TOC entry 5767 (class 0 OID 203903)
+-- TOC entry 5881 (class 0 OID 203903)
 -- Dependencies: 228
 -- Data for Name: recurring_invoice_runs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.recurring_invoice_runs (id, "recurringInvoiceId", "runAt", status, attempt, "invoiceId", error) FROM stdin;
+cmnhq016q0006il5g9iecfq8p	cmm6fingm00021klq7j0gp2lx	2026-04-02 17:00:00.384	SUCCESS	1	cmnhq014a0002il5g8x6qzmpb	\N
+cmnhq018c000cil5gh329xp18	cmm6xrdbu001s13hmewcees78	2026-04-02 17:00:00.444	SUCCESS	1	cmnhq01870008il5g9f0gk02x	\N
+cmnhq019u000iil5g2nbma1j5	cmmj89tzm00dpzyd2jguoni3b	2026-04-02 17:00:00.498	SUCCESS	1	cmnhq019c000eil5gfozc4a8r	\N
+cmnhq01ai000qil5ggljv86ix	cmmj89tz900ddzyd2ullx18vg	2026-04-02 17:00:00.522	SUCCESS	1	cmnhq01ab000mil5ggf2upb40	\N
+cmnhq01b1000wil5g5t9f9qo1	cmmj89tz900dczyd2c1txdl3n	2026-04-02 17:00:00.541	SUCCESS	1	cmnhq01at000sil5g0n21nkd2	\N
+cmnhq01bq0014il5gs9ner4sp	cmmj89tz900dezyd2k56h2kq3	2026-04-02 17:00:00.566	SUCCESS	1	cmnhq01bm0010il5g699bq3wh	\N
+cmnhq01c4001ail5gfsxgejxu	cmmj89tzs00dszyd2hogf7b6f	2026-04-02 17:00:00.58	SUCCESS	1	cmnhq01c10016il5gdspjhxm4	\N
+cmnhq01cg001gil5gmq9w0qox	cmmj89u5j00dyzyd2t7ahgotx	2026-04-02 17:00:00.593	SUCCESS	1	cmnhq01cd001cil5g1m8u2g2v	\N
+cmnhq01ee001nil5g8lcsj2mf	cmmj89u5r00e2zyd29vk7ahn4	2026-04-02 17:00:00.662	SUCCESS	1	cmnhq01co001iil5gn7ozjtd4	\N
+cmnhq01er001til5g9f9s83mi	cmmj89u5z00e9zyd24jrdes3g	2026-04-02 17:00:00.675	SUCCESS	1	cmnhq01en001pil5gi1vc6sfj	\N
+cmnhq01f4001zil5go7db95lo	cmmj89u6000eezyd2fpcvgxdr	2026-04-02 17:00:00.688	SUCCESS	1	cmnhq01ey001vil5gwx5dp4ad	\N
+cmnhq01fh0025il5gi79zelq2	cmmj89u6500ejzyd2gfpga3fs	2026-04-02 17:00:00.702	SUCCESS	1	cmnhq01fe0021il5gu4slheky	\N
+cmnhq01fv002bil5gltffkxna	cmmj89u6700enzyd2u5ze7bfm	2026-04-02 17:00:00.716	SUCCESS	1	cmnhq01fs0027il5gnd8o0rz7	\N
+cmnhq01g8002hil5ga5l45bub	cmmj89u7h00eszyd24v63u1fh	2026-04-02 17:00:00.729	SUCCESS	1	cmnhq01g5002dil5gb3d6zax8	\N
+cmnhq01gm002nil5gf5ha3sm2	cmmj89u8000exzyd28gqlpptp	2026-04-02 17:00:00.742	SUCCESS	1	cmnhq01gi002jil5gllim8wr2	\N
+cmnhq01gz002til5ghl1xxntj	cmmj89u8n00f3zyd2rrx5bm41	2026-04-02 17:00:00.755	SUCCESS	1	cmnhq01gt002pil5gddd7qcmo	\N
+cmnhq01ha002zil5gfxfht4gp	cmmj89u8r00f8zyd2yff3gz36	2026-04-02 17:00:00.767	SUCCESS	1	cmnhq01h7002vil5g6hon7p0k	\N
+cmnhq01ho0035il5g8h03own8	cmmj89u9000fdzyd248rf2vdw	2026-04-02 17:00:00.78	SUCCESS	1	cmnhq01hl0031il5gggsgcp9n	\N
+cmnhq01i5003dil5gf5la5rej	cmmj89u9500fhzyd2h7wek72w	2026-04-02 17:00:00.797	SUCCESS	1	cmnhq01i10039il5ga38l4cst	\N
+cmnhq01ii003jil5g3o4oznq7	cmmj89u9w00fnzyd2j3l5j6ov	2026-04-02 17:00:00.81	SUCCESS	1	cmnhq01if003fil5g0jdvy4l2	\N
+cmnhq01it003pil5glbozq5ab	cmmj89u9z00frzyd2sezhyu3v	2026-04-02 17:00:00.822	SUCCESS	1	cmnhq01io003lil5gxnh50ht7	\N
+cmnhq01j5003vil5gkxij85sd	cmmj8be9k00fyzyd2icx3ls9k	2026-04-02 17:00:00.833	SUCCESS	1	cmnhq01j3003ril5giatnc40g	\N
+cmnhq01ji0041il5gs380ji24	cmmj8bea100g4zyd2n5ld0rcu	2026-04-02 17:00:00.846	SUCCESS	1	cmnhq01jf003xil5g4gjodk7r	\N
+cmnhq01ju0047il5glw31mwyb	cmmj8beac00g8zyd2n02ez2fw	2026-04-02 17:00:00.859	SUCCESS	1	cmnhq01jq0043il5guu3cnbg8	\N
+cmnhq01k6004dil5gn67dfwb4	cmmj8beag00gfzyd2tanq0a6n	2026-04-02 17:00:00.87	SUCCESS	1	cmnhq01k10049il5gamnrycij	\N
+cmnhq01kh004jil5gx12fm5xs	cmmj8beah00gjzyd291o41dqy	2026-04-02 17:00:00.881	SUCCESS	1	cmnhq01ke004fil5gsqlatwhb	\N
+cmnhq01kt004pil5gwypqaljg	cmmj8beal00gnzyd2zd79wttj	2026-04-02 17:00:00.893	SUCCESS	1	cmnhq01kp004lil5gkguig1dn	\N
+cmnhq01l5004vil5gc40ge8zo	cmmj8bec300gszyd2jjpi5hpb	2026-04-02 17:00:00.905	SUCCESS	1	cmnhq01l0004ril5ggwi170gk	\N
+cmnhq01lf0051il5gvfku3pbm	cmmj8becf00gyzyd2mi1f0u91	2026-04-02 17:00:00.916	SUCCESS	1	cmnhq01ld004xil5g6g4m0ds0	\N
+cmnhq01mn0059il5g0q97w59y	cmmj8beck00h3zyd2eihljyqw	2026-04-02 17:00:00.959	SUCCESS	1	cmnhq01md0055il5g8evc6smq	\N
+cmnhq01n9005fil5gc4l76ylj	cmmj8becu00h8zyd230u3a52m	2026-04-02 17:00:00.981	SUCCESS	1	cmnhq01n3005bil5gor68ssc5	\N
+cmnhq01o3005pil5g7qqha2o4	cmmj8becx00hdzyd27nueb0wz	2026-04-02 17:00:01.011	SUCCESS	1	cmnhq01nm005jil5gshu2o4rf	\N
+cmnhq01ps0063il5g00s0bgeu	cmmj8bed500hhzyd2dodpoaq5	2026-04-02 17:00:01.072	SUCCESS	1	cmnhq01pl005zil5gk3fovhc8	\N
+cmnhq01q9006fil5gv8km7kvm	cmmj8bee500hmzyd2qzbu29ma	2026-04-02 17:00:01.089	SUCCESS	1	cmnhq01q20069il5gsrm6b0pc	\N
+cmnhq01qo006vil5g6eqy2kvg	cmmj8beeq00htzyd2bwso0i75	2026-04-02 17:00:01.105	SUCCESS	1	cmnhq01qi006nil5g2f0e69j1	\N
+cmnhq01r6007bil5g8if91z4j	cmmj8beeq00hxzyd2hqri1d4t	2026-04-02 17:00:01.123	SUCCESS	1	cmnhq01r00073il5g3dqgocst	\N
+cmnhq01rm007pil5g78svyr5l	cmmj8beew00i1zyd26iazc9z5	2026-04-02 17:00:01.138	SUCCESS	1	cmnhq01rg007jil5gwlqndpz8	\N
+cmnhq01ry0083il5guu3b7lh6	cmmj8bef500i7zyd2sa79lqbl	2026-04-02 17:00:01.151	SUCCESS	1	cmnhq01ru007xil5gxpxlxc4a	\N
+cmnhq01sc008dil5gllcbezil	cmmj8bef700ibzyd2jappjex2	2026-04-02 17:00:01.164	SUCCESS	1	cmnhq01s80089il5guiuv4e6d	\N
+cmnhq01sn008jil5gcbf557tu	cmmj8beg400ihzyd2w9tmk3cp	2026-04-02 17:00:01.176	SUCCESS	1	cmnhq01sk008fil5g02c48kal	\N
 \.
 
 
 --
--- TOC entry 5764 (class 0 OID 203753)
+-- TOC entry 5878 (class 0 OID 203753)
 -- Dependencies: 225
 -- Data for Name: recurring_invoices; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.recurring_invoices (id, "clientId", "userId", "templateName", frequency, "intervalValue", "startDate", "endDate", "lastGenerated", "nextRunDate", "isActive", subtotal, "taxAmount", "totalAmount", "createdAt", "updatedAt") FROM stdin;
-cmm6fingm00021klq7j0gp2lx	cmm55uhcv00b5s8x6xh6qqij3	cmm47pax500048s6ob25tkito	Monthly susbcription	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-28 00:00:00	t	465.00	0.00	465.00	2026-02-28 14:41:23.015	2026-02-28 14:41:38.257
-cmm6xrdbu001s13hmewcees78	cmm54h217002ts8x6qs5irdmh	cmm47pax500048s6ob25tkito	Recurring: INV-005	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-27 00:00:00	t	365.00	0.00	365.00	2026-02-28 23:12:02.766	2026-02-28 23:12:02.766
-cmmj89tzm00dpzyd2jguoni3b	cmm47x6lz0039pdmhlznggcdn	cmm47pax500048s6ob25tkito	Recurring from INV-002	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	450.00	0.00	450.00	2026-03-09 13:39:34.496	2026-03-09 13:39:34.496
-cmmj89tz900ddzyd2ullx18vg	cmm54h217002ts8x6qs5irdmh	cmm47pax500048s6ob25tkito	Recurring from INV-005	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.494	2026-03-09 13:39:34.494
-cmmj89tz900dczyd2c1txdl3n	cmm540m4p001os8x6km8cvelc	cmm47pax500048s6ob25tkito	Recurring from INV-004	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	270.00	0.00	270.00	2026-03-09 13:39:34.494	2026-03-09 13:39:34.494
-cmmj89tz900dezyd2k56h2kq3	cmm54ohzw003xs8x6p4nhgv8l	cmm47pax500048s6ob25tkito	Recurring from INV-007	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	465.00	0.00	465.00	2026-03-09 13:39:34.496	2026-03-09 13:39:34.496
-cmmj89tzs00dszyd2hogf7b6f	cmm54kjqp003ds8x67pxwkczp	cmm47pax500048s6ob25tkito	Recurring from INV-006	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	300.00	0.00	300.00	2026-03-09 13:39:34.493	2026-03-09 13:39:34.493
-cmmj89u5j00dyzyd2t7ahgotx	cmm551ver006ls8x65km4hqtw	cmm47pax500048s6ob25tkito	Recurring from INV-008	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.759	2026-03-09 13:39:34.759
-cmmj89u5r00e2zyd29vk7ahn4	cmm554muh0074s8x6hn9a7048	cmm47pax500048s6ob25tkito	Recurring from INV-009	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	600.00	0.00	600.00	2026-03-09 13:39:34.767	2026-03-09 13:39:34.767
-cmmj89u5z00e9zyd24jrdes3g	cmm557419007os8x6nailjge0	cmm47pax500048s6ob25tkito	Recurring from INV-010	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	350.00	0.00	350.00	2026-03-09 13:39:34.776	2026-03-09 13:39:34.776
-cmmj89u6000eezyd2fpcvgxdr	cmm55a6s8008bs8x6h6fnp5yd	cmm47pax500048s6ob25tkito	Recurring from INV-011	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.776	2026-03-09 13:39:34.776
-cmmj89u6500ejzyd2gfpga3fs	cmm55j1sz009fs8x62nkk3wym	cmm47pax500048s6ob25tkito	Recurring from INV-013	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	350.00	0.00	350.00	2026-03-09 13:39:34.781	2026-03-09 13:39:34.781
-cmmj89u6700enzyd2u5ze7bfm	cmm55f2iq008ws8x6c9k8kvpl	cmm47pax500048s6ob25tkito	Recurring from INV-012	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.783	2026-03-09 13:39:34.783
-cmmj89u7h00eszyd24v63u1fh	cmm55nh8g00a2s8x6rvry714w	cmm47pax500048s6ob25tkito	Recurring from INV-014	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.83	2026-03-09 13:39:34.83
-cmmj89u8000exzyd28gqlpptp	cmm55r8pq00ams8x6i0lchg3w	cmm47pax500048s6ob25tkito	Recurring from INV-015	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.849	2026-03-09 13:39:34.849
-cmmj89u8n00f3zyd2rrx5bm41	cmm55uhcv00b5s8x6xh6qqij3	cmm47pax500048s6ob25tkito	Recurring from INV-016	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	465.00	0.00	465.00	2026-03-09 13:39:34.871	2026-03-09 13:39:34.871
-cmmj89u8r00f8zyd2yff3gz36	cmm55wz4x00bos8x6nnrkl8re	cmm47pax500048s6ob25tkito	Recurring from INV-017	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.875	2026-03-09 13:39:34.875
-cmmj89u9000fdzyd248rf2vdw	cmm6f2oi90000zvp15rcvh9dq	cmm47pax500048s6ob25tkito	Recurring from INV-018	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	350.00	0.00	350.00	2026-03-09 13:39:34.884	2026-03-09 13:39:34.884
-cmmj89u9500fhzyd2h7wek72w	cmm6fuy5g000q1klqcvvtfvcr	cmm47pax500048s6ob25tkito	Recurring from INV-019	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.89	2026-03-09 13:39:34.89
-cmmj89u9w00fnzyd2j3l5j6ov	cmm6fwzea00191klqx8mfarvz	cmm47pax500048s6ob25tkito	Recurring from INV-020	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.917	2026-03-09 13:39:34.917
-cmmj89u9z00frzyd2sezhyu3v	cmm6lh7k3002n1klq8jh12onn	cmm47pax500048s6ob25tkito	Recurring from INV-021	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.92	2026-03-09 13:39:34.92
-cmmj8be9k00fyzyd2icx3ls9k	cmm6ljd7h00361klqff2544qa	cmm47pax500048s6ob25tkito	Recurring from INV-022	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.48	2026-03-09 13:40:47.48
-cmmj8bea100g4zyd2n5ld0rcu	cmm6llpqi003q1klqf1ejb34c	cmm47pax500048s6ob25tkito	Recurring from INV-023	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.497	2026-03-09 13:40:47.497
-cmmj8beac00g8zyd2n02ez2fw	cmm6lqnd2004b1klqtzti29rl	cmm47pax500048s6ob25tkito	Recurring from INV-024	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.508	2026-03-09 13:40:47.508
-cmmj8beag00gfzyd2tanq0a6n	cmm6ltyls004u1klq3s6arqce	cmm47pax500048s6ob25tkito	Recurring from INV-025	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.512	2026-03-09 13:40:47.512
-cmmj8beah00gjzyd291o41dqy	cmm6lvyqs005d1klqltorxkd7	cmm47pax500048s6ob25tkito	Recurring from INV-026	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	465.00	0.00	465.00	2026-03-09 13:40:47.514	2026-03-09 13:40:47.514
-cmmj8beal00gnzyd2zd79wttj	cmm6ly0d0005x1klqmrye4jav	cmm47pax500048s6ob25tkito	Recurring from INV-027	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	350.00	0.00	350.00	2026-03-09 13:40:47.517	2026-03-09 13:40:47.517
-cmmj8bec300gszyd2jjpi5hpb	cmm6lzufz006g1klqacvd1c71	cmm47pax500048s6ob25tkito	Recurring from INV-028	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	550.00	0.00	550.00	2026-03-09 13:40:47.571	2026-03-09 13:40:47.571
-cmmj8becf00gyzyd2mi1f0u91	cmm6m2n1z00721klq0sctxew0	cmm47pax500048s6ob25tkito	Recurring from INV-029	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	350.00	0.00	350.00	2026-03-09 13:40:47.584	2026-03-09 13:40:47.584
-cmmj8beck00h3zyd2eihljyqw	cmm6m4kb2007m1klquhr4s41u	cmm47pax500048s6ob25tkito	Recurring from INV-030	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	230.00	0.00	230.00	2026-03-09 13:40:47.588	2026-03-09 13:40:47.588
-cmmj8becu00h8zyd230u3a52m	cmm6m7zmc00851klqhgp4clh1	cmm47pax500048s6ob25tkito	Recurring from INV-031	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.598	2026-03-09 13:40:47.598
-cmmj8becx00hdzyd27nueb0wz	cmm6maqjf008p1klq0iyvmq8j	cmm47pax500048s6ob25tkito	Recurring from INV-032	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.602	2026-03-09 13:40:47.602
-cmmj8bed500hhzyd2dodpoaq5	cmm6mcin600981klqhytyq4gf	cmm47pax500048s6ob25tkito	Recurring from INV-033	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.609	2026-03-09 13:40:47.609
-cmmj8bee500hmzyd2qzbu29ma	cmm6me5qh009r1klq9lfn2jhx	cmm47pax500048s6ob25tkito	Recurring from INV-034	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.645	2026-03-09 13:40:47.645
-cmmj8beeq00htzyd2bwso0i75	cmm6mglj9009t1klqm9q1uznw	cmm47pax500048s6ob25tkito	Recurring from INV-035	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.666	2026-03-09 13:40:47.666
-cmmj8beeq00hxzyd2hqri1d4t	cmm6mjll100au1klqlwbnnjp9	cmm47pax500048s6ob25tkito	Recurring from INV-036	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	230.00	0.00	230.00	2026-03-09 13:40:47.667	2026-03-09 13:40:47.667
-cmmj8beew00i1zyd26iazc9z5	cmm6movbm00be1klqnc8pn4f6	cmm47pax500048s6ob25tkito	Recurring from INV-037	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	300.00	0.00	300.00	2026-03-09 13:40:47.672	2026-03-09 13:40:47.672
-cmmj8bef500i7zyd2sa79lqbl	cmm6mtbuc00ch1klq0odakxsn	cmm47pax500048s6ob25tkito	Recurring from INV-039	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.682	2026-03-09 13:40:47.682
-cmmj8bef700ibzyd2jappjex2	cmm6mrbxw00bx1klq6snmtbyb	cmm47pax500048s6ob25tkito	Recurring from INV-038	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.683	2026-03-09 13:40:47.683
-cmmj8beg400ihzyd2w9tmk3cp	cmm6mvjxx00d01klqrij7sk43	cmm47pax500048s6ob25tkito	Recurring from INV-040	MONTHLY	1	2026-03-25 00:00:00	\N	\N	2026-03-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.716	2026-03-09 13:40:47.716
+cmm6fingm00021klq7j0gp2lx	cmm55uhcv00b5s8x6xh6qqij3	cmm47pax500048s6ob25tkito	Monthly susbcription	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-28 00:00:00	t	465.00	0.00	465.00	2026-02-28 14:41:23.015	2026-04-02 17:00:00.408
+cmm6xrdbu001s13hmewcees78	cmm54h217002ts8x6qs5irdmh	cmm47pax500048s6ob25tkito	Recurring: INV-005	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-27 00:00:00	t	365.00	0.00	365.00	2026-02-28 23:12:02.766	2026-04-02 17:00:00.447
+cmmj89tzm00dpzyd2jguoni3b	cmm47x6lz0039pdmhlznggcdn	cmm47pax500048s6ob25tkito	Recurring from INV-002	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	450.00	0.00	450.00	2026-03-09 13:39:34.496	2026-04-02 17:00:00.509
+cmmj89tz900ddzyd2ullx18vg	cmm54h217002ts8x6qs5irdmh	cmm47pax500048s6ob25tkito	Recurring from INV-005	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.494	2026-04-02 17:00:00.524
+cmmj89tz900dczyd2c1txdl3n	cmm540m4p001os8x6km8cvelc	cmm47pax500048s6ob25tkito	Recurring from INV-004	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	270.00	0.00	270.00	2026-03-09 13:39:34.494	2026-04-02 17:00:00.547
+cmmj89tz900dezyd2k56h2kq3	cmm54ohzw003xs8x6p4nhgv8l	cmm47pax500048s6ob25tkito	Recurring from INV-007	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	465.00	0.00	465.00	2026-03-09 13:39:34.496	2026-04-02 17:00:00.57
+cmmj89tzs00dszyd2hogf7b6f	cmm54kjqp003ds8x67pxwkczp	cmm47pax500048s6ob25tkito	Recurring from INV-006	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	300.00	0.00	300.00	2026-03-09 13:39:34.493	2026-04-02 17:00:00.582
+cmmj89u5j00dyzyd2t7ahgotx	cmm551ver006ls8x65km4hqtw	cmm47pax500048s6ob25tkito	Recurring from INV-008	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.759	2026-04-02 17:00:00.595
+cmmj89u5r00e2zyd29vk7ahn4	cmm554muh0074s8x6hn9a7048	cmm47pax500048s6ob25tkito	Recurring from INV-009	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	600.00	0.00	600.00	2026-03-09 13:39:34.767	2026-04-02 17:00:00.664
+cmmj89u5z00e9zyd24jrdes3g	cmm557419007os8x6nailjge0	cmm47pax500048s6ob25tkito	Recurring from INV-010	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	350.00	0.00	350.00	2026-03-09 13:39:34.776	2026-04-02 17:00:00.677
+cmmj89u6000eezyd2fpcvgxdr	cmm55a6s8008bs8x6h6fnp5yd	cmm47pax500048s6ob25tkito	Recurring from INV-011	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.776	2026-04-02 17:00:00.691
+cmmj89u6500ejzyd2gfpga3fs	cmm55j1sz009fs8x62nkk3wym	cmm47pax500048s6ob25tkito	Recurring from INV-013	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	350.00	0.00	350.00	2026-03-09 13:39:34.781	2026-04-02 17:00:00.705
+cmmj89u6700enzyd2u5ze7bfm	cmm55f2iq008ws8x6c9k8kvpl	cmm47pax500048s6ob25tkito	Recurring from INV-012	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.783	2026-04-02 17:00:00.717
+cmmj89u7h00eszyd24v63u1fh	cmm55nh8g00a2s8x6rvry714w	cmm47pax500048s6ob25tkito	Recurring from INV-014	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.83	2026-04-02 17:00:00.731
+cmmj89u8000exzyd28gqlpptp	cmm55r8pq00ams8x6i0lchg3w	cmm47pax500048s6ob25tkito	Recurring from INV-015	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.849	2026-04-02 17:00:00.745
+cmmj89u8n00f3zyd2rrx5bm41	cmm55uhcv00b5s8x6xh6qqij3	cmm47pax500048s6ob25tkito	Recurring from INV-016	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	465.00	0.00	465.00	2026-03-09 13:39:34.871	2026-04-02 17:00:00.758
+cmmj89u8r00f8zyd2yff3gz36	cmm55wz4x00bos8x6nnrkl8re	cmm47pax500048s6ob25tkito	Recurring from INV-017	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.875	2026-04-02 17:00:00.77
+cmmj89u9000fdzyd248rf2vdw	cmm6f2oi90000zvp15rcvh9dq	cmm47pax500048s6ob25tkito	Recurring from INV-018	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	350.00	0.00	350.00	2026-03-09 13:39:34.884	2026-04-02 17:00:00.784
+cmmj89u9500fhzyd2h7wek72w	cmm6fuy5g000q1klqcvvtfvcr	cmm47pax500048s6ob25tkito	Recurring from INV-019	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.89	2026-04-02 17:00:00.799
+cmmj89u9w00fnzyd2j3l5j6ov	cmm6fwzea00191klqx8mfarvz	cmm47pax500048s6ob25tkito	Recurring from INV-020	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.917	2026-04-02 17:00:00.812
+cmmj89u9z00frzyd2sezhyu3v	cmm6lh7k3002n1klq8jh12onn	cmm47pax500048s6ob25tkito	Recurring from INV-021	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:39:34.92	2026-04-02 17:00:00.824
+cmmj8be9k00fyzyd2icx3ls9k	cmm6ljd7h00361klqff2544qa	cmm47pax500048s6ob25tkito	Recurring from INV-022	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.48	2026-04-02 17:00:00.836
+cmmj8bea100g4zyd2n5ld0rcu	cmm6llpqi003q1klqf1ejb34c	cmm47pax500048s6ob25tkito	Recurring from INV-023	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.497	2026-04-02 17:00:00.848
+cmmj8beac00g8zyd2n02ez2fw	cmm6lqnd2004b1klqtzti29rl	cmm47pax500048s6ob25tkito	Recurring from INV-024	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.508	2026-04-02 17:00:00.86
+cmmj8beag00gfzyd2tanq0a6n	cmm6ltyls004u1klq3s6arqce	cmm47pax500048s6ob25tkito	Recurring from INV-025	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.512	2026-04-02 17:00:00.873
+cmmj8beah00gjzyd291o41dqy	cmm6lvyqs005d1klqltorxkd7	cmm47pax500048s6ob25tkito	Recurring from INV-026	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	465.00	0.00	465.00	2026-03-09 13:40:47.514	2026-04-02 17:00:00.883
+cmmj8beal00gnzyd2zd79wttj	cmm6ly0d0005x1klqmrye4jav	cmm47pax500048s6ob25tkito	Recurring from INV-027	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	350.00	0.00	350.00	2026-03-09 13:40:47.517	2026-04-02 17:00:00.896
+cmmj8bec300gszyd2jjpi5hpb	cmm6lzufz006g1klqacvd1c71	cmm47pax500048s6ob25tkito	Recurring from INV-028	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	550.00	0.00	550.00	2026-03-09 13:40:47.571	2026-04-02 17:00:00.907
+cmmj8becf00gyzyd2mi1f0u91	cmm6m2n1z00721klq0sctxew0	cmm47pax500048s6ob25tkito	Recurring from INV-029	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	350.00	0.00	350.00	2026-03-09 13:40:47.584	2026-04-02 17:00:00.917
+cmmj8beck00h3zyd2eihljyqw	cmm6m4kb2007m1klquhr4s41u	cmm47pax500048s6ob25tkito	Recurring from INV-030	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	230.00	0.00	230.00	2026-03-09 13:40:47.588	2026-04-02 17:00:00.962
+cmmj8becu00h8zyd230u3a52m	cmm6m7zmc00851klqhgp4clh1	cmm47pax500048s6ob25tkito	Recurring from INV-031	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.598	2026-04-02 17:00:00.984
+cmmj8becx00hdzyd27nueb0wz	cmm6maqjf008p1klq0iyvmq8j	cmm47pax500048s6ob25tkito	Recurring from INV-032	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.602	2026-04-02 17:00:01.054
+cmmj8bed500hhzyd2dodpoaq5	cmm6mcin600981klqhytyq4gf	cmm47pax500048s6ob25tkito	Recurring from INV-033	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.609	2026-04-02 17:00:01.074
+cmmj8bee500hmzyd2qzbu29ma	cmm6me5qh009r1klq9lfn2jhx	cmm47pax500048s6ob25tkito	Recurring from INV-034	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.645	2026-04-02 17:00:01.092
+cmmj8beeq00htzyd2bwso0i75	cmm6mglj9009t1klqm9q1uznw	cmm47pax500048s6ob25tkito	Recurring from INV-035	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.666	2026-04-02 17:00:01.109
+cmmj8beeq00hxzyd2hqri1d4t	cmm6mjll100au1klqlwbnnjp9	cmm47pax500048s6ob25tkito	Recurring from INV-036	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	230.00	0.00	230.00	2026-03-09 13:40:47.667	2026-04-02 17:00:01.126
+cmmj8beew00i1zyd26iazc9z5	cmm6movbm00be1klqnc8pn4f6	cmm47pax500048s6ob25tkito	Recurring from INV-037	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	300.00	0.00	300.00	2026-03-09 13:40:47.672	2026-04-02 17:00:01.14
+cmmj8bef500i7zyd2sa79lqbl	cmm6mtbuc00ch1klq0odakxsn	cmm47pax500048s6ob25tkito	Recurring from INV-039	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.682	2026-04-02 17:00:01.154
+cmmj8bef700ibzyd2jappjex2	cmm6mrbxw00bx1klq6snmtbyb	cmm47pax500048s6ob25tkito	Recurring from INV-038	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.683	2026-04-02 17:00:01.166
+cmmj8beg400ihzyd2w9tmk3cp	cmm6mvjxx00d01klqrij7sk43	cmm47pax500048s6ob25tkito	Recurring from INV-040	MONTHLY	1	2026-03-25 00:00:00	\N	2026-04-02 17:00:00.047	2026-04-25 00:00:00	t	365.00	0.00	365.00	2026-03-09 13:40:47.716	2026-04-02 17:00:01.178
 \.
 
 
 --
--- TOC entry 5809 (class 0 OID 204773)
+-- TOC entry 5923 (class 0 OID 204773)
 -- Dependencies: 270
 -- Data for Name: recurring_journal_entries; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7142,7 +8085,7 @@ COPY public.recurring_journal_entries (id, name, memo, frequency, "nextRunDate",
 
 
 --
--- TOC entry 5801 (class 0 OID 204611)
+-- TOC entry 5915 (class 0 OID 204611)
 -- Dependencies: 262
 -- Data for Name: role_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7273,7 +8216,7 @@ cmm47nd9a001gfkjo9wlkqld9	cmm47nd8y001dfkjok2y23r2l
 
 
 --
--- TOC entry 5799 (class 0 OID 204594)
+-- TOC entry 5913 (class 0 OID 204594)
 -- Dependencies: 260
 -- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7286,7 +8229,17 @@ cmm47nd9a001gfkjo9wlkqld9	Accountant	Create and edit invoices, payments, and bas
 
 
 --
--- TOC entry 5803 (class 0 OID 204654)
+-- TOC entry 5944 (class 0 OID 276573)
+-- Dependencies: 291
+-- Data for Name: service_plans; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.service_plans (id, name, description, "downloadSpeed", "uploadSpeed", "monthlyPrice", "dataCapGb", "isActive", "ownerCompanyName", "createdAt", "updatedAt") FROM stdin;
+\.
+
+
+--
+-- TOC entry 5917 (class 0 OID 204654)
 -- Dependencies: 264
 -- Data for Name: subscription_plans; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7299,7 +8252,7 @@ cmm47ndah001jfkjog4mkq1cp	PROFESSIONAL	450.00	monthly	{"features": ["Unlimited u
 
 
 --
--- TOC entry 5792 (class 0 OID 204424)
+-- TOC entry 5906 (class 0 OID 204424)
 -- Dependencies: 253
 -- Data for Name: supplier_payment_allocations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7310,7 +8263,7 @@ cmm6o3sth00038nodv8gqyf1i	cmm6o3st700028nodwk3gwk7c	cmm6nj44n00ed1klqdm4z3naf	91
 
 
 --
--- TOC entry 5791 (class 0 OID 204413)
+-- TOC entry 5905 (class 0 OID 204413)
 -- Dependencies: 252
 -- Data for Name: supplier_payments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7321,7 +8274,7 @@ cmm6o3st700028nodwk3gwk7c	SPAY-001	cmm6nbyic00e81klqvju1ivxv	cmm47pax500048s6ob2
 
 
 --
--- TOC entry 5790 (class 0 OID 204360)
+-- TOC entry 5904 (class 0 OID 204360)
 -- Dependencies: 251
 -- Data for Name: suppliers; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7334,7 +8287,7 @@ cmm6nbyic00e81klqvju1ivxv	2	Get Wiza	Get Wiza	Chad	connect@getwiza.com	+27 21 20
 
 
 --
--- TOC entry 5787 (class 0 OID 204220)
+-- TOC entry 5901 (class 0 OID 204220)
 -- Dependencies: 248
 -- Data for Name: task_activities; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7346,7 +8299,7 @@ cmmivgkrd006hkem8kdg9ko43	cmm6ygi1500028ohk718t6v76	cmm47pax500048s6ob25tkito	CO
 
 
 --
--- TOC entry 5788 (class 0 OID 204228)
+-- TOC entry 5902 (class 0 OID 204228)
 -- Dependencies: 249
 -- Data for Name: task_notifications; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7357,7 +8310,7 @@ cmm6ygi2600068ohk2yt1k5nj	cmm6ygi1500028ohk718t6v76	cmm47pax500048s6ob25tkito	RE
 
 
 --
--- TOC entry 5784 (class 0 OID 204195)
+-- TOC entry 5898 (class 0 OID 204195)
 -- Dependencies: 245
 -- Data for Name: task_recurrences; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7367,7 +8320,7 @@ COPY public.task_recurrences (id, frequency, "intervalValue", "startDate", "endD
 
 
 --
--- TOC entry 5786 (class 0 OID 204206)
+-- TOC entry 5900 (class 0 OID 204206)
 -- Dependencies: 247
 -- Data for Name: tasks; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7378,20 +8331,20 @@ cmm6ygi1500028ohk718t6v76	1	ghjhg	fggfhg	SUPPORT	MEDIUM	COMPLETED	2026-03-01 14:
 
 
 --
--- TOC entry 5757 (class 0 OID 203675)
+-- TOC entry 5871 (class 0 OID 203675)
 -- Dependencies: 218
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.users (id, email, password, "firstName", "lastName", role, "isActive", "refreshToken", "lastLogin", "createdAt", "updatedAt", "companyName", "userNumber", "roleId", "companyId") FROM stdin;
 cmm4zhe5z013a1vs3vdkx1i3f	fummah3@gmail.com	$2a$12$XVlLNMCXGBCmaJBEKXru8OanraRKVmLOJO.N3s1GPYHkuhKDI3JSO	Fortune	Matenda	ADMIN	t	$2a$12$BFAk8lIcv398iTdSr06.EuKnuICuRRF4m.FPHiUAEZ5Rx6YDBCw3e	2026-02-27 20:42:20.984	2026-02-27 14:24:44.278	2026-02-27 20:42:20.997	Dziva T	2	\N	cmm4zhe3b01361vs3dxk98b9o
-cmm47pax500048s6ob25tkito	fortunematenda@gmail.com	$2a$12$NPQebYpSXOKMbJN1N4FPiuMCeBPIWMbueEXprfLGbB5iQQ.clfKTW	Fortune	Matenda	ADMIN	t	$2a$12$o2bvqMEKDFA1hShhuXjaOeBwOfVDzZK/2a7qZ78TbZ1O34oCOUkEe	2026-03-09 23:32:26.608	2026-02-27 01:27:04.074	2026-03-09 23:32:26.631	Bretune Technologies	1	\N	cmm47pawm00008s6o8eq8i8y7
+cmm47pax500048s6ob25tkito	fortunematenda@gmail.com	$2a$12$NPQebYpSXOKMbJN1N4FPiuMCeBPIWMbueEXprfLGbB5iQQ.clfKTW	Fortune	Matenda	ADMIN	t	$2a$12$r7xweKucKBWnYOVYiNYhMehd/k3FLjTXGqPTbGvtyo.1ojPhAcBsS	2026-04-02 18:49:34.011	2026-02-27 01:27:04.074	2026-04-02 18:49:34.017	Bretune Technologies	1	\N	cmm47pawm00008s6o8eq8i8y7
 cmmael1y10005kgp4vea5fi0c	chris@gmail.com	$2a$12$wTKQvPRcHhI8ALwxnnZtBeKz51ezPo6vrH4A/AsVkIRtOk4IWZhSy	Chris	Hendricks	ADMIN	t	$2a$12$BGzG4dD3mDmrYZ8FVEfAAOnVFLMGHC9CxTof3YuUSi3CYfMjnCKA6	2026-03-03 11:27:16.152	2026-03-03 09:26:20.186	2026-03-03 11:27:16.155	Bluedog Technologies	3	\N	cmmael1we0001kgp4revaocoi
 \.
 
 
 --
--- TOC entry 5841 (class 0 OID 0)
+-- TOC entry 5962 (class 0 OID 0)
 -- Dependencies: 243
 -- Name: bills_billNumber_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -7400,16 +8353,16 @@ SELECT pg_catalog.setval('public."bills_billNumber_seq"', 1, true);
 
 
 --
--- TOC entry 5842 (class 0 OID 0)
+-- TOC entry 5963 (class 0 OID 0)
 -- Dependencies: 235
 -- Name: clients_clientSeq_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."clients_clientSeq_seq"', 48, true);
+SELECT pg_catalog.setval('public."clients_clientSeq_seq"', 50, true);
 
 
 --
--- TOC entry 5843 (class 0 OID 0)
+-- TOC entry 5964 (class 0 OID 0)
 -- Dependencies: 239
 -- Name: employees_employeeNumber_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -7418,7 +8371,7 @@ SELECT pg_catalog.setval('public."employees_employeeNumber_seq"', 1, false);
 
 
 --
--- TOC entry 5844 (class 0 OID 0)
+-- TOC entry 5965 (class 0 OID 0)
 -- Dependencies: 258
 -- Name: expenses_expenseSeq_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -7427,16 +8380,16 @@ SELECT pg_catalog.setval('public."expenses_expenseSeq_seq"', 1, false);
 
 
 --
--- TOC entry 5845 (class 0 OID 0)
+-- TOC entry 5966 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: invoices_invoiceSeq_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."invoices_invoiceSeq_seq"', 45, true);
+SELECT pg_catalog.setval('public."invoices_invoiceSeq_seq"', 92, true);
 
 
 --
--- TOC entry 5846 (class 0 OID 0)
+-- TOC entry 5967 (class 0 OID 0)
 -- Dependencies: 241
 -- Name: projects_projectNumber_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -7445,7 +8398,7 @@ SELECT pg_catalog.setval('public."projects_projectNumber_seq"', 1, false);
 
 
 --
--- TOC entry 5847 (class 0 OID 0)
+-- TOC entry 5968 (class 0 OID 0)
 -- Dependencies: 233
 -- Name: quotes_quoteSeq_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -7454,7 +8407,7 @@ SELECT pg_catalog.setval('public."quotes_quoteSeq_seq"', 1, true);
 
 
 --
--- TOC entry 5848 (class 0 OID 0)
+-- TOC entry 5969 (class 0 OID 0)
 -- Dependencies: 250
 -- Name: suppliers_supplierSeq_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -7463,7 +8416,7 @@ SELECT pg_catalog.setval('public."suppliers_supplierSeq_seq"', 3, true);
 
 
 --
--- TOC entry 5849 (class 0 OID 0)
+-- TOC entry 5970 (class 0 OID 0)
 -- Dependencies: 246
 -- Name: tasks_taskSeq_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -7472,7 +8425,7 @@ SELECT pg_catalog.setval('public."tasks_taskSeq_seq"', 1, true);
 
 
 --
--- TOC entry 5850 (class 0 OID 0)
+-- TOC entry 5971 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: users_userNumber_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -7481,7 +8434,7 @@ SELECT pg_catalog.setval('public."users_userNumber_seq"', 3, true);
 
 
 --
--- TOC entry 5248 (class 2606 OID 203583)
+-- TOC entry 5317 (class 2606 OID 203583)
 -- Name: _prisma_migrations _prisma_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7490,7 +8443,7 @@ ALTER TABLE ONLY public._prisma_migrations
 
 
 --
--- TOC entry 5471 (class 2606 OID 204825)
+-- TOC entry 5539 (class 2606 OID 204825)
 -- Name: accounting_entities accounting_entities_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7499,7 +8452,7 @@ ALTER TABLE ONLY public.accounting_entities
 
 
 --
--- TOC entry 5463 (class 2606 OID 204772)
+-- TOC entry 5531 (class 2606 OID 204772)
 -- Name: accounting_periods accounting_periods_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7508,7 +8461,16 @@ ALTER TABLE ONLY public.accounting_periods
 
 
 --
--- TOC entry 5481 (class 2606 OID 204869)
+-- TOC entry 5600 (class 2606 OID 276591)
+-- Name: ai_suggestions ai_suggestions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ai_suggestions
+    ADD CONSTRAINT ai_suggestions_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 5549 (class 2606 OID 204869)
 -- Name: audit_logs audit_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7517,7 +8479,16 @@ ALTER TABLE ONLY public.audit_logs
 
 
 --
--- TOC entry 5459 (class 2606 OID 204763)
+-- TOC entry 5607 (class 2606 OID 276593)
+-- Name: automation_rules automation_rules_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.automation_rules
+    ADD CONSTRAINT automation_rules_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 5527 (class 2606 OID 204763)
 -- Name: bank_reconciliation_matches bank_reconciliation_matches_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7526,7 +8497,7 @@ ALTER TABLE ONLY public.bank_reconciliation_matches
 
 
 --
--- TOC entry 5451 (class 2606 OID 204747)
+-- TOC entry 5519 (class 2606 OID 204747)
 -- Name: bank_reconciliations bank_reconciliations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7535,7 +8506,7 @@ ALTER TABLE ONLY public.bank_reconciliations
 
 
 --
--- TOC entry 5455 (class 2606 OID 204755)
+-- TOC entry 5523 (class 2606 OID 204755)
 -- Name: bank_statement_lines bank_statement_lines_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7544,7 +8515,7 @@ ALTER TABLE ONLY public.bank_statement_lines
 
 
 --
--- TOC entry 5511 (class 2606 OID 221845)
+-- TOC entry 5579 (class 2606 OID 221845)
 -- Name: bank_transactions bank_transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7553,7 +8524,7 @@ ALTER TABLE ONLY public.bank_transactions
 
 
 --
--- TOC entry 5342 (class 2606 OID 204194)
+-- TOC entry 5410 (class 2606 OID 204194)
 -- Name: bills bills_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7562,7 +8533,7 @@ ALTER TABLE ONLY public.bills
 
 
 --
--- TOC entry 5505 (class 2606 OID 221822)
+-- TOC entry 5573 (class 2606 OID 221822)
 -- Name: business_bank_accounts business_bank_accounts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7571,7 +8542,16 @@ ALTER TABLE ONLY public.business_bank_accounts
 
 
 --
--- TOC entry 5439 (class 2606 OID 204653)
+-- TOC entry 5612 (class 2606 OID 276595)
+-- Name: client_network_links client_network_links_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.client_network_links
+    ADD CONSTRAINT client_network_links_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 5507 (class 2606 OID 204653)
 -- Name: companies companies_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7580,7 +8560,7 @@ ALTER TABLE ONLY public.companies
 
 
 --
--- TOC entry 5320 (class 2606 OID 204052)
+-- TOC entry 5388 (class 2606 OID 204052)
 -- Name: company_settings company_settings_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7589,7 +8569,7 @@ ALTER TABLE ONLY public.company_settings
 
 
 --
--- TOC entry 5446 (class 2606 OID 204672)
+-- TOC entry 5514 (class 2606 OID 204672)
 -- Name: company_subscriptions company_subscriptions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7598,7 +8578,7 @@ ALTER TABLE ONLY public.company_subscriptions
 
 
 --
--- TOC entry 5473 (class 2606 OID 204842)
+-- TOC entry 5541 (class 2606 OID 204842)
 -- Name: currencies currencies_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7607,7 +8587,7 @@ ALTER TABLE ONLY public.currencies
 
 
 --
--- TOC entry 5516 (class 2606 OID 240486)
+-- TOC entry 5584 (class 2606 OID 240486)
 -- Name: customer_documents customer_documents_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7616,7 +8596,7 @@ ALTER TABLE ONLY public.customer_documents
 
 
 --
--- TOC entry 5260 (class 2606 OID 203700)
+-- TOC entry 5329 (class 2606 OID 203700)
 -- Name: customers customers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7625,7 +8605,7 @@ ALTER TABLE ONLY public.customers
 
 
 --
--- TOC entry 5492 (class 2606 OID 204932)
+-- TOC entry 5560 (class 2606 OID 204932)
 -- Name: depreciation_runs depreciation_runs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7634,7 +8614,7 @@ ALTER TABLE ONLY public.depreciation_runs
 
 
 --
--- TOC entry 5313 (class 2606 OID 203977)
+-- TOC entry 5381 (class 2606 OID 203977)
 -- Name: document_counters document_counters_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7643,7 +8623,7 @@ ALTER TABLE ONLY public.document_counters
 
 
 --
--- TOC entry 5308 (class 2606 OID 203922)
+-- TOC entry 5376 (class 2606 OID 203922)
 -- Name: email_outbox email_outbox_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7652,7 +8632,7 @@ ALTER TABLE ONLY public.email_outbox
 
 
 --
--- TOC entry 5330 (class 2606 OID 204171)
+-- TOC entry 5398 (class 2606 OID 204171)
 -- Name: employees employees_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7661,7 +8641,7 @@ ALTER TABLE ONLY public.employees
 
 
 --
--- TOC entry 5477 (class 2606 OID 204850)
+-- TOC entry 5545 (class 2606 OID 204850)
 -- Name: exchange_rates exchange_rates_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7670,7 +8650,7 @@ ALTER TABLE ONLY public.exchange_rates
 
 
 --
--- TOC entry 5418 (class 2606 OID 204557)
+-- TOC entry 5486 (class 2606 OID 204557)
 -- Name: expense_categories expense_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7679,7 +8659,7 @@ ALTER TABLE ONLY public.expense_categories
 
 
 --
--- TOC entry 5425 (class 2606 OID 204571)
+-- TOC entry 5493 (class 2606 OID 204571)
 -- Name: expenses expenses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7688,7 +8668,7 @@ ALTER TABLE ONLY public.expenses
 
 
 --
--- TOC entry 5488 (class 2606 OID 204922)
+-- TOC entry 5556 (class 2606 OID 204922)
 -- Name: fixed_assets fixed_assets_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7697,7 +8677,7 @@ ALTER TABLE ONLY public.fixed_assets
 
 
 --
--- TOC entry 5484 (class 2606 OID 204898)
+-- TOC entry 5552 (class 2606 OID 204898)
 -- Name: inventory_movements inventory_movements_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7706,7 +8686,7 @@ ALTER TABLE ONLY public.inventory_movements
 
 
 --
--- TOC entry 5287 (class 2606 OID 203752)
+-- TOC entry 5355 (class 2606 OID 203752)
 -- Name: invoice_items invoice_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7715,7 +8695,7 @@ ALTER TABLE ONLY public.invoice_items
 
 
 --
--- TOC entry 5283 (class 2606 OID 203743)
+-- TOC entry 5351 (class 2606 OID 203743)
 -- Name: invoices invoices_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7724,7 +8704,7 @@ ALTER TABLE ONLY public.invoices
 
 
 --
--- TOC entry 5311 (class 2606 OID 203930)
+-- TOC entry 5379 (class 2606 OID 203930)
 -- Name: job_locks job_locks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7733,7 +8713,7 @@ ALTER TABLE ONLY public.job_locks
 
 
 --
--- TOC entry 5408 (class 2606 OID 204451)
+-- TOC entry 5476 (class 2606 OID 204451)
 -- Name: journal_entries journal_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7742,7 +8722,7 @@ ALTER TABLE ONLY public.journal_entries
 
 
 --
--- TOC entry 5415 (class 2606 OID 204461)
+-- TOC entry 5483 (class 2606 OID 204461)
 -- Name: journal_lines journal_lines_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7751,7 +8731,7 @@ ALTER TABLE ONLY public.journal_lines
 
 
 --
--- TOC entry 5402 (class 2606 OID 204441)
+-- TOC entry 5470 (class 2606 OID 204441)
 -- Name: ledger_accounts ledger_accounts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7760,7 +8740,7 @@ ALTER TABLE ONLY public.ledger_accounts
 
 
 --
--- TOC entry 5526 (class 2606 OID 244950)
+-- TOC entry 5596 (class 2606 OID 244950)
 -- Name: loan_repayments loan_repayments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7769,7 +8749,7 @@ ALTER TABLE ONLY public.loan_repayments
 
 
 --
--- TOC entry 5522 (class 2606 OID 244942)
+-- TOC entry 5591 (class 2606 OID 244942)
 -- Name: loans loans_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7778,7 +8758,34 @@ ALTER TABLE ONLY public.loans
 
 
 --
--- TOC entry 5315 (class 2606 OID 204036)
+-- TOC entry 5619 (class 2606 OID 276597)
+-- Name: network_alerts network_alerts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.network_alerts
+    ADD CONSTRAINT network_alerts_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 5625 (class 2606 OID 276599)
+-- Name: network_devices network_devices_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.network_devices
+    ADD CONSTRAINT network_devices_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 5630 (class 2606 OID 276601)
+-- Name: network_interfaces network_interfaces_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.network_interfaces
+    ADD CONSTRAINT network_interfaces_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 5383 (class 2606 OID 204036)
 -- Name: password_resets password_resets_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7787,7 +8794,7 @@ ALTER TABLE ONLY public.password_resets
 
 
 --
--- TOC entry 5501 (class 2606 OID 204969)
+-- TOC entry 5569 (class 2606 OID 204969)
 -- Name: pay_run_lines pay_run_lines_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7796,7 +8803,7 @@ ALTER TABLE ONLY public.pay_run_lines
 
 
 --
--- TOC entry 5496 (class 2606 OID 204959)
+-- TOC entry 5564 (class 2606 OID 204959)
 -- Name: pay_runs pay_runs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7805,7 +8812,7 @@ ALTER TABLE ONLY public.pay_runs
 
 
 --
--- TOC entry 5324 (class 2606 OID 204070)
+-- TOC entry 5392 (class 2606 OID 204070)
 -- Name: payment_allocations payment_allocations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7814,7 +8821,7 @@ ALTER TABLE ONLY public.payment_allocations
 
 
 --
--- TOC entry 5298 (class 2606 OID 203773)
+-- TOC entry 5366 (class 2606 OID 203773)
 -- Name: payments payments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7823,7 +8830,7 @@ ALTER TABLE ONLY public.payments
 
 
 --
--- TOC entry 5434 (class 2606 OID 204610)
+-- TOC entry 5502 (class 2606 OID 204610)
 -- Name: permissions permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7832,7 +8839,7 @@ ALTER TABLE ONLY public.permissions
 
 
 --
--- TOC entry 5267 (class 2606 OID 203711)
+-- TOC entry 5335 (class 2606 OID 203711)
 -- Name: products products_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7841,7 +8848,7 @@ ALTER TABLE ONLY public.products
 
 
 --
--- TOC entry 5333 (class 2606 OID 204182)
+-- TOC entry 5401 (class 2606 OID 204182)
 -- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7850,7 +8857,7 @@ ALTER TABLE ONLY public.projects
 
 
 --
--- TOC entry 5276 (class 2606 OID 203731)
+-- TOC entry 5344 (class 2606 OID 203731)
 -- Name: quote_items quote_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7859,7 +8866,7 @@ ALTER TABLE ONLY public.quote_items
 
 
 --
--- TOC entry 5271 (class 2606 OID 203722)
+-- TOC entry 5339 (class 2606 OID 203722)
 -- Name: quotes quotes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7868,7 +8875,7 @@ ALTER TABLE ONLY public.quotes
 
 
 --
--- TOC entry 5300 (class 2606 OID 203872)
+-- TOC entry 5368 (class 2606 OID 203872)
 -- Name: recurring_invoice_items recurring_invoice_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7877,7 +8884,7 @@ ALTER TABLE ONLY public.recurring_invoice_items
 
 
 --
--- TOC entry 5303 (class 2606 OID 203911)
+-- TOC entry 5371 (class 2606 OID 203911)
 -- Name: recurring_invoice_runs recurring_invoice_runs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7886,7 +8893,7 @@ ALTER TABLE ONLY public.recurring_invoice_runs
 
 
 --
--- TOC entry 5291 (class 2606 OID 203763)
+-- TOC entry 5359 (class 2606 OID 203763)
 -- Name: recurring_invoices recurring_invoices_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7895,7 +8902,7 @@ ALTER TABLE ONLY public.recurring_invoices
 
 
 --
--- TOC entry 5468 (class 2606 OID 204781)
+-- TOC entry 5536 (class 2606 OID 204781)
 -- Name: recurring_journal_entries recurring_journal_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7904,7 +8911,7 @@ ALTER TABLE ONLY public.recurring_journal_entries
 
 
 --
--- TOC entry 5436 (class 2606 OID 204617)
+-- TOC entry 5504 (class 2606 OID 204617)
 -- Name: role_permissions role_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7913,7 +8920,7 @@ ALTER TABLE ONLY public.role_permissions
 
 
 --
--- TOC entry 5431 (class 2606 OID 204602)
+-- TOC entry 5499 (class 2606 OID 204602)
 -- Name: roles roles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7922,7 +8929,16 @@ ALTER TABLE ONLY public.roles
 
 
 --
--- TOC entry 5442 (class 2606 OID 204663)
+-- TOC entry 5634 (class 2606 OID 276603)
+-- Name: service_plans service_plans_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.service_plans
+    ADD CONSTRAINT service_plans_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 5510 (class 2606 OID 204663)
 -- Name: subscription_plans subscription_plans_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7931,7 +8947,7 @@ ALTER TABLE ONLY public.subscription_plans
 
 
 --
--- TOC entry 5398 (class 2606 OID 204431)
+-- TOC entry 5466 (class 2606 OID 204431)
 -- Name: supplier_payment_allocations supplier_payment_allocations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7940,7 +8956,7 @@ ALTER TABLE ONLY public.supplier_payment_allocations
 
 
 --
--- TOC entry 5392 (class 2606 OID 204423)
+-- TOC entry 5460 (class 2606 OID 204423)
 -- Name: supplier_payments supplier_payments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7949,7 +8965,7 @@ ALTER TABLE ONLY public.supplier_payments
 
 
 --
--- TOC entry 5383 (class 2606 OID 204370)
+-- TOC entry 5451 (class 2606 OID 204370)
 -- Name: suppliers suppliers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7958,7 +8974,7 @@ ALTER TABLE ONLY public.suppliers
 
 
 --
--- TOC entry 5370 (class 2606 OID 204227)
+-- TOC entry 5438 (class 2606 OID 204227)
 -- Name: task_activities task_activities_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7967,7 +8983,7 @@ ALTER TABLE ONLY public.task_activities
 
 
 --
--- TOC entry 5373 (class 2606 OID 204236)
+-- TOC entry 5441 (class 2606 OID 204236)
 -- Name: task_notifications task_notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7976,7 +8992,7 @@ ALTER TABLE ONLY public.task_notifications
 
 
 --
--- TOC entry 5349 (class 2606 OID 204204)
+-- TOC entry 5417 (class 2606 OID 204204)
 -- Name: task_recurrences task_recurrences_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7985,7 +9001,7 @@ ALTER TABLE ONLY public.task_recurrences
 
 
 --
--- TOC entry 5360 (class 2606 OID 204219)
+-- TOC entry 5428 (class 2606 OID 204219)
 -- Name: tasks tasks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -7994,7 +9010,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- TOC entry 5252 (class 2606 OID 203684)
+-- TOC entry 5321 (class 2606 OID 203684)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -8003,7 +9019,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 5469 (class 1259 OID 204826)
+-- TOC entry 5537 (class 1259 OID 204826)
 -- Name: accounting_entities_companyId_code_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8011,7 +9027,7 @@ CREATE UNIQUE INDEX "accounting_entities_companyId_code_key" ON public.accountin
 
 
 --
--- TOC entry 5464 (class 1259 OID 204789)
+-- TOC entry 5532 (class 1259 OID 204789)
 -- Name: accounting_periods_startDate_endDate_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8019,7 +9035,7 @@ CREATE UNIQUE INDEX "accounting_periods_startDate_endDate_key" ON public.account
 
 
 --
--- TOC entry 5465 (class 1259 OID 204790)
+-- TOC entry 5533 (class 1259 OID 204790)
 -- Name: accounting_periods_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8027,7 +9043,39 @@ CREATE INDEX accounting_periods_status_idx ON public.accounting_periods USING bt
 
 
 --
--- TOC entry 5478 (class 1259 OID 204871)
+-- TOC entry 5597 (class 1259 OID 276604)
+-- Name: ai_suggestions_createdAt_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "ai_suggestions_createdAt_idx" ON public.ai_suggestions USING btree ("createdAt");
+
+
+--
+-- TOC entry 5598 (class 1259 OID 276605)
+-- Name: ai_suggestions_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "ai_suggestions_ownerCompanyName_idx" ON public.ai_suggestions USING btree ("ownerCompanyName");
+
+
+--
+-- TOC entry 5601 (class 1259 OID 276606)
+-- Name: ai_suggestions_sourceEntityType_sourceEntityId_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "ai_suggestions_sourceEntityType_sourceEntityId_idx" ON public.ai_suggestions USING btree ("sourceEntityType", "sourceEntityId");
+
+
+--
+-- TOC entry 5602 (class 1259 OID 276607)
+-- Name: ai_suggestions_type_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX ai_suggestions_type_status_idx ON public.ai_suggestions USING btree (type, status);
+
+
+--
+-- TOC entry 5546 (class 1259 OID 204871)
 -- Name: audit_logs_changedAt_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8035,7 +9083,7 @@ CREATE INDEX "audit_logs_changedAt_idx" ON public.audit_logs USING btree ("chang
 
 
 --
--- TOC entry 5479 (class 1259 OID 204870)
+-- TOC entry 5547 (class 1259 OID 204870)
 -- Name: audit_logs_entityType_entityId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8043,7 +9091,31 @@ CREATE INDEX "audit_logs_entityType_entityId_idx" ON public.audit_logs USING btr
 
 
 --
--- TOC entry 5457 (class 1259 OID 204787)
+-- TOC entry 5603 (class 1259 OID 276608)
+-- Name: automation_rules_action_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX automation_rules_action_idx ON public.automation_rules USING btree (action);
+
+
+--
+-- TOC entry 5604 (class 1259 OID 276609)
+-- Name: automation_rules_isActive_priority_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "automation_rules_isActive_priority_idx" ON public.automation_rules USING btree ("isActive", priority);
+
+
+--
+-- TOC entry 5605 (class 1259 OID 276610)
+-- Name: automation_rules_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "automation_rules_ownerCompanyName_idx" ON public.automation_rules USING btree ("ownerCompanyName");
+
+
+--
+-- TOC entry 5525 (class 1259 OID 204787)
 -- Name: bank_reconciliation_matches_journalLineId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8051,7 +9123,7 @@ CREATE INDEX "bank_reconciliation_matches_journalLineId_idx" ON public.bank_reco
 
 
 --
--- TOC entry 5460 (class 1259 OID 204786)
+-- TOC entry 5528 (class 1259 OID 204786)
 -- Name: bank_reconciliation_matches_reconciliationId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8059,7 +9131,7 @@ CREATE INDEX "bank_reconciliation_matches_reconciliationId_idx" ON public.bank_r
 
 
 --
--- TOC entry 5461 (class 1259 OID 204788)
+-- TOC entry 5529 (class 1259 OID 204788)
 -- Name: bank_reconciliation_matches_reconciliationId_statementLineId_jo; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8067,7 +9139,7 @@ CREATE UNIQUE INDEX "bank_reconciliation_matches_reconciliationId_statementLineI
 
 
 --
--- TOC entry 5448 (class 1259 OID 204782)
+-- TOC entry 5516 (class 1259 OID 204782)
 -- Name: bank_reconciliations_accountCode_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8075,7 +9147,7 @@ CREATE INDEX "bank_reconciliations_accountCode_idx" ON public.bank_reconciliatio
 
 
 --
--- TOC entry 5449 (class 1259 OID 221825)
+-- TOC entry 5517 (class 1259 OID 221825)
 -- Name: bank_reconciliations_bankAccountId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8083,7 +9155,7 @@ CREATE INDEX "bank_reconciliations_bankAccountId_idx" ON public.bank_reconciliat
 
 
 --
--- TOC entry 5452 (class 1259 OID 204783)
+-- TOC entry 5520 (class 1259 OID 204783)
 -- Name: bank_reconciliations_statementDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8091,7 +9163,7 @@ CREATE INDEX "bank_reconciliations_statementDate_idx" ON public.bank_reconciliat
 
 
 --
--- TOC entry 5453 (class 1259 OID 204784)
+-- TOC entry 5521 (class 1259 OID 204784)
 -- Name: bank_reconciliations_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8099,7 +9171,7 @@ CREATE INDEX bank_reconciliations_status_idx ON public.bank_reconciliations USIN
 
 
 --
--- TOC entry 5456 (class 1259 OID 204785)
+-- TOC entry 5524 (class 1259 OID 204785)
 -- Name: bank_statement_lines_reconciliationId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8107,7 +9179,7 @@ CREATE INDEX "bank_statement_lines_reconciliationId_idx" ON public.bank_statemen
 
 
 --
--- TOC entry 5506 (class 1259 OID 221846)
+-- TOC entry 5574 (class 1259 OID 221846)
 -- Name: bank_transactions_bankAccountId_hash_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8115,7 +9187,7 @@ CREATE UNIQUE INDEX "bank_transactions_bankAccountId_hash_key" ON public.bank_tr
 
 
 --
--- TOC entry 5507 (class 1259 OID 221847)
+-- TOC entry 5575 (class 1259 OID 221847)
 -- Name: bank_transactions_bankAccountId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8123,7 +9195,7 @@ CREATE INDEX "bank_transactions_bankAccountId_idx" ON public.bank_transactions U
 
 
 --
--- TOC entry 5508 (class 1259 OID 221849)
+-- TOC entry 5576 (class 1259 OID 221849)
 -- Name: bank_transactions_isReconciled_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8131,7 +9203,7 @@ CREATE INDEX "bank_transactions_isReconciled_idx" ON public.bank_transactions US
 
 
 --
--- TOC entry 5509 (class 1259 OID 221850)
+-- TOC entry 5577 (class 1259 OID 221850)
 -- Name: bank_transactions_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8139,7 +9211,7 @@ CREATE INDEX "bank_transactions_ownerCompanyName_idx" ON public.bank_transaction
 
 
 --
--- TOC entry 5512 (class 1259 OID 221848)
+-- TOC entry 5580 (class 1259 OID 221848)
 -- Name: bank_transactions_transactionDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8147,7 +9219,7 @@ CREATE INDEX "bank_transactions_transactionDate_idx" ON public.bank_transactions
 
 
 --
--- TOC entry 5336 (class 1259 OID 204248)
+-- TOC entry 5404 (class 1259 OID 204248)
 -- Name: bills_billDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8155,7 +9227,7 @@ CREATE INDEX "bills_billDate_idx" ON public.bills USING btree ("billDate");
 
 
 --
--- TOC entry 5337 (class 1259 OID 204244)
+-- TOC entry 5405 (class 1259 OID 204244)
 -- Name: bills_billNumber_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8163,7 +9235,7 @@ CREATE UNIQUE INDEX "bills_billNumber_key" ON public.bills USING btree ("billNum
 
 
 --
--- TOC entry 5338 (class 1259 OID 204245)
+-- TOC entry 5406 (class 1259 OID 204245)
 -- Name: bills_clientId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8171,7 +9243,7 @@ CREATE INDEX "bills_clientId_idx" ON public.bills USING btree ("clientId");
 
 
 --
--- TOC entry 5339 (class 1259 OID 204482)
+-- TOC entry 5407 (class 1259 OID 204482)
 -- Name: bills_journalEntryId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8179,7 +9251,7 @@ CREATE INDEX "bills_journalEntryId_idx" ON public.bills USING btree ("journalEnt
 
 
 --
--- TOC entry 5340 (class 1259 OID 204480)
+-- TOC entry 5408 (class 1259 OID 204480)
 -- Name: bills_journalEntryId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8187,7 +9259,7 @@ CREATE UNIQUE INDEX "bills_journalEntryId_key" ON public.bills USING btree ("jou
 
 
 --
--- TOC entry 5343 (class 1259 OID 204247)
+-- TOC entry 5411 (class 1259 OID 204247)
 -- Name: bills_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8195,7 +9267,7 @@ CREATE INDEX bills_status_idx ON public.bills USING btree (status);
 
 
 --
--- TOC entry 5344 (class 1259 OID 204481)
+-- TOC entry 5412 (class 1259 OID 204481)
 -- Name: bills_supplierId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8203,7 +9275,7 @@ CREATE INDEX "bills_supplierId_idx" ON public.bills USING btree ("supplierId");
 
 
 --
--- TOC entry 5345 (class 1259 OID 204246)
+-- TOC entry 5413 (class 1259 OID 204246)
 -- Name: bills_userId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8211,7 +9283,7 @@ CREATE INDEX "bills_userId_idx" ON public.bills USING btree ("userId");
 
 
 --
--- TOC entry 5502 (class 1259 OID 221824)
+-- TOC entry 5570 (class 1259 OID 221824)
 -- Name: business_bank_accounts_ledgerAccountCode_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8219,7 +9291,7 @@ CREATE INDEX "business_bank_accounts_ledgerAccountCode_idx" ON public.business_b
 
 
 --
--- TOC entry 5503 (class 1259 OID 221823)
+-- TOC entry 5571 (class 1259 OID 221823)
 -- Name: business_bank_accounts_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8227,7 +9299,47 @@ CREATE INDEX "business_bank_accounts_ownerCompanyName_idx" ON public.business_ba
 
 
 --
--- TOC entry 5255 (class 1259 OID 203775)
+-- TOC entry 5608 (class 1259 OID 276611)
+-- Name: client_network_links_clientId_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "client_network_links_clientId_idx" ON public.client_network_links USING btree ("clientId");
+
+
+--
+-- TOC entry 5609 (class 1259 OID 276612)
+-- Name: client_network_links_deviceId_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "client_network_links_deviceId_idx" ON public.client_network_links USING btree ("deviceId");
+
+
+--
+-- TOC entry 5610 (class 1259 OID 276613)
+-- Name: client_network_links_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "client_network_links_ownerCompanyName_idx" ON public.client_network_links USING btree ("ownerCompanyName");
+
+
+--
+-- TOC entry 5613 (class 1259 OID 276614)
+-- Name: client_network_links_servicePlanId_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "client_network_links_servicePlanId_idx" ON public.client_network_links USING btree ("servicePlanId");
+
+
+--
+-- TOC entry 5614 (class 1259 OID 276615)
+-- Name: client_network_links_serviceStatus_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "client_network_links_serviceStatus_idx" ON public.client_network_links USING btree ("serviceStatus");
+
+
+--
+-- TOC entry 5324 (class 1259 OID 203775)
 -- Name: clients_email_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8235,7 +9347,7 @@ CREATE INDEX clients_email_idx ON public.customers USING btree (email);
 
 
 --
--- TOC entry 5437 (class 1259 OID 204673)
+-- TOC entry 5505 (class 1259 OID 204673)
 -- Name: companies_name_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8243,7 +9355,7 @@ CREATE UNIQUE INDEX companies_name_key ON public.companies USING btree (name);
 
 
 --
--- TOC entry 5443 (class 1259 OID 204676)
+-- TOC entry 5511 (class 1259 OID 204676)
 -- Name: company_subscriptions_companyId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8251,7 +9363,7 @@ CREATE INDEX "company_subscriptions_companyId_idx" ON public.company_subscriptio
 
 
 --
--- TOC entry 5444 (class 1259 OID 204675)
+-- TOC entry 5512 (class 1259 OID 204675)
 -- Name: company_subscriptions_companyId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8259,7 +9371,7 @@ CREATE UNIQUE INDEX "company_subscriptions_companyId_key" ON public.company_subs
 
 
 --
--- TOC entry 5447 (class 1259 OID 204677)
+-- TOC entry 5515 (class 1259 OID 204677)
 -- Name: company_subscriptions_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8267,7 +9379,7 @@ CREATE INDEX company_subscriptions_status_idx ON public.company_subscriptions US
 
 
 --
--- TOC entry 5513 (class 1259 OID 240487)
+-- TOC entry 5581 (class 1259 OID 240487)
 -- Name: customer_documents_clientId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8275,7 +9387,7 @@ CREATE INDEX "customer_documents_clientId_idx" ON public.customer_documents USIN
 
 
 --
--- TOC entry 5514 (class 1259 OID 240488)
+-- TOC entry 5582 (class 1259 OID 276691)
 -- Name: customer_documents_createdAt_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8283,7 +9395,7 @@ CREATE INDEX "customer_documents_createdAt_idx" ON public.customer_documents USI
 
 
 --
--- TOC entry 5256 (class 1259 OID 204028)
+-- TOC entry 5325 (class 1259 OID 204028)
 -- Name: customers_clientSeq_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8291,7 +9403,7 @@ CREATE UNIQUE INDEX "customers_clientSeq_key" ON public.customers USING btree ("
 
 
 --
--- TOC entry 5257 (class 1259 OID 204083)
+-- TOC entry 5326 (class 1259 OID 204083)
 -- Name: customers_email_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8299,7 +9411,7 @@ CREATE INDEX customers_email_idx ON public.customers USING btree (email);
 
 
 --
--- TOC entry 5258 (class 1259 OID 204983)
+-- TOC entry 5327 (class 1259 OID 204983)
 -- Name: customers_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8307,7 +9419,7 @@ CREATE INDEX "customers_ownerCompanyName_idx" ON public.customers USING btree ("
 
 
 --
--- TOC entry 5261 (class 1259 OID 203776)
+-- TOC entry 5330 (class 1259 OID 203776)
 -- Name: customers_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8315,7 +9427,7 @@ CREATE INDEX customers_status_idx ON public.customers USING btree (status);
 
 
 --
--- TOC entry 5490 (class 1259 OID 204933)
+-- TOC entry 5558 (class 1259 OID 204933)
 -- Name: depreciation_runs_assetId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8323,7 +9435,7 @@ CREATE INDEX "depreciation_runs_assetId_idx" ON public.depreciation_runs USING b
 
 
 --
--- TOC entry 5493 (class 1259 OID 204934)
+-- TOC entry 5561 (class 1259 OID 204934)
 -- Name: depreciation_runs_runDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8331,7 +9443,7 @@ CREATE INDEX "depreciation_runs_runDate_idx" ON public.depreciation_runs USING b
 
 
 --
--- TOC entry 5305 (class 1259 OID 203956)
+-- TOC entry 5373 (class 1259 OID 203956)
 -- Name: email_outbox_clientId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8339,7 +9451,7 @@ CREATE INDEX "email_outbox_clientId_idx" ON public.email_outbox USING btree ("cl
 
 
 --
--- TOC entry 5306 (class 1259 OID 203933)
+-- TOC entry 5374 (class 1259 OID 203933)
 -- Name: email_outbox_invoiceId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8347,7 +9459,7 @@ CREATE INDEX "email_outbox_invoiceId_idx" ON public.email_outbox USING btree ("i
 
 
 --
--- TOC entry 5309 (class 1259 OID 203932)
+-- TOC entry 5377 (class 1259 OID 203932)
 -- Name: email_outbox_status_nextAttemptAt_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8355,7 +9467,7 @@ CREATE INDEX "email_outbox_status_nextAttemptAt_idx" ON public.email_outbox USIN
 
 
 --
--- TOC entry 5325 (class 1259 OID 204240)
+-- TOC entry 5393 (class 1259 OID 204240)
 -- Name: employees_email_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8363,7 +9475,7 @@ CREATE INDEX employees_email_idx ON public.employees USING btree (email);
 
 
 --
--- TOC entry 5326 (class 1259 OID 204238)
+-- TOC entry 5394 (class 1259 OID 204238)
 -- Name: employees_email_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8371,7 +9483,7 @@ CREATE UNIQUE INDEX employees_email_key ON public.employees USING btree (email);
 
 
 --
--- TOC entry 5327 (class 1259 OID 204237)
+-- TOC entry 5395 (class 1259 OID 204237)
 -- Name: employees_employeeNumber_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8379,7 +9491,7 @@ CREATE UNIQUE INDEX "employees_employeeNumber_key" ON public.employees USING btr
 
 
 --
--- TOC entry 5328 (class 1259 OID 204239)
+-- TOC entry 5396 (class 1259 OID 204239)
 -- Name: employees_isActive_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8387,7 +9499,7 @@ CREATE INDEX "employees_isActive_idx" ON public.employees USING btree ("isActive
 
 
 --
--- TOC entry 5474 (class 1259 OID 204851)
+-- TOC entry 5542 (class 1259 OID 204851)
 -- Name: exchange_rates_fromCurrencyCode_toCurrencyCode_asOfDate_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8395,7 +9507,7 @@ CREATE UNIQUE INDEX "exchange_rates_fromCurrencyCode_toCurrencyCode_asOfDate_key
 
 
 --
--- TOC entry 5475 (class 1259 OID 226200)
+-- TOC entry 5543 (class 1259 OID 226200)
 -- Name: exchange_rates_fromCurrencyCode_toCurrencyCode_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8403,7 +9515,7 @@ CREATE INDEX "exchange_rates_fromCurrencyCode_toCurrencyCode_idx" ON public.exch
 
 
 --
--- TOC entry 5416 (class 1259 OID 204572)
+-- TOC entry 5484 (class 1259 OID 204572)
 -- Name: expense_categories_name_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8411,7 +9523,7 @@ CREATE INDEX expense_categories_name_idx ON public.expense_categories USING btre
 
 
 --
--- TOC entry 5419 (class 1259 OID 204577)
+-- TOC entry 5487 (class 1259 OID 204577)
 -- Name: expenses_categoryId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8419,7 +9531,7 @@ CREATE INDEX "expenses_categoryId_idx" ON public.expenses USING btree ("category
 
 
 --
--- TOC entry 5420 (class 1259 OID 204574)
+-- TOC entry 5488 (class 1259 OID 204574)
 -- Name: expenses_expenseDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8427,7 +9539,7 @@ CREATE INDEX "expenses_expenseDate_idx" ON public.expenses USING btree ("expense
 
 
 --
--- TOC entry 5421 (class 1259 OID 204573)
+-- TOC entry 5489 (class 1259 OID 204573)
 -- Name: expenses_expenseSeq_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8435,7 +9547,7 @@ CREATE UNIQUE INDEX "expenses_expenseSeq_key" ON public.expenses USING btree ("e
 
 
 --
--- TOC entry 5422 (class 1259 OID 204714)
+-- TOC entry 5490 (class 1259 OID 204714)
 -- Name: expenses_journalEntryId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8443,7 +9555,7 @@ CREATE INDEX "expenses_journalEntryId_idx" ON public.expenses USING btree ("jour
 
 
 --
--- TOC entry 5423 (class 1259 OID 204713)
+-- TOC entry 5491 (class 1259 OID 204713)
 -- Name: expenses_journalEntryId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8451,7 +9563,7 @@ CREATE UNIQUE INDEX "expenses_journalEntryId_key" ON public.expenses USING btree
 
 
 --
--- TOC entry 5426 (class 1259 OID 204575)
+-- TOC entry 5494 (class 1259 OID 204575)
 -- Name: expenses_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8459,7 +9571,7 @@ CREATE INDEX expenses_status_idx ON public.expenses USING btree (status);
 
 
 --
--- TOC entry 5427 (class 1259 OID 204576)
+-- TOC entry 5495 (class 1259 OID 204576)
 -- Name: expenses_supplierId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8467,7 +9579,7 @@ CREATE INDEX "expenses_supplierId_idx" ON public.expenses USING btree ("supplier
 
 
 --
--- TOC entry 5428 (class 1259 OID 204578)
+-- TOC entry 5496 (class 1259 OID 204578)
 -- Name: expenses_userId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8475,7 +9587,7 @@ CREATE INDEX "expenses_userId_idx" ON public.expenses USING btree ("userId");
 
 
 --
--- TOC entry 5486 (class 1259 OID 204923)
+-- TOC entry 5554 (class 1259 OID 204923)
 -- Name: fixed_assets_journalEntryId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8483,7 +9595,7 @@ CREATE UNIQUE INDEX "fixed_assets_journalEntryId_key" ON public.fixed_assets USI
 
 
 --
--- TOC entry 5489 (class 1259 OID 204924)
+-- TOC entry 5557 (class 1259 OID 204924)
 -- Name: fixed_assets_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8491,7 +9603,7 @@ CREATE INDEX fixed_assets_status_idx ON public.fixed_assets USING btree (status)
 
 
 --
--- TOC entry 5482 (class 1259 OID 204900)
+-- TOC entry 5550 (class 1259 OID 204900)
 -- Name: inventory_movements_createdAt_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8499,7 +9611,7 @@ CREATE INDEX "inventory_movements_createdAt_idx" ON public.inventory_movements U
 
 
 --
--- TOC entry 5485 (class 1259 OID 204899)
+-- TOC entry 5553 (class 1259 OID 204899)
 -- Name: inventory_movements_productId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8507,7 +9619,7 @@ CREATE INDEX "inventory_movements_productId_idx" ON public.inventory_movements U
 
 
 --
--- TOC entry 5277 (class 1259 OID 203874)
+-- TOC entry 5345 (class 1259 OID 203874)
 -- Name: invoices_clientId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8515,7 +9627,7 @@ CREATE INDEX "invoices_clientId_idx" ON public.invoices USING btree ("clientId")
 
 
 --
--- TOC entry 5278 (class 1259 OID 203876)
+-- TOC entry 5346 (class 1259 OID 203876)
 -- Name: invoices_dueDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8523,7 +9635,7 @@ CREATE INDEX "invoices_dueDate_idx" ON public.invoices USING btree ("dueDate");
 
 
 --
--- TOC entry 5279 (class 1259 OID 203781)
+-- TOC entry 5347 (class 1259 OID 203781)
 -- Name: invoices_invoiceNumber_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8531,7 +9643,7 @@ CREATE UNIQUE INDEX "invoices_invoiceNumber_key" ON public.invoices USING btree 
 
 
 --
--- TOC entry 5280 (class 1259 OID 204013)
+-- TOC entry 5348 (class 1259 OID 204013)
 -- Name: invoices_invoiceSeq_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8539,7 +9651,7 @@ CREATE UNIQUE INDEX "invoices_invoiceSeq_key" ON public.invoices USING btree ("i
 
 
 --
--- TOC entry 5281 (class 1259 OID 204697)
+-- TOC entry 5349 (class 1259 OID 204697)
 -- Name: invoices_journalEntryId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8547,7 +9659,7 @@ CREATE UNIQUE INDEX "invoices_journalEntryId_key" ON public.invoices USING btree
 
 
 --
--- TOC entry 5284 (class 1259 OID 203782)
+-- TOC entry 5352 (class 1259 OID 203782)
 -- Name: invoices_quoteId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8555,7 +9667,7 @@ CREATE UNIQUE INDEX "invoices_quoteId_key" ON public.invoices USING btree ("quot
 
 
 --
--- TOC entry 5285 (class 1259 OID 203875)
+-- TOC entry 5353 (class 1259 OID 203875)
 -- Name: invoices_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8563,7 +9675,7 @@ CREATE INDEX invoices_status_idx ON public.invoices USING btree (status);
 
 
 --
--- TOC entry 5404 (class 1259 OID 204477)
+-- TOC entry 5472 (class 1259 OID 204477)
 -- Name: journal_entries_createdByUserId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8571,7 +9683,7 @@ CREATE INDEX "journal_entries_createdByUserId_idx" ON public.journal_entries USI
 
 
 --
--- TOC entry 5405 (class 1259 OID 204475)
+-- TOC entry 5473 (class 1259 OID 204475)
 -- Name: journal_entries_date_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8579,7 +9691,7 @@ CREATE INDEX journal_entries_date_idx ON public.journal_entries USING btree (dat
 
 
 --
--- TOC entry 5406 (class 1259 OID 204473)
+-- TOC entry 5474 (class 1259 OID 204473)
 -- Name: journal_entries_entryNumber_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8587,7 +9699,7 @@ CREATE UNIQUE INDEX "journal_entries_entryNumber_key" ON public.journal_entries 
 
 
 --
--- TOC entry 5409 (class 1259 OID 204474)
+-- TOC entry 5477 (class 1259 OID 204474)
 -- Name: journal_entries_reversedEntryId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8595,7 +9707,7 @@ CREATE UNIQUE INDEX "journal_entries_reversedEntryId_key" ON public.journal_entr
 
 
 --
--- TOC entry 5410 (class 1259 OID 204476)
+-- TOC entry 5478 (class 1259 OID 204476)
 -- Name: journal_entries_sourceType_sourceId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8603,7 +9715,7 @@ CREATE INDEX "journal_entries_sourceType_sourceId_idx" ON public.journal_entries
 
 
 --
--- TOC entry 5411 (class 1259 OID 204872)
+-- TOC entry 5479 (class 1259 OID 204872)
 -- Name: journal_entries_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8611,7 +9723,7 @@ CREATE INDEX journal_entries_status_idx ON public.journal_entries USING btree (s
 
 
 --
--- TOC entry 5412 (class 1259 OID 204479)
+-- TOC entry 5480 (class 1259 OID 204479)
 -- Name: journal_lines_accountId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8619,7 +9731,7 @@ CREATE INDEX "journal_lines_accountId_idx" ON public.journal_lines USING btree (
 
 
 --
--- TOC entry 5413 (class 1259 OID 204478)
+-- TOC entry 5481 (class 1259 OID 204478)
 -- Name: journal_lines_entryId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8627,7 +9739,7 @@ CREATE INDEX "journal_lines_entryId_idx" ON public.journal_lines USING btree ("e
 
 
 --
--- TOC entry 5399 (class 1259 OID 204470)
+-- TOC entry 5467 (class 1259 OID 204470)
 -- Name: ledger_accounts_code_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8635,7 +9747,7 @@ CREATE UNIQUE INDEX ledger_accounts_code_key ON public.ledger_accounts USING btr
 
 
 --
--- TOC entry 5400 (class 1259 OID 204472)
+-- TOC entry 5468 (class 1259 OID 204472)
 -- Name: ledger_accounts_isActive_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8643,7 +9755,7 @@ CREATE INDEX "ledger_accounts_isActive_idx" ON public.ledger_accounts USING btre
 
 
 --
--- TOC entry 5403 (class 1259 OID 204471)
+-- TOC entry 5471 (class 1259 OID 204471)
 -- Name: ledger_accounts_type_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8651,7 +9763,15 @@ CREATE INDEX ledger_accounts_type_idx ON public.ledger_accounts USING btree (typ
 
 
 --
--- TOC entry 5523 (class 1259 OID 244974)
+-- TOC entry 5592 (class 1259 OID 276616)
+-- Name: loan_repayments_journalEntryId_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "loan_repayments_journalEntryId_idx" ON public.loan_repayments USING btree ("journalEntryId");
+
+
+--
+-- TOC entry 5593 (class 1259 OID 244974)
 -- Name: loan_repayments_journalEntryId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8659,7 +9779,7 @@ CREATE UNIQUE INDEX "loan_repayments_journalEntryId_key" ON public.loan_repaymen
 
 
 --
--- TOC entry 5524 (class 1259 OID 244953)
+-- TOC entry 5594 (class 1259 OID 244953)
 -- Name: loan_repayments_loanId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8667,7 +9787,7 @@ CREATE INDEX "loan_repayments_loanId_idx" ON public.loan_repayments USING btree 
 
 
 --
--- TOC entry 5517 (class 1259 OID 244952)
+-- TOC entry 5585 (class 1259 OID 244952)
 -- Name: loans_createdById_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8675,7 +9795,7 @@ CREATE INDEX "loans_createdById_idx" ON public.loans USING btree ("createdById")
 
 
 --
--- TOC entry 5518 (class 1259 OID 244964)
+-- TOC entry 5586 (class 1259 OID 244964)
 -- Name: loans_customerId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8683,7 +9803,15 @@ CREATE INDEX "loans_customerId_idx" ON public.loans USING btree ("customerId");
 
 
 --
--- TOC entry 5519 (class 1259 OID 244973)
+-- TOC entry 5587 (class 1259 OID 276617)
+-- Name: loans_journalEntryId_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "loans_journalEntryId_idx" ON public.loans USING btree ("journalEntryId");
+
+
+--
+-- TOC entry 5588 (class 1259 OID 244973)
 -- Name: loans_journalEntryId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8691,7 +9819,7 @@ CREATE UNIQUE INDEX "loans_journalEntryId_key" ON public.loans USING btree ("jou
 
 
 --
--- TOC entry 5520 (class 1259 OID 244951)
+-- TOC entry 5589 (class 1259 OID 244951)
 -- Name: loans_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8699,7 +9827,87 @@ CREATE INDEX "loans_ownerCompanyName_idx" ON public.loans USING btree ("ownerCom
 
 
 --
--- TOC entry 5316 (class 1259 OID 204038)
+-- TOC entry 5615 (class 1259 OID 276618)
+-- Name: network_alerts_createdAt_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "network_alerts_createdAt_idx" ON public.network_alerts USING btree ("createdAt");
+
+
+--
+-- TOC entry 5616 (class 1259 OID 276619)
+-- Name: network_alerts_deviceId_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "network_alerts_deviceId_idx" ON public.network_alerts USING btree ("deviceId");
+
+
+--
+-- TOC entry 5617 (class 1259 OID 276620)
+-- Name: network_alerts_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "network_alerts_ownerCompanyName_idx" ON public.network_alerts USING btree ("ownerCompanyName");
+
+
+--
+-- TOC entry 5620 (class 1259 OID 276621)
+-- Name: network_alerts_severity_isResolved_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "network_alerts_severity_isResolved_idx" ON public.network_alerts USING btree (severity, "isResolved");
+
+
+--
+-- TOC entry 5621 (class 1259 OID 276622)
+-- Name: network_devices_ipAddress_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "network_devices_ipAddress_idx" ON public.network_devices USING btree ("ipAddress");
+
+
+--
+-- TOC entry 5622 (class 1259 OID 276623)
+-- Name: network_devices_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "network_devices_ownerCompanyName_idx" ON public.network_devices USING btree ("ownerCompanyName");
+
+
+--
+-- TOC entry 5623 (class 1259 OID 276624)
+-- Name: network_devices_parentDeviceId_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "network_devices_parentDeviceId_idx" ON public.network_devices USING btree ("parentDeviceId");
+
+
+--
+-- TOC entry 5626 (class 1259 OID 276625)
+-- Name: network_devices_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX network_devices_status_idx ON public.network_devices USING btree (status);
+
+
+--
+-- TOC entry 5627 (class 1259 OID 276626)
+-- Name: network_devices_type_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX network_devices_type_idx ON public.network_devices USING btree (type);
+
+
+--
+-- TOC entry 5628 (class 1259 OID 276627)
+-- Name: network_interfaces_deviceId_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "network_interfaces_deviceId_idx" ON public.network_interfaces USING btree ("deviceId");
+
+
+--
+-- TOC entry 5384 (class 1259 OID 204038)
 -- Name: password_resets_token_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8707,7 +9915,7 @@ CREATE INDEX password_resets_token_idx ON public.password_resets USING btree (to
 
 
 --
--- TOC entry 5317 (class 1259 OID 204037)
+-- TOC entry 5385 (class 1259 OID 204037)
 -- Name: password_resets_token_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8715,7 +9923,7 @@ CREATE UNIQUE INDEX password_resets_token_key ON public.password_resets USING bt
 
 
 --
--- TOC entry 5318 (class 1259 OID 204039)
+-- TOC entry 5386 (class 1259 OID 204039)
 -- Name: password_resets_userId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8723,7 +9931,7 @@ CREATE INDEX "password_resets_userId_idx" ON public.password_resets USING btree 
 
 
 --
--- TOC entry 5498 (class 1259 OID 204971)
+-- TOC entry 5566 (class 1259 OID 204971)
 -- Name: pay_run_lines_employeeId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8731,7 +9939,7 @@ CREATE INDEX "pay_run_lines_employeeId_idx" ON public.pay_run_lines USING btree 
 
 
 --
--- TOC entry 5499 (class 1259 OID 204970)
+-- TOC entry 5567 (class 1259 OID 204970)
 -- Name: pay_run_lines_payRunId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8739,7 +9947,7 @@ CREATE INDEX "pay_run_lines_payRunId_idx" ON public.pay_run_lines USING btree ("
 
 
 --
--- TOC entry 5494 (class 1259 OID 204961)
+-- TOC entry 5562 (class 1259 OID 204961)
 -- Name: pay_runs_payPeriodStart_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8747,7 +9955,7 @@ CREATE INDEX "pay_runs_payPeriodStart_idx" ON public.pay_runs USING btree ("payP
 
 
 --
--- TOC entry 5497 (class 1259 OID 204960)
+-- TOC entry 5565 (class 1259 OID 204960)
 -- Name: pay_runs_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8755,7 +9963,7 @@ CREATE INDEX pay_runs_status_idx ON public.pay_runs USING btree (status);
 
 
 --
--- TOC entry 5321 (class 1259 OID 204082)
+-- TOC entry 5389 (class 1259 OID 204082)
 -- Name: payment_allocations_invoiceId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8763,7 +9971,7 @@ CREATE INDEX "payment_allocations_invoiceId_idx" ON public.payment_allocations U
 
 
 --
--- TOC entry 5322 (class 1259 OID 204081)
+-- TOC entry 5390 (class 1259 OID 204081)
 -- Name: payment_allocations_paymentId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8771,7 +9979,7 @@ CREATE INDEX "payment_allocations_paymentId_idx" ON public.payment_allocations U
 
 
 --
--- TOC entry 5292 (class 1259 OID 203786)
+-- TOC entry 5360 (class 1259 OID 203786)
 -- Name: payments_clientId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8779,7 +9987,7 @@ CREATE INDEX "payments_clientId_idx" ON public.payments USING btree ("clientId")
 
 
 --
--- TOC entry 5293 (class 1259 OID 203787)
+-- TOC entry 5361 (class 1259 OID 203787)
 -- Name: payments_invoiceId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8787,7 +9995,7 @@ CREATE INDEX "payments_invoiceId_idx" ON public.payments USING btree ("invoiceId
 
 
 --
--- TOC entry 5294 (class 1259 OID 204698)
+-- TOC entry 5362 (class 1259 OID 204698)
 -- Name: payments_journalEntryId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8795,7 +10003,7 @@ CREATE UNIQUE INDEX "payments_journalEntryId_key" ON public.payments USING btree
 
 
 --
--- TOC entry 5295 (class 1259 OID 203788)
+-- TOC entry 5363 (class 1259 OID 203788)
 -- Name: payments_paymentDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8803,7 +10011,7 @@ CREATE INDEX "payments_paymentDate_idx" ON public.payments USING btree ("payment
 
 
 --
--- TOC entry 5296 (class 1259 OID 203785)
+-- TOC entry 5364 (class 1259 OID 203785)
 -- Name: payments_paymentNumber_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8811,7 +10019,7 @@ CREATE UNIQUE INDEX "payments_paymentNumber_key" ON public.payments USING btree 
 
 
 --
--- TOC entry 5432 (class 1259 OID 204619)
+-- TOC entry 5500 (class 1259 OID 204619)
 -- Name: permissions_key_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8819,7 +10027,7 @@ CREATE UNIQUE INDEX permissions_key_key ON public.permissions USING btree (key);
 
 
 --
--- TOC entry 5262 (class 1259 OID 203778)
+-- TOC entry 5331 (class 1259 OID 203778)
 -- Name: products_isActive_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8827,7 +10035,7 @@ CREATE INDEX "products_isActive_idx" ON public.products USING btree ("isActive")
 
 
 --
--- TOC entry 5263 (class 1259 OID 203779)
+-- TOC entry 5332 (class 1259 OID 203779)
 -- Name: products_isRecurring_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8835,7 +10043,7 @@ CREATE INDEX "products_isRecurring_idx" ON public.products USING btree ("isRecur
 
 
 --
--- TOC entry 5264 (class 1259 OID 204985)
+-- TOC entry 5333 (class 1259 OID 204985)
 -- Name: products_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8843,15 +10051,7 @@ CREATE INDEX "products_ownerCompanyName_idx" ON public.products USING btree ("ow
 
 
 --
--- TOC entry 5265 (class 1259 OID 240495)
--- Name: products_ownerCompanyName_type_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX "products_ownerCompanyName_type_idx" ON public.products USING btree ("ownerCompanyName", type);
-
-
---
--- TOC entry 5268 (class 1259 OID 203777)
+-- TOC entry 5336 (class 1259 OID 203777)
 -- Name: products_sku_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8859,7 +10059,7 @@ CREATE UNIQUE INDEX products_sku_key ON public.products USING btree (sku);
 
 
 --
--- TOC entry 5331 (class 1259 OID 204242)
+-- TOC entry 5399 (class 1259 OID 204242)
 -- Name: projects_clientId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8867,7 +10067,7 @@ CREATE INDEX "projects_clientId_idx" ON public.projects USING btree ("clientId")
 
 
 --
--- TOC entry 5334 (class 1259 OID 204241)
+-- TOC entry 5402 (class 1259 OID 204241)
 -- Name: projects_projectNumber_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8875,7 +10075,7 @@ CREATE UNIQUE INDEX "projects_projectNumber_key" ON public.projects USING btree 
 
 
 --
--- TOC entry 5335 (class 1259 OID 204243)
+-- TOC entry 5403 (class 1259 OID 204243)
 -- Name: projects_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8883,7 +10083,7 @@ CREATE INDEX projects_status_idx ON public.projects USING btree (status);
 
 
 --
--- TOC entry 5269 (class 1259 OID 203877)
+-- TOC entry 5337 (class 1259 OID 203877)
 -- Name: quotes_clientId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8891,7 +10091,7 @@ CREATE INDEX "quotes_clientId_idx" ON public.quotes USING btree ("clientId");
 
 
 --
--- TOC entry 5272 (class 1259 OID 203780)
+-- TOC entry 5340 (class 1259 OID 203780)
 -- Name: quotes_quoteNumber_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8899,7 +10099,7 @@ CREATE UNIQUE INDEX "quotes_quoteNumber_key" ON public.quotes USING btree ("quot
 
 
 --
--- TOC entry 5273 (class 1259 OID 204014)
+-- TOC entry 5341 (class 1259 OID 204014)
 -- Name: quotes_quoteSeq_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8907,7 +10107,7 @@ CREATE UNIQUE INDEX "quotes_quoteSeq_key" ON public.quotes USING btree ("quoteSe
 
 
 --
--- TOC entry 5274 (class 1259 OID 203878)
+-- TOC entry 5342 (class 1259 OID 203878)
 -- Name: quotes_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8915,7 +10115,7 @@ CREATE INDEX quotes_status_idx ON public.quotes USING btree (status);
 
 
 --
--- TOC entry 5301 (class 1259 OID 203873)
+-- TOC entry 5369 (class 1259 OID 203873)
 -- Name: recurring_invoice_items_recurringInvoiceId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8923,7 +10123,7 @@ CREATE INDEX "recurring_invoice_items_recurringInvoiceId_idx" ON public.recurrin
 
 
 --
--- TOC entry 5304 (class 1259 OID 203931)
+-- TOC entry 5372 (class 1259 OID 203931)
 -- Name: recurring_invoice_runs_recurringInvoiceId_runAt_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8931,7 +10131,7 @@ CREATE INDEX "recurring_invoice_runs_recurringInvoiceId_runAt_idx" ON public.rec
 
 
 --
--- TOC entry 5288 (class 1259 OID 203783)
+-- TOC entry 5356 (class 1259 OID 203783)
 -- Name: recurring_invoices_clientId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8939,7 +10139,7 @@ CREATE INDEX "recurring_invoices_clientId_idx" ON public.recurring_invoices USIN
 
 
 --
--- TOC entry 5289 (class 1259 OID 203784)
+-- TOC entry 5357 (class 1259 OID 203784)
 -- Name: recurring_invoices_isActive_nextRunDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8947,7 +10147,7 @@ CREATE INDEX "recurring_invoices_isActive_nextRunDate_idx" ON public.recurring_i
 
 
 --
--- TOC entry 5466 (class 1259 OID 204791)
+-- TOC entry 5534 (class 1259 OID 204791)
 -- Name: recurring_journal_entries_isActive_nextRunDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8955,7 +10155,7 @@ CREATE INDEX "recurring_journal_entries_isActive_nextRunDate_idx" ON public.recu
 
 
 --
--- TOC entry 5429 (class 1259 OID 204618)
+-- TOC entry 5497 (class 1259 OID 204618)
 -- Name: roles_name_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8963,7 +10163,23 @@ CREATE UNIQUE INDEX roles_name_key ON public.roles USING btree (name);
 
 
 --
--- TOC entry 5440 (class 1259 OID 204674)
+-- TOC entry 5631 (class 1259 OID 276628)
+-- Name: service_plans_isActive_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "service_plans_isActive_idx" ON public.service_plans USING btree ("isActive");
+
+
+--
+-- TOC entry 5632 (class 1259 OID 276629)
+-- Name: service_plans_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "service_plans_ownerCompanyName_idx" ON public.service_plans USING btree ("ownerCompanyName");
+
+
+--
+-- TOC entry 5508 (class 1259 OID 204674)
 -- Name: subscription_plans_name_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8971,7 +10187,7 @@ CREATE UNIQUE INDEX subscription_plans_name_key ON public.subscription_plans USI
 
 
 --
--- TOC entry 5394 (class 1259 OID 204468)
+-- TOC entry 5462 (class 1259 OID 204468)
 -- Name: supplier_payment_allocations_billId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8979,7 +10195,7 @@ CREATE INDEX "supplier_payment_allocations_billId_idx" ON public.supplier_paymen
 
 
 --
--- TOC entry 5395 (class 1259 OID 204469)
+-- TOC entry 5463 (class 1259 OID 204469)
 -- Name: supplier_payment_allocations_paymentId_billId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8987,7 +10203,7 @@ CREATE UNIQUE INDEX "supplier_payment_allocations_paymentId_billId_key" ON publi
 
 
 --
--- TOC entry 5396 (class 1259 OID 204467)
+-- TOC entry 5464 (class 1259 OID 204467)
 -- Name: supplier_payment_allocations_paymentId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -8995,7 +10211,7 @@ CREATE INDEX "supplier_payment_allocations_paymentId_idx" ON public.supplier_pay
 
 
 --
--- TOC entry 5387 (class 1259 OID 204466)
+-- TOC entry 5455 (class 1259 OID 204466)
 -- Name: supplier_payments_journalEntryId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9003,7 +10219,7 @@ CREATE INDEX "supplier_payments_journalEntryId_idx" ON public.supplier_payments 
 
 
 --
--- TOC entry 5388 (class 1259 OID 204463)
+-- TOC entry 5456 (class 1259 OID 204463)
 -- Name: supplier_payments_journalEntryId_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9011,7 +10227,7 @@ CREATE UNIQUE INDEX "supplier_payments_journalEntryId_key" ON public.supplier_pa
 
 
 --
--- TOC entry 5389 (class 1259 OID 204465)
+-- TOC entry 5457 (class 1259 OID 204465)
 -- Name: supplier_payments_paymentDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9019,7 +10235,7 @@ CREATE INDEX "supplier_payments_paymentDate_idx" ON public.supplier_payments USI
 
 
 --
--- TOC entry 5390 (class 1259 OID 204462)
+-- TOC entry 5458 (class 1259 OID 204462)
 -- Name: supplier_payments_paymentNumber_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9027,7 +10243,7 @@ CREATE UNIQUE INDEX "supplier_payments_paymentNumber_key" ON public.supplier_pay
 
 
 --
--- TOC entry 5393 (class 1259 OID 204464)
+-- TOC entry 5461 (class 1259 OID 204464)
 -- Name: supplier_payments_supplierId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9035,7 +10251,7 @@ CREATE INDEX "supplier_payments_supplierId_idx" ON public.supplier_payments USIN
 
 
 --
--- TOC entry 5378 (class 1259 OID 204376)
+-- TOC entry 5446 (class 1259 OID 204376)
 -- Name: suppliers_email_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9043,7 +10259,7 @@ CREATE INDEX suppliers_email_idx ON public.suppliers USING btree (email);
 
 
 --
--- TOC entry 5379 (class 1259 OID 204372)
+-- TOC entry 5447 (class 1259 OID 204372)
 -- Name: suppliers_email_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9051,7 +10267,7 @@ CREATE UNIQUE INDEX suppliers_email_key ON public.suppliers USING btree (email);
 
 
 --
--- TOC entry 5380 (class 1259 OID 204984)
+-- TOC entry 5448 (class 1259 OID 204984)
 -- Name: suppliers_ownerCompanyName_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9059,7 +10275,7 @@ CREATE INDEX "suppliers_ownerCompanyName_idx" ON public.suppliers USING btree ("
 
 
 --
--- TOC entry 5381 (class 1259 OID 204373)
+-- TOC entry 5449 (class 1259 OID 204373)
 -- Name: suppliers_phone_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9067,7 +10283,7 @@ CREATE UNIQUE INDEX suppliers_phone_key ON public.suppliers USING btree (phone);
 
 
 --
--- TOC entry 5384 (class 1259 OID 204375)
+-- TOC entry 5452 (class 1259 OID 204375)
 -- Name: suppliers_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9075,7 +10291,7 @@ CREATE INDEX suppliers_status_idx ON public.suppliers USING btree (status);
 
 
 --
--- TOC entry 5385 (class 1259 OID 204374)
+-- TOC entry 5453 (class 1259 OID 204374)
 -- Name: suppliers_supplierName_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9083,7 +10299,7 @@ CREATE INDEX "suppliers_supplierName_idx" ON public.suppliers USING btree ("supp
 
 
 --
--- TOC entry 5386 (class 1259 OID 204371)
+-- TOC entry 5454 (class 1259 OID 204371)
 -- Name: suppliers_supplierSeq_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9091,7 +10307,7 @@ CREATE UNIQUE INDEX "suppliers_supplierSeq_key" ON public.suppliers USING btree 
 
 
 --
--- TOC entry 5367 (class 1259 OID 204268)
+-- TOC entry 5435 (class 1259 OID 204268)
 -- Name: task_activities_action_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9099,7 +10315,7 @@ CREATE INDEX task_activities_action_idx ON public.task_activities USING btree (a
 
 
 --
--- TOC entry 5368 (class 1259 OID 204267)
+-- TOC entry 5436 (class 1259 OID 204267)
 -- Name: task_activities_actorUserId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9107,7 +10323,7 @@ CREATE INDEX "task_activities_actorUserId_idx" ON public.task_activities USING b
 
 
 --
--- TOC entry 5371 (class 1259 OID 204266)
+-- TOC entry 5439 (class 1259 OID 204266)
 -- Name: task_activities_taskId_createdAt_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9115,7 +10331,7 @@ CREATE INDEX "task_activities_taskId_createdAt_idx" ON public.task_activities US
 
 
 --
--- TOC entry 5374 (class 1259 OID 204272)
+-- TOC entry 5442 (class 1259 OID 204272)
 -- Name: task_notifications_sentAt_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9123,7 +10339,7 @@ CREATE INDEX "task_notifications_sentAt_idx" ON public.task_notifications USING 
 
 
 --
--- TOC entry 5375 (class 1259 OID 204270)
+-- TOC entry 5443 (class 1259 OID 204270)
 -- Name: task_notifications_taskId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9131,7 +10347,7 @@ CREATE INDEX "task_notifications_taskId_idx" ON public.task_notifications USING 
 
 
 --
--- TOC entry 5376 (class 1259 OID 204271)
+-- TOC entry 5444 (class 1259 OID 204271)
 -- Name: task_notifications_type_scheduledAt_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9139,7 +10355,7 @@ CREATE INDEX "task_notifications_type_scheduledAt_idx" ON public.task_notificati
 
 
 --
--- TOC entry 5377 (class 1259 OID 204269)
+-- TOC entry 5445 (class 1259 OID 204269)
 -- Name: task_notifications_userId_readAt_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9147,7 +10363,7 @@ CREATE INDEX "task_notifications_userId_readAt_idx" ON public.task_notifications
 
 
 --
--- TOC entry 5346 (class 1259 OID 204249)
+-- TOC entry 5414 (class 1259 OID 204249)
 -- Name: task_recurrences_isActive_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9155,7 +10371,7 @@ CREATE INDEX "task_recurrences_isActive_idx" ON public.task_recurrences USING bt
 
 
 --
--- TOC entry 5347 (class 1259 OID 204250)
+-- TOC entry 5415 (class 1259 OID 204250)
 -- Name: task_recurrences_isActive_nextRunDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9163,7 +10379,7 @@ CREATE INDEX "task_recurrences_isActive_nextRunDate_idx" ON public.task_recurren
 
 
 --
--- TOC entry 5350 (class 1259 OID 204259)
+-- TOC entry 5418 (class 1259 OID 204259)
 -- Name: tasks_assignedEmployeeId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9171,7 +10387,7 @@ CREATE INDEX "tasks_assignedEmployeeId_idx" ON public.tasks USING btree ("assign
 
 
 --
--- TOC entry 5351 (class 1259 OID 204258)
+-- TOC entry 5419 (class 1259 OID 204258)
 -- Name: tasks_assignedUserId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9179,7 +10395,7 @@ CREATE INDEX "tasks_assignedUserId_idx" ON public.tasks USING btree ("assignedUs
 
 
 --
--- TOC entry 5352 (class 1259 OID 204262)
+-- TOC entry 5420 (class 1259 OID 204262)
 -- Name: tasks_billId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9187,7 +10403,7 @@ CREATE INDEX "tasks_billId_idx" ON public.tasks USING btree ("billId");
 
 
 --
--- TOC entry 5353 (class 1259 OID 204260)
+-- TOC entry 5421 (class 1259 OID 204260)
 -- Name: tasks_clientId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9195,7 +10411,7 @@ CREATE INDEX "tasks_clientId_idx" ON public.tasks USING btree ("clientId");
 
 
 --
--- TOC entry 5354 (class 1259 OID 204265)
+-- TOC entry 5422 (class 1259 OID 204265)
 -- Name: tasks_createdByUserId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9203,7 +10419,7 @@ CREATE INDEX "tasks_createdByUserId_idx" ON public.tasks USING btree ("createdBy
 
 
 --
--- TOC entry 5355 (class 1259 OID 204255)
+-- TOC entry 5423 (class 1259 OID 204255)
 -- Name: tasks_dueDate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9211,7 +10427,7 @@ CREATE INDEX "tasks_dueDate_idx" ON public.tasks USING btree ("dueDate");
 
 
 --
--- TOC entry 5356 (class 1259 OID 204257)
+-- TOC entry 5424 (class 1259 OID 204257)
 -- Name: tasks_generatedFromTaskId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9219,7 +10435,7 @@ CREATE INDEX "tasks_generatedFromTaskId_idx" ON public.tasks USING btree ("gener
 
 
 --
--- TOC entry 5357 (class 1259 OID 204261)
+-- TOC entry 5425 (class 1259 OID 204261)
 -- Name: tasks_invoiceId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9227,7 +10443,7 @@ CREATE INDEX "tasks_invoiceId_idx" ON public.tasks USING btree ("invoiceId");
 
 
 --
--- TOC entry 5358 (class 1259 OID 204256)
+-- TOC entry 5426 (class 1259 OID 204256)
 -- Name: tasks_isTemplate_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9235,7 +10451,7 @@ CREATE INDEX "tasks_isTemplate_idx" ON public.tasks USING btree ("isTemplate");
 
 
 --
--- TOC entry 5361 (class 1259 OID 204253)
+-- TOC entry 5429 (class 1259 OID 204253)
 -- Name: tasks_priority_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9243,7 +10459,7 @@ CREATE INDEX tasks_priority_idx ON public.tasks USING btree (priority);
 
 
 --
--- TOC entry 5362 (class 1259 OID 204263)
+-- TOC entry 5430 (class 1259 OID 204263)
 -- Name: tasks_projectId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9251,7 +10467,7 @@ CREATE INDEX "tasks_projectId_idx" ON public.tasks USING btree ("projectId");
 
 
 --
--- TOC entry 5363 (class 1259 OID 204264)
+-- TOC entry 5431 (class 1259 OID 204264)
 -- Name: tasks_recurrenceId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9259,7 +10475,7 @@ CREATE INDEX "tasks_recurrenceId_idx" ON public.tasks USING btree ("recurrenceId
 
 
 --
--- TOC entry 5364 (class 1259 OID 204252)
+-- TOC entry 5432 (class 1259 OID 204252)
 -- Name: tasks_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9267,7 +10483,7 @@ CREATE INDEX tasks_status_idx ON public.tasks USING btree (status);
 
 
 --
--- TOC entry 5365 (class 1259 OID 204251)
+-- TOC entry 5433 (class 1259 OID 204251)
 -- Name: tasks_taskSeq_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9275,7 +10491,7 @@ CREATE UNIQUE INDEX "tasks_taskSeq_key" ON public.tasks USING btree ("taskSeq");
 
 
 --
--- TOC entry 5366 (class 1259 OID 204254)
+-- TOC entry 5434 (class 1259 OID 204254)
 -- Name: tasks_type_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9283,7 +10499,7 @@ CREATE INDEX tasks_type_idx ON public.tasks USING btree (type);
 
 
 --
--- TOC entry 5249 (class 1259 OID 204678)
+-- TOC entry 5318 (class 1259 OID 204678)
 -- Name: users_companyId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9291,7 +10507,7 @@ CREATE INDEX "users_companyId_idx" ON public.users USING btree ("companyId");
 
 
 --
--- TOC entry 5250 (class 1259 OID 203774)
+-- TOC entry 5319 (class 1259 OID 203774)
 -- Name: users_email_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9299,7 +10515,7 @@ CREATE UNIQUE INDEX users_email_key ON public.users USING btree (email);
 
 
 --
--- TOC entry 5253 (class 1259 OID 204630)
+-- TOC entry 5322 (class 1259 OID 204630)
 -- Name: users_roleId_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9307,7 +10523,7 @@ CREATE INDEX "users_roleId_idx" ON public.users USING btree ("roleId");
 
 
 --
--- TOC entry 5254 (class 1259 OID 204015)
+-- TOC entry 5323 (class 1259 OID 204015)
 -- Name: users_userNumber_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -9315,7 +10531,7 @@ CREATE UNIQUE INDEX "users_userNumber_key" ON public.users USING btree ("userNum
 
 
 --
--- TOC entry 5596 (class 2606 OID 204827)
+-- TOC entry 5704 (class 2606 OID 204827)
 -- Name: accounting_entities accounting_entities_companyId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9324,7 +10540,7 @@ ALTER TABLE ONLY public.accounting_entities
 
 
 --
--- TOC entry 5593 (class 2606 OID 204807)
+-- TOC entry 5701 (class 2606 OID 204807)
 -- Name: bank_reconciliation_matches bank_reconciliation_matches_journalLineId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9333,7 +10549,7 @@ ALTER TABLE ONLY public.bank_reconciliation_matches
 
 
 --
--- TOC entry 5594 (class 2606 OID 204797)
+-- TOC entry 5702 (class 2606 OID 204797)
 -- Name: bank_reconciliation_matches bank_reconciliation_matches_reconciliationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9342,7 +10558,7 @@ ALTER TABLE ONLY public.bank_reconciliation_matches
 
 
 --
--- TOC entry 5595 (class 2606 OID 204802)
+-- TOC entry 5703 (class 2606 OID 204802)
 -- Name: bank_reconciliation_matches bank_reconciliation_matches_statementLineId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9351,7 +10567,7 @@ ALTER TABLE ONLY public.bank_reconciliation_matches
 
 
 --
--- TOC entry 5591 (class 2606 OID 221831)
+-- TOC entry 5699 (class 2606 OID 221831)
 -- Name: bank_reconciliations bank_reconciliations_bankAccountId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9360,7 +10576,7 @@ ALTER TABLE ONLY public.bank_reconciliations
 
 
 --
--- TOC entry 5592 (class 2606 OID 204792)
+-- TOC entry 5700 (class 2606 OID 204792)
 -- Name: bank_statement_lines bank_statement_lines_reconciliationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9369,7 +10585,7 @@ ALTER TABLE ONLY public.bank_statement_lines
 
 
 --
--- TOC entry 5604 (class 2606 OID 221851)
+-- TOC entry 5712 (class 2606 OID 221851)
 -- Name: bank_transactions bank_transactions_bankAccountId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9378,7 +10594,7 @@ ALTER TABLE ONLY public.bank_transactions
 
 
 --
--- TOC entry 5556 (class 2606 OID 204278)
+-- TOC entry 5664 (class 2606 OID 204278)
 -- Name: bills bills_clientId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9387,7 +10603,7 @@ ALTER TABLE ONLY public.bills
 
 
 --
--- TOC entry 5557 (class 2606 OID 204488)
+-- TOC entry 5665 (class 2606 OID 204488)
 -- Name: bills bills_journalEntryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9396,7 +10612,7 @@ ALTER TABLE ONLY public.bills
 
 
 --
--- TOC entry 5558 (class 2606 OID 204483)
+-- TOC entry 5666 (class 2606 OID 204483)
 -- Name: bills bills_supplierId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9405,7 +10621,7 @@ ALTER TABLE ONLY public.bills
 
 
 --
--- TOC entry 5559 (class 2606 OID 204283)
+-- TOC entry 5667 (class 2606 OID 204283)
 -- Name: bills bills_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9414,7 +10630,7 @@ ALTER TABLE ONLY public.bills
 
 
 --
--- TOC entry 5603 (class 2606 OID 221826)
+-- TOC entry 5711 (class 2606 OID 221826)
 -- Name: business_bank_accounts business_bank_accounts_createdByUserId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9423,7 +10639,34 @@ ALTER TABLE ONLY public.business_bank_accounts
 
 
 --
--- TOC entry 5589 (class 2606 OID 204679)
+-- TOC entry 5719 (class 2606 OID 276630)
+-- Name: client_network_links client_network_links_clientId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.client_network_links
+    ADD CONSTRAINT "client_network_links_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES public.customers(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 5720 (class 2606 OID 276635)
+-- Name: client_network_links client_network_links_deviceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.client_network_links
+    ADD CONSTRAINT "client_network_links_deviceId_fkey" FOREIGN KEY ("deviceId") REFERENCES public.network_devices(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 5721 (class 2606 OID 276640)
+-- Name: client_network_links client_network_links_servicePlanId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.client_network_links
+    ADD CONSTRAINT "client_network_links_servicePlanId_fkey" FOREIGN KEY ("servicePlanId") REFERENCES public.service_plans(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 5697 (class 2606 OID 204679)
 -- Name: company_subscriptions company_subscriptions_companyId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9432,7 +10675,7 @@ ALTER TABLE ONLY public.company_subscriptions
 
 
 --
--- TOC entry 5590 (class 2606 OID 204684)
+-- TOC entry 5698 (class 2606 OID 204684)
 -- Name: company_subscriptions company_subscriptions_planId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9441,7 +10684,7 @@ ALTER TABLE ONLY public.company_subscriptions
 
 
 --
--- TOC entry 5605 (class 2606 OID 240489)
+-- TOC entry 5713 (class 2606 OID 240489)
 -- Name: customer_documents customer_documents_clientId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9450,7 +10693,7 @@ ALTER TABLE ONLY public.customer_documents
 
 
 --
--- TOC entry 5600 (class 2606 OID 204935)
+-- TOC entry 5708 (class 2606 OID 204935)
 -- Name: depreciation_runs depreciation_runs_assetId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9459,7 +10702,7 @@ ALTER TABLE ONLY public.depreciation_runs
 
 
 --
--- TOC entry 5550 (class 2606 OID 203957)
+-- TOC entry 5658 (class 2606 OID 203957)
 -- Name: email_outbox email_outbox_clientId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9468,7 +10711,7 @@ ALTER TABLE ONLY public.email_outbox
 
 
 --
--- TOC entry 5551 (class 2606 OID 203944)
+-- TOC entry 5659 (class 2606 OID 203944)
 -- Name: email_outbox email_outbox_invoiceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9477,7 +10720,7 @@ ALTER TABLE ONLY public.email_outbox
 
 
 --
--- TOC entry 5597 (class 2606 OID 204852)
+-- TOC entry 5705 (class 2606 OID 204852)
 -- Name: exchange_rates exchange_rates_fromCurrencyCode_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9486,7 +10729,7 @@ ALTER TABLE ONLY public.exchange_rates
 
 
 --
--- TOC entry 5598 (class 2606 OID 204857)
+-- TOC entry 5706 (class 2606 OID 204857)
 -- Name: exchange_rates exchange_rates_toCurrencyCode_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9495,7 +10738,7 @@ ALTER TABLE ONLY public.exchange_rates
 
 
 --
--- TOC entry 5583 (class 2606 OID 204584)
+-- TOC entry 5691 (class 2606 OID 204584)
 -- Name: expenses expenses_categoryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9504,7 +10747,7 @@ ALTER TABLE ONLY public.expenses
 
 
 --
--- TOC entry 5584 (class 2606 OID 204715)
+-- TOC entry 5692 (class 2606 OID 204715)
 -- Name: expenses expenses_journalEntryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9513,7 +10756,7 @@ ALTER TABLE ONLY public.expenses
 
 
 --
--- TOC entry 5585 (class 2606 OID 204579)
+-- TOC entry 5693 (class 2606 OID 204579)
 -- Name: expenses expenses_supplierId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9522,7 +10765,7 @@ ALTER TABLE ONLY public.expenses
 
 
 --
--- TOC entry 5586 (class 2606 OID 204589)
+-- TOC entry 5694 (class 2606 OID 204589)
 -- Name: expenses expenses_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9531,7 +10774,7 @@ ALTER TABLE ONLY public.expenses
 
 
 --
--- TOC entry 5599 (class 2606 OID 204901)
+-- TOC entry 5707 (class 2606 OID 204901)
 -- Name: inventory_movements inventory_movements_productId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9540,7 +10783,7 @@ ALTER TABLE ONLY public.inventory_movements
 
 
 --
--- TOC entry 5538 (class 2606 OID 203829)
+-- TOC entry 5646 (class 2606 OID 203829)
 -- Name: invoice_items invoice_items_invoiceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9549,7 +10792,7 @@ ALTER TABLE ONLY public.invoice_items
 
 
 --
--- TOC entry 5539 (class 2606 OID 203834)
+-- TOC entry 5647 (class 2606 OID 203834)
 -- Name: invoice_items invoice_items_productId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9558,7 +10801,7 @@ ALTER TABLE ONLY public.invoice_items
 
 
 --
--- TOC entry 5533 (class 2606 OID 203809)
+-- TOC entry 5641 (class 2606 OID 203809)
 -- Name: invoices invoices_clientId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9567,7 +10810,7 @@ ALTER TABLE ONLY public.invoices
 
 
 --
--- TOC entry 5534 (class 2606 OID 204699)
+-- TOC entry 5642 (class 2606 OID 204699)
 -- Name: invoices invoices_journalEntryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9576,7 +10819,7 @@ ALTER TABLE ONLY public.invoices
 
 
 --
--- TOC entry 5535 (class 2606 OID 203819)
+-- TOC entry 5643 (class 2606 OID 203819)
 -- Name: invoices invoices_quoteId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9585,7 +10828,7 @@ ALTER TABLE ONLY public.invoices
 
 
 --
--- TOC entry 5536 (class 2606 OID 203824)
+-- TOC entry 5644 (class 2606 OID 203824)
 -- Name: invoices invoices_recurringInvoiceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9594,7 +10837,7 @@ ALTER TABLE ONLY public.invoices
 
 
 --
--- TOC entry 5537 (class 2606 OID 203814)
+-- TOC entry 5645 (class 2606 OID 203814)
 -- Name: invoices invoices_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9603,7 +10846,7 @@ ALTER TABLE ONLY public.invoices
 
 
 --
--- TOC entry 5578 (class 2606 OID 204873)
+-- TOC entry 5686 (class 2606 OID 204873)
 -- Name: journal_entries journal_entries_approvedByUserId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9612,7 +10855,7 @@ ALTER TABLE ONLY public.journal_entries
 
 
 --
--- TOC entry 5579 (class 2606 OID 204523)
+-- TOC entry 5687 (class 2606 OID 204523)
 -- Name: journal_entries journal_entries_createdByUserId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9621,7 +10864,7 @@ ALTER TABLE ONLY public.journal_entries
 
 
 --
--- TOC entry 5580 (class 2606 OID 204518)
+-- TOC entry 5688 (class 2606 OID 204518)
 -- Name: journal_entries journal_entries_reversedEntryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9630,7 +10873,7 @@ ALTER TABLE ONLY public.journal_entries
 
 
 --
--- TOC entry 5581 (class 2606 OID 204533)
+-- TOC entry 5689 (class 2606 OID 204533)
 -- Name: journal_lines journal_lines_accountId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9639,7 +10882,7 @@ ALTER TABLE ONLY public.journal_lines
 
 
 --
--- TOC entry 5582 (class 2606 OID 204528)
+-- TOC entry 5690 (class 2606 OID 204528)
 -- Name: journal_lines journal_lines_entryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9648,7 +10891,7 @@ ALTER TABLE ONLY public.journal_lines
 
 
 --
--- TOC entry 5609 (class 2606 OID 244980)
+-- TOC entry 5717 (class 2606 OID 244980)
 -- Name: loan_repayments loan_repayments_journalEntryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9657,7 +10900,7 @@ ALTER TABLE ONLY public.loan_repayments
 
 
 --
--- TOC entry 5610 (class 2606 OID 244959)
+-- TOC entry 5718 (class 2606 OID 244959)
 -- Name: loan_repayments loan_repayments_loanId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9666,7 +10909,7 @@ ALTER TABLE ONLY public.loan_repayments
 
 
 --
--- TOC entry 5606 (class 2606 OID 244954)
+-- TOC entry 5714 (class 2606 OID 244954)
 -- Name: loans loans_createdById_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9675,7 +10918,7 @@ ALTER TABLE ONLY public.loans
 
 
 --
--- TOC entry 5607 (class 2606 OID 244965)
+-- TOC entry 5715 (class 2606 OID 244965)
 -- Name: loans loans_customerId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9684,7 +10927,7 @@ ALTER TABLE ONLY public.loans
 
 
 --
--- TOC entry 5608 (class 2606 OID 244975)
+-- TOC entry 5716 (class 2606 OID 244975)
 -- Name: loans loans_journalEntryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9693,7 +10936,34 @@ ALTER TABLE ONLY public.loans
 
 
 --
--- TOC entry 5552 (class 2606 OID 204040)
+-- TOC entry 5722 (class 2606 OID 276645)
+-- Name: network_alerts network_alerts_deviceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.network_alerts
+    ADD CONSTRAINT "network_alerts_deviceId_fkey" FOREIGN KEY ("deviceId") REFERENCES public.network_devices(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 5723 (class 2606 OID 276650)
+-- Name: network_devices network_devices_parentDeviceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.network_devices
+    ADD CONSTRAINT "network_devices_parentDeviceId_fkey" FOREIGN KEY ("parentDeviceId") REFERENCES public.network_devices(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- TOC entry 5724 (class 2606 OID 276655)
+-- Name: network_interfaces network_interfaces_deviceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.network_interfaces
+    ADD CONSTRAINT "network_interfaces_deviceId_fkey" FOREIGN KEY ("deviceId") REFERENCES public.network_devices(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 5660 (class 2606 OID 204040)
 -- Name: password_resets password_resets_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9702,7 +10972,7 @@ ALTER TABLE ONLY public.password_resets
 
 
 --
--- TOC entry 5601 (class 2606 OID 204977)
+-- TOC entry 5709 (class 2606 OID 204977)
 -- Name: pay_run_lines pay_run_lines_employeeId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9711,7 +10981,7 @@ ALTER TABLE ONLY public.pay_run_lines
 
 
 --
--- TOC entry 5602 (class 2606 OID 204972)
+-- TOC entry 5710 (class 2606 OID 204972)
 -- Name: pay_run_lines pay_run_lines_payRunId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9720,7 +10990,7 @@ ALTER TABLE ONLY public.pay_run_lines
 
 
 --
--- TOC entry 5553 (class 2606 OID 204076)
+-- TOC entry 5661 (class 2606 OID 204076)
 -- Name: payment_allocations payment_allocations_invoiceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9729,7 +10999,7 @@ ALTER TABLE ONLY public.payment_allocations
 
 
 --
--- TOC entry 5554 (class 2606 OID 204071)
+-- TOC entry 5662 (class 2606 OID 204071)
 -- Name: payment_allocations payment_allocations_paymentId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9738,7 +11008,7 @@ ALTER TABLE ONLY public.payment_allocations
 
 
 --
--- TOC entry 5542 (class 2606 OID 203854)
+-- TOC entry 5650 (class 2606 OID 203854)
 -- Name: payments payments_clientId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9747,7 +11017,7 @@ ALTER TABLE ONLY public.payments
 
 
 --
--- TOC entry 5543 (class 2606 OID 204058)
+-- TOC entry 5651 (class 2606 OID 204058)
 -- Name: payments payments_invoiceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9756,7 +11026,7 @@ ALTER TABLE ONLY public.payments
 
 
 --
--- TOC entry 5544 (class 2606 OID 204704)
+-- TOC entry 5652 (class 2606 OID 204704)
 -- Name: payments payments_journalEntryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9765,7 +11035,7 @@ ALTER TABLE ONLY public.payments
 
 
 --
--- TOC entry 5545 (class 2606 OID 203859)
+-- TOC entry 5653 (class 2606 OID 203859)
 -- Name: payments payments_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9774,7 +11044,7 @@ ALTER TABLE ONLY public.payments
 
 
 --
--- TOC entry 5555 (class 2606 OID 204273)
+-- TOC entry 5663 (class 2606 OID 204273)
 -- Name: projects projects_clientId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9783,7 +11053,7 @@ ALTER TABLE ONLY public.projects
 
 
 --
--- TOC entry 5531 (class 2606 OID 203804)
+-- TOC entry 5639 (class 2606 OID 203804)
 -- Name: quote_items quote_items_productId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9792,7 +11062,7 @@ ALTER TABLE ONLY public.quote_items
 
 
 --
--- TOC entry 5532 (class 2606 OID 203799)
+-- TOC entry 5640 (class 2606 OID 203799)
 -- Name: quote_items quote_items_quoteId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9801,7 +11071,7 @@ ALTER TABLE ONLY public.quote_items
 
 
 --
--- TOC entry 5529 (class 2606 OID 203789)
+-- TOC entry 5637 (class 2606 OID 203789)
 -- Name: quotes quotes_clientId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9810,7 +11080,7 @@ ALTER TABLE ONLY public.quotes
 
 
 --
--- TOC entry 5530 (class 2606 OID 203794)
+-- TOC entry 5638 (class 2606 OID 203794)
 -- Name: quotes quotes_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9819,7 +11089,7 @@ ALTER TABLE ONLY public.quotes
 
 
 --
--- TOC entry 5546 (class 2606 OID 203884)
+-- TOC entry 5654 (class 2606 OID 203884)
 -- Name: recurring_invoice_items recurring_invoice_items_productId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9828,7 +11098,7 @@ ALTER TABLE ONLY public.recurring_invoice_items
 
 
 --
--- TOC entry 5547 (class 2606 OID 203879)
+-- TOC entry 5655 (class 2606 OID 203879)
 -- Name: recurring_invoice_items recurring_invoice_items_recurringInvoiceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9837,7 +11107,7 @@ ALTER TABLE ONLY public.recurring_invoice_items
 
 
 --
--- TOC entry 5548 (class 2606 OID 203939)
+-- TOC entry 5656 (class 2606 OID 203939)
 -- Name: recurring_invoice_runs recurring_invoice_runs_invoiceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9846,7 +11116,7 @@ ALTER TABLE ONLY public.recurring_invoice_runs
 
 
 --
--- TOC entry 5549 (class 2606 OID 203934)
+-- TOC entry 5657 (class 2606 OID 203934)
 -- Name: recurring_invoice_runs recurring_invoice_runs_recurringInvoiceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9855,7 +11125,7 @@ ALTER TABLE ONLY public.recurring_invoice_runs
 
 
 --
--- TOC entry 5540 (class 2606 OID 203839)
+-- TOC entry 5648 (class 2606 OID 203839)
 -- Name: recurring_invoices recurring_invoices_clientId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9864,7 +11134,7 @@ ALTER TABLE ONLY public.recurring_invoices
 
 
 --
--- TOC entry 5541 (class 2606 OID 203844)
+-- TOC entry 5649 (class 2606 OID 203844)
 -- Name: recurring_invoices recurring_invoices_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9873,7 +11143,7 @@ ALTER TABLE ONLY public.recurring_invoices
 
 
 --
--- TOC entry 5587 (class 2606 OID 204625)
+-- TOC entry 5695 (class 2606 OID 204625)
 -- Name: role_permissions role_permissions_permissionId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9882,7 +11152,7 @@ ALTER TABLE ONLY public.role_permissions
 
 
 --
--- TOC entry 5588 (class 2606 OID 204620)
+-- TOC entry 5696 (class 2606 OID 204620)
 -- Name: role_permissions role_permissions_roleId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9891,7 +11161,7 @@ ALTER TABLE ONLY public.role_permissions
 
 
 --
--- TOC entry 5576 (class 2606 OID 204513)
+-- TOC entry 5684 (class 2606 OID 204513)
 -- Name: supplier_payment_allocations supplier_payment_allocations_billId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9900,7 +11170,7 @@ ALTER TABLE ONLY public.supplier_payment_allocations
 
 
 --
--- TOC entry 5577 (class 2606 OID 204508)
+-- TOC entry 5685 (class 2606 OID 204508)
 -- Name: supplier_payment_allocations supplier_payment_allocations_paymentId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9909,7 +11179,7 @@ ALTER TABLE ONLY public.supplier_payment_allocations
 
 
 --
--- TOC entry 5573 (class 2606 OID 204503)
+-- TOC entry 5681 (class 2606 OID 204503)
 -- Name: supplier_payments supplier_payments_journalEntryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9918,7 +11188,7 @@ ALTER TABLE ONLY public.supplier_payments
 
 
 --
--- TOC entry 5574 (class 2606 OID 204493)
+-- TOC entry 5682 (class 2606 OID 204493)
 -- Name: supplier_payments supplier_payments_supplierId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9927,7 +11197,7 @@ ALTER TABLE ONLY public.supplier_payments
 
 
 --
--- TOC entry 5575 (class 2606 OID 204498)
+-- TOC entry 5683 (class 2606 OID 204498)
 -- Name: supplier_payments supplier_payments_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9936,7 +11206,7 @@ ALTER TABLE ONLY public.supplier_payments
 
 
 --
--- TOC entry 5569 (class 2606 OID 204338)
+-- TOC entry 5677 (class 2606 OID 204338)
 -- Name: task_activities task_activities_actorUserId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9945,7 +11215,7 @@ ALTER TABLE ONLY public.task_activities
 
 
 --
--- TOC entry 5570 (class 2606 OID 204333)
+-- TOC entry 5678 (class 2606 OID 204333)
 -- Name: task_activities task_activities_taskId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9954,7 +11224,7 @@ ALTER TABLE ONLY public.task_activities
 
 
 --
--- TOC entry 5571 (class 2606 OID 204343)
+-- TOC entry 5679 (class 2606 OID 204343)
 -- Name: task_notifications task_notifications_taskId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9963,7 +11233,7 @@ ALTER TABLE ONLY public.task_notifications
 
 
 --
--- TOC entry 5572 (class 2606 OID 204348)
+-- TOC entry 5680 (class 2606 OID 204348)
 -- Name: task_notifications task_notifications_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9972,7 +11242,7 @@ ALTER TABLE ONLY public.task_notifications
 
 
 --
--- TOC entry 5560 (class 2606 OID 204298)
+-- TOC entry 5668 (class 2606 OID 204298)
 -- Name: tasks tasks_assignedEmployeeId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9981,7 +11251,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- TOC entry 5561 (class 2606 OID 204293)
+-- TOC entry 5669 (class 2606 OID 204293)
 -- Name: tasks tasks_assignedUserId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9990,7 +11260,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- TOC entry 5562 (class 2606 OID 204318)
+-- TOC entry 5670 (class 2606 OID 204318)
 -- Name: tasks tasks_billId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -9999,7 +11269,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- TOC entry 5563 (class 2606 OID 204308)
+-- TOC entry 5671 (class 2606 OID 204308)
 -- Name: tasks tasks_clientId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -10008,7 +11278,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- TOC entry 5564 (class 2606 OID 204288)
+-- TOC entry 5672 (class 2606 OID 204288)
 -- Name: tasks tasks_createdByUserId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -10017,7 +11287,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- TOC entry 5565 (class 2606 OID 204303)
+-- TOC entry 5673 (class 2606 OID 204303)
 -- Name: tasks tasks_generatedFromTaskId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -10026,7 +11296,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- TOC entry 5566 (class 2606 OID 204313)
+-- TOC entry 5674 (class 2606 OID 204313)
 -- Name: tasks tasks_invoiceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -10035,7 +11305,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- TOC entry 5567 (class 2606 OID 204323)
+-- TOC entry 5675 (class 2606 OID 204323)
 -- Name: tasks tasks_projectId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -10044,7 +11314,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- TOC entry 5568 (class 2606 OID 204328)
+-- TOC entry 5676 (class 2606 OID 204328)
 -- Name: tasks tasks_recurrenceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -10053,7 +11323,7 @@ ALTER TABLE ONLY public.tasks
 
 
 --
--- TOC entry 5527 (class 2606 OID 204689)
+-- TOC entry 5635 (class 2606 OID 204689)
 -- Name: users users_companyId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -10062,7 +11332,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 5528 (class 2606 OID 204631)
+-- TOC entry 5636 (class 2606 OID 204631)
 -- Name: users users_roleId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -10071,7 +11341,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 5830 (class 0 OID 0)
+-- TOC entry 5951 (class 0 OID 0)
 -- Dependencies: 5
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
 --
@@ -10079,7 +11349,7 @@ ALTER TABLE ONLY public.users
 REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 
 
--- Completed on 2026-03-17 21:00:09
+-- Completed on 2026-04-04 12:32:05
 
 --
 -- PostgreSQL database dump complete
