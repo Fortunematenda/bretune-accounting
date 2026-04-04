@@ -616,11 +616,12 @@ function StatisticsTab({ client, session, username }) {
       },
       y: {
         beginAtZero: true,
+        suggestedMax: 10000,
         ticks: {
           font: { size: 10 },
           color: "#999",
           callback: function(v) {
-            if (v == null || v <= 0) return "0 bps";
+            if (v == null || v < 1) return "0 bps";
             if (v >= 1000000000) return (v / 1000000000).toFixed(1) + " Gbps";
             if (v >= 1000000) return (v / 1000000).toFixed(1) + " Mbps";
             if (v >= 1000) return (v / 1000).toFixed(1) + " Kbps";
