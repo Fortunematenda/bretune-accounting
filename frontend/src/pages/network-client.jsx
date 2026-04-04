@@ -619,12 +619,12 @@ function StatisticsTab({ client, session, username }) {
         ticks: {
           font: { size: 10 },
           color: "#999",
-          callback: (v) => {
+          callback: function(v) {
             if (v == null || v <= 0) return "0 bps";
-            const k = 1000;
-            const s = ["bps", "Kbps", "Mbps", "Gbps"];
-            const i = Math.min(Math.floor(Math.log(Math.abs(v)) / Math.log(k)), s.length - 1);
-            return parseFloat((v / Math.pow(k, Math.max(0, i))).toFixed(1)) + " " + s[Math.max(0, i)];
+            if (v >= 1000000000) return (v / 1000000000).toFixed(1) + " Gbps";
+            if (v >= 1000000) return (v / 1000000).toFixed(1) + " Mbps";
+            if (v >= 1000) return (v / 1000).toFixed(1) + " Kbps";
+            return Math.round(v) + " bps";
           },
           maxTicksLimit: 8,
         },
