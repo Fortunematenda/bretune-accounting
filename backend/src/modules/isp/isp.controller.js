@@ -2,14 +2,16 @@ const { Controller, Get, Post, Put, Delete, Inject, Query, Param, Body, UseGuard
 const { ApiBearerAuth, ApiTags } = require('@nestjs/swagger');
 const { JwtAuthGuard } = require('../auth/guards/jwt-auth.guard');
 const { ISPService } = require('./isp.service');
+const { MikroTikService } = require('./mikrotik.service');
 
 @ApiTags('ISP')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('isp')
 class ISPController {
-  constructor(@Inject(ISPService) ispService) {
+  constructor(@Inject(ISPService) ispService, @Inject(MikroTikService) mikroTikService) {
     this.ispService = ispService;
+    this.mikroTik = mikroTikService;
   }
 
   // ── Dashboard ────────────────────────────────
@@ -198,6 +200,94 @@ class ISPController {
     return this.ispService.getClientsForAutoSuspension(req.user?.companyName || null, {
       overdueDays: query.overdueDays ? Number(query.overdueDays) : 30,
     });
+  }
+
+  // ── MikroTik Router Live Data ──────────────────
+
+  @Get('router/dashboard')
+  async routerDashboard() {
+    return this.mikroTik.getRouterDashboard();
+  }
+
+  @Get('router/system')
+  async routerSystem() {
+    return this.mikroTik.getSystemResource();
+  }
+
+  @Get('router/active')
+  async routerActiveConnections() {
+    return this.mikroTik.getActiveConnections();
+  }
+
+  @Get('router/secrets')
+  async routerSecrets() {
+    return this.mikroTik.getSecrets();
+  }
+
+  @Get('router/secrets/:username')
+  async routerSecret(@Param('username') username) {
+    return this.mikroTik.getSecret(username);
+  }
+
+  @Post('router/secrets')
+  async routerCreateSecret(@Body() body) {
+    return this.mikroTik.createSecret({
+      name: body.name,
+      password: body.password,
+      profile: body.profile,
+      service: body.service || 'pppoe',
+      comment: body.comment || '',
+    });
+  }
+
+  @Put('router/secrets/:id')
+  async routerUpdateSecret(@Param('id') id, @Body() body) {
+    return this.mikroTik.updateSecret(id, body);
+  }
+
+  @Delete('router/secrets/:id')
+  async routerDeleteSecret(@Param('id') id) {
+    return this.mikroTik.deleteSecret(id);
+  }
+
+  @Get('router/profiles')
+  async routerProfiles() {
+    return this.mikroTik.getProfiles();
+  }
+
+  @Get('router/interfaces')
+  async routerInterfaces() {
+    return this.mikroTik.getInterfaces();
+  }
+
+  @Get('router/interfaces/:name/traffic')
+  async routerInterfaceTraffic(@Param('name') name) {
+    return this.mikroTik.getInterfaceTraffic(name);
+  }
+
+  @Get('router/queues')
+  async routerQueues() {
+    return this.mikroTik.getQueues();
+  }
+
+  @Get('router/logs')
+  async routerLogs(@Query() query) {
+    return this.mikroTik.getLogs(query.limit ? Number(query.limit) : 50);
+  }
+
+  @Post('router/disconnect/:username')
+  async routerDisconnect(@Param('username') username) {
+    return this.mikroTik.disconnectByUsername(username);
+  }
+
+  @Post('router/disable/:username')
+  async routerDisable(@Param('username') username) {
+    return this.mikroTik.disableSecret(username);
+  }
+
+  @Post('router/enable/:username')
+  async routerEnable(@Param('username') username) {
+    return this.mikroTik.enableSecret(username);
   }
 }
 

@@ -34,6 +34,12 @@ const envSchema = Joi.object({
   // Rate limiting
   THROTTLE_TTL_SECONDS: Joi.number().integer().min(1).default(60),
   THROTTLE_LIMIT: Joi.number().integer().min(1).default(100),
+
+  // MikroTik Router
+  MIKROTIK_HOST: Joi.string().allow(''),
+  MIKROTIK_PORT: Joi.number().port().default(8728),
+  MIKROTIK_USER: Joi.string().allow(''),
+  MIKROTIK_PASSWORD: Joi.string().allow(''),
 }).unknown(true);
 
 function validateEnv(config) {

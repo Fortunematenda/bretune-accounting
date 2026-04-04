@@ -676,4 +676,22 @@ export const api = {
     ).toString();
     return request(`/isp/billing/auto-suspend${qs ? `?${qs}` : ""}`);
   },
+
+  // ── MikroTik Router Live Monitoring ─────────────
+  routerDashboard: () => request("/isp/router/dashboard"),
+  routerSystem: () => request("/isp/router/system"),
+  routerActiveConnections: () => request("/isp/router/active"),
+  routerSecrets: () => request("/isp/router/secrets"),
+  routerSecret: (username) => request(`/isp/router/secrets/${username}`),
+  routerCreateSecret: (payload) => request("/isp/router/secrets", { method: "POST", body: payload }),
+  routerUpdateSecret: (id, payload) => request(`/isp/router/secrets/${id}`, { method: "PUT", body: payload }),
+  routerDeleteSecret: (id) => request(`/isp/router/secrets/${id}`, { method: "DELETE" }),
+  routerProfiles: () => request("/isp/router/profiles"),
+  routerInterfaces: () => request("/isp/router/interfaces"),
+  routerInterfaceTraffic: (name) => request(`/isp/router/interfaces/${name}/traffic`),
+  routerQueues: () => request("/isp/router/queues"),
+  routerLogs: (limit = 50) => request(`/isp/router/logs?limit=${limit}`),
+  routerDisconnect: (username) => request(`/isp/router/disconnect/${username}`, { method: "POST" }),
+  routerDisable: (username) => request(`/isp/router/disable/${username}`, { method: "POST" }),
+  routerEnable: (username) => request(`/isp/router/enable/${username}`, { method: "POST" }),
 };
