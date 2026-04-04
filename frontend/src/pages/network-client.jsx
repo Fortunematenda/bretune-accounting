@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../lib/api";
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from "recharts";
+// recharts kept for other pages but not used here - pure canvas streaming chart
 
 import {
   ArrowLeft,
@@ -502,45 +500,19 @@ function ServicesTab({ client, session, profileData }) {
   );
 }
 
-// ── Custom Tooltip ───────────────────────────────
-function BwTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div style={{ background: "#fff", border: "1px solid #ddd", borderRadius: 6, padding: "8px 12px", fontSize: 11, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-      <div style={{ fontWeight: 600, color: "#555", marginBottom: 4 }}>{label}</div>
-      {payload.map((p) => (
-        <div key={p.dataKey} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: p.color, display: "inline-block" }} />
-          <span style={{ color: "#888" }}>{p.name}:</span>
-          <span style={{ fontWeight: 700, color: "#333" }}>{formatBits(p.value)}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
+// ── Streaming Canvas Chart (Splynx-style marquee) ──
 
-// ── Statistics Tab (recharts marquee) ────────────
+function StreamingChart({ username }) {
+  const canvasRef = useRef(null);
+  const dataRef = useRef([]);
+  const animRef = useRef(null);
+  const [currentUpload, setCurrentUpload] = useState(0);
+  const [currentDownload, setCurrentDownload] = useState(0);
 
-function initChartData(count) {
-  const arr = [];
-  const now = Date.now();
-  for (let i = count - 1; i >= 0; i--) {
-    const d = new Date(now - i * 2000);
-    arr.push({
-      time: d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-      upload: 0,
-      download: 0,
-    });
-  }
-  return arr;
-}
+  const DURATION = 120000; // 2 minutes visible window
+  const POLL_MS = 2000;
 
-function StatisticsTab({ client, session, username }) {
-  const isOnline = client.isOnline;
-  const MAX_POINTS = 60;
-  const [chartData, setChartData] = useState(() => initChartData(MAX_POINTS));
-  const pollRef = useRef(null);
-
+  // Poll traffic data
   useEffect(() => {
     let active = true;
     const poll = async () => {
@@ -551,20 +523,165 @@ function StatisticsTab({ client, session, username }) {
         up = traffic?.rxBitsPerSecond || 0;
         down = traffic?.txBitsPerSecond || 0;
       } catch { /* silent */ }
-
-      setChartData((prev) => {
-        const next = [...prev.slice(1), { time: timeLabel(), upload: up, download: down }];
-        return next;
-      });
+      dataRef.current.push({ t: Date.now(), up, down });
+      // keep 3 minutes of data
+      const cutoff = Date.now() - 180000;
+      dataRef.current = dataRef.current.filter((d) => d.t > cutoff);
+      setCurrentUpload(up);
+      setCurrentDownload(down);
     };
     poll();
-    pollRef.current = setInterval(poll, 2000);
-    return () => { active = false; clearInterval(pollRef.current); };
+    const id = setInterval(poll, POLL_MS);
+    return () => { active = false; clearInterval(id); };
   }, [username]);
 
-  const lastPoint = chartData[chartData.length - 1];
-  const currentUpload = lastPoint?.upload || 0;
-  const currentDownload = lastPoint?.download || 0;
+  // 60fps canvas draw loop
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let running = true;
+
+    const draw = () => {
+      if (!running) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      const W = rect.width;
+      const H = rect.height;
+      const PAD_L = 65, PAD_R = 10, PAD_T = 10, PAD_B = 45;
+      const chartW = W - PAD_L - PAD_R;
+      const chartH = H - PAD_T - PAD_B;
+
+      ctx.clearRect(0, 0, W, H);
+
+      const now = Date.now();
+      const tMin = now - DURATION;
+      const data = dataRef.current;
+
+      // Find max value for Y scale
+      let maxVal = 10000; // minimum 10 Kbps
+      for (const d of data) {
+        if (d.t >= tMin) {
+          if (d.up > maxVal) maxVal = d.up;
+          if (d.down > maxVal) maxVal = d.down;
+        }
+      }
+      maxVal = maxVal * 1.15; // 15% headroom
+
+      // Grid lines
+      ctx.strokeStyle = "#f0f0f0";
+      ctx.lineWidth = 1;
+      const gridLines = 5;
+      for (let i = 0; i <= gridLines; i++) {
+        const y = PAD_T + (chartH / gridLines) * i;
+        ctx.beginPath();
+        ctx.moveTo(PAD_L, y);
+        ctx.lineTo(PAD_L + chartW, y);
+        ctx.stroke();
+      }
+
+      // Y-axis labels
+      ctx.fillStyle = "#999";
+      ctx.font = "10px sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      for (let i = 0; i <= gridLines; i++) {
+        const y = PAD_T + (chartH / gridLines) * i;
+        const val = maxVal * (1 - i / gridLines);
+        ctx.fillText(formatBits(val), PAD_L - 6, y);
+      }
+
+      // X-axis time labels
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillStyle = "#999";
+      const xTicks = 10;
+      for (let i = 0; i <= xTicks; i++) {
+        const t = tMin + (DURATION / xTicks) * i;
+        const x = PAD_L + (chartW / xTicks) * i;
+        const d = new Date(t);
+        const label = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        ctx.save();
+        ctx.translate(x, PAD_T + chartH + 6);
+        ctx.rotate(-Math.PI / 4);
+        ctx.fillText(label, 0, 0);
+        ctx.restore();
+      }
+
+      // Y-axis line
+      ctx.strokeStyle = "#ddd";
+      ctx.beginPath();
+      ctx.moveTo(PAD_L, PAD_T);
+      ctx.lineTo(PAD_L, PAD_T + chartH);
+      ctx.stroke();
+      // X-axis line
+      ctx.beginPath();
+      ctx.moveTo(PAD_L, PAD_T + chartH);
+      ctx.lineTo(PAD_L + chartW, PAD_T + chartH);
+      ctx.stroke();
+
+      // Helper: time -> x, value -> y
+      const tx = (t) => PAD_L + ((t - tMin) / DURATION) * chartW;
+      const vy = (v) => PAD_T + chartH - (v / maxVal) * chartH;
+
+      // Draw filled area
+      const drawArea = (key, strokeColor, fillColor) => {
+        const pts = data.filter((d) => d.t >= tMin - POLL_MS);
+        if (pts.length < 2) return;
+
+        // Fill
+        ctx.beginPath();
+        ctx.moveTo(tx(pts[0].t), PAD_T + chartH);
+        for (const d of pts) {
+          ctx.lineTo(tx(d.t), vy(d[key]));
+        }
+        ctx.lineTo(tx(pts[pts.length - 1].t), PAD_T + chartH);
+        ctx.closePath();
+        const grad = ctx.createLinearGradient(0, PAD_T, 0, PAD_T + chartH);
+        grad.addColorStop(0, fillColor);
+        grad.addColorStop(1, "rgba(255,255,255,0.02)");
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Stroke
+        ctx.beginPath();
+        ctx.moveTo(tx(pts[0].t), vy(pts[0][key]));
+        for (let i = 1; i < pts.length; i++) {
+          ctx.lineTo(tx(pts[i].t), vy(pts[i][key]));
+        }
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      };
+
+      drawArea("up", "rgba(220,100,100,0.8)", "rgba(255,140,140,0.35)");
+      drawArea("down", "rgba(80,150,240,0.8)", "rgba(130,180,255,0.45)");
+
+      animRef.current = requestAnimationFrame(draw);
+    };
+
+    animRef.current = requestAnimationFrame(draw);
+    return () => { running = false; cancelAnimationFrame(animRef.current); };
+  }, []);
+
+  return (
+    <div>
+      <canvas ref={canvasRef} style={{ width: "100%", height: 300, display: "block" }} />
+      <div className="px-6 py-3 border-t border-slate-100 text-center">
+        <div className="text-xs text-slate-400">Upload / Download</div>
+        <div className="text-sm font-semibold text-slate-700">{formatBits(currentUpload)} / {formatBits(currentDownload)}</div>
+      </div>
+    </div>
+  );
+}
+
+// ── Statistics Tab ───────────────────────────────
+
+function StatisticsTab({ client, session, username }) {
+  const isOnline = client.isOnline;
 
   return (
     <div className="space-y-6">
@@ -605,7 +722,7 @@ function StatisticsTab({ client, session, username }) {
         )}
       </div>
 
-      {/* Live Bandwidth Usage - Splynx style */}
+      {/* Live Bandwidth Usage - Splynx streaming canvas */}
       <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
         <div className="px-6 py-3 border-b border-slate-100 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
@@ -629,35 +746,8 @@ function StatisticsTab({ client, session, username }) {
           </div>
         </div>
 
-        {/* Recharts Marquee */}
-        <div className="px-2 pb-2" style={{ height: 320 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 15, left: 5, bottom: 30 }}>
-              <defs>
-                <linearGradient id="upFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ff9999" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="#ffcccc" stopOpacity={0.05} />
-                </linearGradient>
-                <linearGradient id="downFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#82b4ff" stopOpacity={0.6} />
-                  <stop offset="100%" stopColor="#c4dcff" stopOpacity={0.05} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid stroke="#f0f0f0" horizontal={true} vertical={false} />
-              <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#999" }} angle={-45} textAnchor="end" height={50} interval={Math.max(1, Math.floor(chartData.length / 12))} axisLine={{ stroke: "#ddd" }} tickLine={{ stroke: "#ddd" }} />
-              <YAxis tick={{ fontSize: 10, fill: "#999" }} tickFormatter={(v) => formatBits(v)} width={70} axisLine={{ stroke: "#ddd" }} tickLine={{ stroke: "#ddd" }} domain={[0, (max) => Math.max(max || 0, 10000)]} />
-              <Tooltip content={<BwTooltip />} />
-              <Area type="monotone" dataKey="upload" name="Upload" stroke="#e08080" fill="url(#upFill)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
-              <Area type="monotone" dataKey="download" name="Download" stroke="#6aadff" fill="url(#downFill)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Upload / Download footer */}
-        <div className="px-6 py-3 border-t border-slate-100 text-center">
-          <div className="text-xs text-slate-400">Upload / Download</div>
-          <div className="text-sm font-semibold text-slate-700">{formatBits(currentUpload)} / {formatBits(currentDownload)}</div>
-        </div>
+        {/* Streaming Canvas */}
+        <StreamingChart username={username} />
       </div>
 
       {/* Total for Period */}
