@@ -522,7 +522,7 @@ function StatisticsTab({ client, session, username }) {
   const isOnline = client.isOnline;
   const [chartData, setChartData] = useState([]);
   const pollRef = useRef(null);
-  const MAX_POINTS = 90;
+  const MAX_POINTS = 120;
 
   useEffect(() => {
     let active = true;
@@ -557,149 +557,170 @@ function StatisticsTab({ client, session, username }) {
     <div className="space-y-6">
       {/* Online Sessions */}
       <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100">
-          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <Signal className="h-4 w-4 text-violet-600" /> Online Sessions
+        <div className="px-6 py-3 border-b border-slate-100">
+          <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+            <Signal className="h-4 w-4 text-slate-400" /> Online sessions
           </h3>
         </div>
         {isOnline && session ? (
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50/80 border-b border-slate-100">
-                <tr>
-                  {["Login", "In", "Out", "Start at", "Time", "IP", "MAC", "NAS"].map((h) => (
-                    <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{h}</th>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  {["Login", "In", "Out", "Start at", "Time", "IP", "MAC", "NAS", "Actions"].map((h) => (
+                    <th key={h} className="px-4 py-2 text-left text-xs font-semibold text-slate-500">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                <tr className="hover:bg-violet-50/30 transition-colors">
-                  <td className="px-4 py-3 text-sm text-violet-700 font-semibold">{client.name}</td>
-                  <td className="px-4 py-3 text-sm text-blue-600 font-medium">{client.bandwidth ? formatBytes(client.bandwidth.rxBytes) : "—"}</td>
-                  <td className="px-4 py-3 text-sm text-emerald-600 font-medium">{client.bandwidth ? formatBytes(client.bandwidth.txBytes) : "—"}</td>
-                  <td className="px-4 py-3 text-sm text-slate-600">—</td>
-                  <td className="px-4 py-3 text-sm text-slate-600">{session.uptime}</td>
-                  <td className="px-4 py-3 text-sm text-slate-700 font-mono">{session.address}</td>
-                  <td className="px-4 py-3 text-xs text-slate-500 font-mono">{session.callerId}</td>
-                  <td className="px-4 py-3 text-xs text-slate-500">MikroTik</td>
+                <tr>
+                  <td className="px-4 py-2.5 text-blue-600 font-medium">{client.name}</td>
+                  <td className="px-4 py-2.5 text-slate-700">{client.bandwidth ? formatBytes(client.bandwidth.rxBytes) : "—"}</td>
+                  <td className="px-4 py-2.5 text-slate-700">{client.bandwidth ? formatBytes(client.bandwidth.txBytes) : "—"}</td>
+                  <td className="px-4 py-2.5 text-slate-500">—</td>
+                  <td className="px-4 py-2.5 text-slate-700">{session.uptime}</td>
+                  <td className="px-4 py-2.5 text-slate-700 font-mono text-xs">{session.address}</td>
+                  <td className="px-4 py-2.5 text-slate-500 font-mono text-xs">{session.callerId}</td>
+                  <td className="px-4 py-2.5 text-slate-500 text-xs">MikroTik</td>
+                  <td className="px-4 py-2.5"><span className="text-blue-500 cursor-pointer text-xs">🔗</span></td>
                 </tr>
               </tbody>
             </table>
           </div>
         ) : (
-          <div className="px-6 py-8 text-center text-sm text-slate-400">No active sessions</div>
+          <div className="px-6 py-6 text-center text-sm text-slate-400">No active sessions</div>
         )}
       </div>
 
-      {/* Live Bandwidth Chart */}
+      {/* Live Bandwidth Usage - Splynx style */}
       <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-violet-600" /> Live Bandwidth Usage
+        <div className="px-6 py-3 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-slate-400" /> Live bandwidth usage
           </h3>
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 text-violet-700 rounded text-xs font-medium">
-              {client.profile}
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[9px] font-bold ring-1 ring-emerald-200/50">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> LIVE
-            </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded px-2 py-1">{client.profile}</span>
+            <span className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded px-2 py-1">1 minute</span>
           </div>
         </div>
 
-        {/* Legend + Current Speed */}
-        <div className="px-6 pt-4 flex items-center justify-center gap-8">
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-6 rounded bg-rose-400/60" />
+        {/* Legend */}
+        <div className="flex items-center justify-center gap-6 pt-4 pb-1">
+          <div className="flex items-center gap-1.5">
+            <span className="inline-block w-5 h-3 rounded-sm" style={{ backgroundColor: "rgba(255,128,128,0.5)", border: "1px solid rgba(220,80,80,0.4)" }} />
             <span className="text-xs text-slate-500">Upload</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-6 rounded bg-blue-400/60" />
+          <div className="flex items-center gap-1.5">
+            <span className="inline-block w-5 h-3 rounded-sm" style={{ backgroundColor: "rgba(130,180,255,0.5)", border: "1px solid rgba(80,140,220,0.4)" }} />
             <span className="text-xs text-slate-500">Download</span>
           </div>
         </div>
 
         {/* Chart */}
-        <div className="px-4 py-4" style={{ height: 300 }}>
+        <div className="px-2 pb-2" style={{ height: 340 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 15, left: 5, bottom: 30 }}>
               <defs>
-                <linearGradient id="uploadGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.02} />
+                <linearGradient id="uploadFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ff9999" stopOpacity={0.6} />
+                  <stop offset="100%" stopColor="#ffcccc" stopOpacity={0.15} />
                 </linearGradient>
-                <linearGradient id="downloadGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.02} />
+                <linearGradient id="downloadFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#82b4ff" stopOpacity={0.7} />
+                  <stop offset="100%" stopColor="#c4dcff" stopOpacity={0.15} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="time" tick={{ fontSize: 9, fill: "#94a3b8" }} interval={Math.max(1, Math.floor(chartData.length / 10))} axisLine={{ stroke: "#e2e8f0" }} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickFormatter={(v) => formatBits(v)} width={70} axisLine={false} tickLine={false} />
+              <CartesianGrid stroke="#eee" strokeDasharray="none" horizontal={true} vertical={false} />
+              <XAxis
+                dataKey="time"
+                tick={{ fontSize: 10, fill: "#888" }}
+                angle={-45}
+                textAnchor="end"
+                height={50}
+                interval={Math.max(1, Math.floor(chartData.length / 15))}
+                axisLine={{ stroke: "#ddd" }}
+                tickLine={{ stroke: "#ddd" }}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: "#888" }}
+                tickFormatter={(v) => { if (v === 0) return "0 bps"; const k = 1000; const s = ["bps","Kbps","Mbps","Gbps"]; const i = Math.floor(Math.log(v)/Math.log(k)); return parseFloat((v/Math.pow(k,i)).toFixed(0)) + " " + s[i]; }}
+                width={65}
+                axisLine={{ stroke: "#ddd" }}
+                tickLine={{ stroke: "#ddd" }}
+              />
               <Tooltip content={<ChartTooltipContent />} />
-              <Area type="monotone" dataKey="upload" name="Upload" stroke="#f43f5e" fill="url(#uploadGrad)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
-              <Area type="monotone" dataKey="download" name="Download" stroke="#3b82f6" fill="url(#downloadGrad)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+              <Area type="monotone" dataKey="upload" name="Upload" stroke="#e08080" fill="url(#uploadFill)" strokeWidth={1} dot={false} isAnimationActive={false} />
+              <Area type="monotone" dataKey="download" name="Download" stroke="#6aadff" fill="url(#downloadFill)" strokeWidth={1} dot={false} isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Current Speed Footer */}
-        <div className="px-6 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-center gap-8">
-          <div className="text-center">
-            <div className="text-[10px] font-semibold text-slate-400 uppercase">Upload</div>
-            <div className="text-sm font-bold text-rose-600 flex items-center gap-1">
-              <ArrowUp className="h-3.5 w-3.5" /> {formatBits(currentUpload)}
-            </div>
-          </div>
-          <div className="text-slate-200 text-lg">/</div>
-          <div className="text-center">
-            <div className="text-[10px] font-semibold text-slate-400 uppercase">Download</div>
-            <div className="text-sm font-bold text-blue-600 flex items-center gap-1">
-              <ArrowDown className="h-3.5 w-3.5" /> {formatBits(currentDownload)}
-            </div>
-          </div>
+        {/* Upload / Download footer */}
+        <div className="px-6 py-3 border-t border-slate-100 text-center">
+          <div className="text-xs text-slate-400">Upload / Download</div>
+          <div className="text-sm font-semibold text-slate-700">{formatBits(currentUpload)} / {formatBits(currentDownload)}</div>
         </div>
       </div>
 
       {/* Total for Period */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Clock className="h-4 w-4 text-violet-600" /> Total for Session
+          <div className="px-6 py-3 border-b border-slate-100">
+            <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <Clock className="h-4 w-4 text-slate-400" /> Total for period
             </h3>
           </div>
-          <div className="p-6 space-y-3">
-            {[
-              ["Total Downloaded", client.bandwidth ? formatBytes(client.bandwidth.rxBytes) : "0 B", "text-blue-700"],
-              ["Total Uploaded", client.bandwidth ? formatBytes(client.bandwidth.txBytes) : "0 B", "text-emerald-700"],
-              ["Session Duration", session?.uptime || "—", "text-slate-700"],
-            ].map(([l, v, c]) => (
-              <div key={l} className="flex justify-between items-center">
-                <span className="text-sm text-slate-500">{l}</span>
-                <span className={`text-sm font-bold ${c}`}>{v}</span>
-              </div>
-            ))}
+          <div className="p-5">
+            <table className="w-full text-sm">
+              <tbody>
+                <tr className="border-b border-slate-50">
+                  <td className="py-2 text-blue-600">Sessions</td>
+                  <td className="py-2 text-right text-slate-700">{isOnline ? 1 : 0}</td>
+                </tr>
+                <tr className="border-b border-slate-50">
+                  <td className="py-2 text-slate-500">Errors</td>
+                  <td className="py-2 text-right text-slate-700">0</td>
+                </tr>
+                <tr className="border-b border-slate-50">
+                  <td className="py-2 text-slate-500">Downloaded</td>
+                  <td className="py-2 text-right text-slate-700 font-medium">{client.bandwidth ? formatBytes(client.bandwidth.rxBytes) : "0 B"}</td>
+                </tr>
+                <tr className="border-b border-slate-50">
+                  <td className="py-2 text-slate-500">Uploaded</td>
+                  <td className="py-2 text-right text-slate-700 font-medium">{client.bandwidth ? formatBytes(client.bandwidth.txBytes) : "0 B"}</td>
+                </tr>
+                <tr>
+                  <td className="py-2 text-slate-500">Session time</td>
+                  <td className="py-2 text-right text-slate-700">{session?.uptime || "—"}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Gauge className="h-4 w-4 text-violet-600" /> Speed Limits
+          <div className="px-6 py-3 border-b border-slate-100">
+            <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <Gauge className="h-4 w-4 text-slate-400" /> Speed Limits
             </h3>
           </div>
-          <div className="p-6 space-y-3">
-            {[
-              ["Max Download", client.bandwidth?.maxLimitDown || "Unlimited", "text-blue-700"],
-              ["Max Upload", client.bandwidth?.maxLimitUp || "Unlimited", "text-emerald-700"],
-              ["Profile", client.profile, "text-violet-700"],
-            ].map(([l, v, c]) => (
-              <div key={l} className="flex justify-between items-center">
-                <span className="text-sm text-slate-500">{l}</span>
-                <span className={`text-sm font-bold ${c}`}>{v}</span>
-              </div>
-            ))}
+          <div className="p-5">
+            <table className="w-full text-sm">
+              <tbody>
+                <tr className="border-b border-slate-50">
+                  <td className="py-2 text-slate-500">Max Download</td>
+                  <td className="py-2 text-right text-slate-700 font-medium">{client.bandwidth?.maxLimitDown || "Unlimited"}</td>
+                </tr>
+                <tr className="border-b border-slate-50">
+                  <td className="py-2 text-slate-500">Max Upload</td>
+                  <td className="py-2 text-right text-slate-700 font-medium">{client.bandwidth?.maxLimitUp || "Unlimited"}</td>
+                </tr>
+                <tr>
+                  <td className="py-2 text-slate-500">Profile</td>
+                  <td className="py-2 text-right text-violet-600 font-medium">{client.profile}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
