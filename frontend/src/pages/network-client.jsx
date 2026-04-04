@@ -620,11 +620,11 @@ function StatisticsTab({ client, session, username }) {
           font: { size: 10 },
           color: "#999",
           callback: (v) => {
-            if (v === 0) return "0 bps";
+            if (v == null || v <= 0) return "0 bps";
             const k = 1000;
             const s = ["bps", "Kbps", "Mbps", "Gbps"];
-            const i = Math.floor(Math.log(v) / Math.log(k));
-            return parseFloat((v / Math.pow(k, i)).toFixed(0)) + " " + s[i];
+            const i = Math.min(Math.floor(Math.log(Math.abs(v)) / Math.log(k)), s.length - 1);
+            return parseFloat((v / Math.pow(k, Math.max(0, i))).toFixed(1)) + " " + s[Math.max(0, i)];
           },
           maxTicksLimit: 8,
         },
