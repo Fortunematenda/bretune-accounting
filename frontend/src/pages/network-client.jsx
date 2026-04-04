@@ -668,8 +668,17 @@ function StreamingChart({ username }) {
   }, []);
 
   return (
-    <div>
-      <canvas ref={canvasRef} style={{ width: "100%", height: 300, display: "block" }} />
+    <div className="panel-body card-block-body">
+      <div className="live-usage-app-wrapper">
+        <div className="chart" style={{ position: "relative", height: 320, width: "100%" }}>
+          <canvas
+            ref={canvasRef}
+            id="live_usage_chart_canvas"
+            className="chartjs-render-monitor"
+            style={{ display: "block", height: 320, width: "100%" }}
+          />
+        </div>
+      </div>
       <div className="px-6 py-3 border-t border-slate-100 text-center">
         <div className="text-xs text-slate-400">Upload / Download</div>
         <div className="text-sm font-semibold text-slate-700">{formatBits(currentUpload)} / {formatBits(currentDownload)}</div>
