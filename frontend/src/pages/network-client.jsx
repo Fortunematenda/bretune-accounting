@@ -261,8 +261,8 @@ function InformationTab({ client, session, username, onAction, actionLoading, on
       setCustData(res);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-      // Refresh parent to update header badge and MikroTik state
-      if (onRefresh) await onRefresh();
+      // Refresh parent in background to update header badge and MikroTik state
+      if (onRefresh) onRefresh();
     } catch (err) {
       alert(err.message || "Failed to save");
     } finally {
@@ -466,35 +466,6 @@ function InformationTab({ client, session, username, onAction, actionLoading, on
           </div>
         </div>
 
-        {/* Actions */}
-        <div className={`rounded-xl border shadow-sm overflow-hidden ${client.disabled ? 'bg-red-50/50 border-red-200' : 'bg-white border-slate-200/60'}`}>
-          <div className={`px-5 py-3 border-b ${client.disabled ? 'border-red-100' : 'border-slate-100'}`}>
-            <h3 className="text-sm font-bold text-slate-900">Client Status</h3>
-          </div>
-          <div className="p-4">
-            {!client.disabled ? (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-sm font-semibold text-emerald-700">Active</span>
-                </div>
-                <button onClick={() => onAction("block")} disabled={actionLoading} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50">
-                  <ShieldBan className="h-4 w-4" /> Block Client
-                </button>
-              </div>
-            ) : (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
-                  <span className="text-sm font-semibold text-red-600">Blocked</span>
-                </div>
-                <button onClick={() => onAction("activate")} disabled={actionLoading} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50">
-                  <ShieldCheck className="h-4 w-4" /> Activate Client
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -897,19 +868,23 @@ export default function NetworkClientPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [custProfile, setCustProfile] = useState(null);
 
-  const fetchClient = useCallback(async () => {
+  const fetchClient = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
-      setError(null);
+      if (!silent) { setLoading(true); setError(null); }
       const [dashData] = await Promise.all([api.routerDashboard()]);
       const found = dashData.clients?.find((c) => c.name === username);
-      if (!found) { setError("PPPoE user not found"); return; }
-      setClient(found);
+      if (!found && !silent) { setError("PPPoE user not found"); return; }
+      if (found) setClient(found);
       setProfiles(dashData.profiles || []);
+      // Also refresh customer profile
+      try {
+        const cust = await api.ispCustomerByUsername(username);
+        if (cust) setCustProfile(cust);
+      } catch {}
     } catch (err) {
-      setError(err.message || "Failed to load client");
+      if (!silent) setError(err.message || "Failed to load client");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [username]);
 
@@ -930,15 +905,6 @@ export default function NetworkClientPage() {
 
   useEffect(() => { fetchClient(); }, [fetchClient]);
 
-  // Fetch ISP customer profile for header display
-  useEffect(() => {
-    (async () => {
-      try {
-        const cust = await api.ispCustomerByUsername(username);
-        if (cust) setCustProfile(cust);
-      } catch { /* no profile yet */ }
-    })();
-  }, [username]);
 
   const enrichedClient = client ? { ...client, bandwidth: liveBw || client.bandwidth } : null;
   const session = enrichedClient?.activeSession;
@@ -969,12 +935,8 @@ export default function NetworkClientPage() {
         navigate("/network");
         return;
       }
-      await fetchClient();
-      // Refresh customer profile
-      try {
-        const cust = await api.ispCustomerByUsername(username);
-        if (cust) setCustProfile(cust);
-      } catch {}
+      // Background refresh - no loading spinner
+      fetchClient(true);
     } catch (err) {
       alert(err.message || `Failed to ${action}`);
     } finally {
@@ -1071,7 +1033,7 @@ export default function NetworkClientPage() {
       </div>
 
       {/* Tab Content */}
-      {tab === "information" && <InformationTab client={enrichedClient} session={session} username={username} onAction={handleAction} actionLoading={actionLoading} onEdit={() => setEditOpen(true)} onRefresh={fetchClient} />}
+      {tab === "information" && <InformationTab client={enrichedClient} session={session} username={username} onAction={handleAction} actionLoading={actionLoading} onEdit={() => setEditOpen(true)} onRefresh={() => fetchClient(true)} />}
       {tab === "services" && <ServicesTab client={enrichedClient} session={session} profileData={profileData} />}
       {tab === "statistics" && <StatisticsTab client={enrichedClient} session={session} username={username} />}
 
