@@ -401,10 +401,16 @@ function InformationTab({ client, session, username, onAction, actionLoading, on
               ))}
             </div>
           </div>
+        ) : client.disabled ? (
+          <div className="bg-red-50 rounded-xl border border-red-200 p-6 text-center">
+            <ShieldBan className="h-8 w-8 text-red-400 mx-auto mb-2" />
+            <p className="text-sm font-bold text-red-600">Account Blocked</p>
+            <p className="text-xs text-red-400 mt-1">Client cannot connect until activated</p>
+          </div>
         ) : (
           <div className="bg-slate-50 rounded-xl border border-slate-200/60 p-6 text-center">
             <WifiOff className="h-8 w-8 text-slate-300 mx-auto mb-2" />
-            <p className="text-sm font-medium text-slate-400">{client.disabled ? "Account Disabled" : "Not Connected"}</p>
+            <p className="text-sm font-medium text-slate-400">Not Connected</p>
           </div>
         )}
 
@@ -441,19 +447,31 @@ function InformationTab({ client, session, username, onAction, actionLoading, on
         </div>
 
         {/* Actions */}
-        <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-          <div className="px-5 py-3 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-900">Actions</h3>
+        <div className={`rounded-xl border shadow-sm overflow-hidden ${client.disabled ? 'bg-red-50/50 border-red-200' : 'bg-white border-slate-200/60'}`}>
+          <div className={`px-5 py-3 border-b ${client.disabled ? 'border-red-100' : 'border-slate-100'}`}>
+            <h3 className="text-sm font-bold text-slate-900">Client Status</h3>
           </div>
-          <div className="p-4 space-y-2">
+          <div className="p-4">
             {!client.disabled ? (
-              <button onClick={() => onAction("block")} disabled={actionLoading} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50">
-                <ShieldBan className="h-4 w-4" /> Block Client
-              </button>
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-sm font-semibold text-emerald-700">Active</span>
+                </div>
+                <button onClick={() => onAction("block")} disabled={actionLoading} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50">
+                  <ShieldBan className="h-4 w-4" /> Block Client
+                </button>
+              </div>
             ) : (
-              <button onClick={() => onAction("activate")} disabled={actionLoading} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-50">
-                <ShieldCheck className="h-4 w-4" /> Activate Client
-              </button>
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                  <span className="text-sm font-semibold text-red-600">Blocked</span>
+                </div>
+                <button onClick={() => onAction("activate")} disabled={actionLoading} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50">
+                  <ShieldCheck className="h-4 w-4" /> Activate Client
+                </button>
+              </div>
             )}
           </div>
         </div>
