@@ -368,7 +368,7 @@ function StatisticsTab({ client, session, username }) {
     const poll = async () => {
       try {
         const traffic = await api.routerUserTraffic(username);
-        pushPoint(traffic?.txBitsPerSecond || 0, traffic?.rxBitsPerSecond || 0);
+        pushPoint(traffic?.rxBitsPerSecond || 0, traffic?.txBitsPerSecond || 0);
       } catch {
         pushPoint(0, 0);
       }
