@@ -2,8 +2,12 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../lib/api";
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-} from "recharts";
+  Chart as ChartJS,
+  CategoryScale, LinearScale, PointElement, LineElement,
+  Filler, Tooltip as ChartTooltip, Legend as ChartLegend,
+} from "chart.js";
+import { Line } from "react-chartjs-2";
+
 import {
   ArrowLeft,
   Wifi,
@@ -38,6 +42,8 @@ import {
   Settings2,
   MonitorSmartphone,
 } from "lucide-react";
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, ChartTooltip, ChartLegend);
 
 // ── Helpers ──────────────────────────────────────
 
@@ -165,23 +171,7 @@ function EditUserModal({ open, onClose, client, profiles, onUpdated }) {
   );
 }
 
-// ── Bandwidth Chart Tooltip ──────────────────────
-
-function ChartTooltipContent({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-white border border-slate-200 rounded-lg shadow-lg px-3 py-2 text-xs">
-      <div className="font-semibold text-slate-600 mb-1">{label}</div>
-      {payload.map((p) => (
-        <div key={p.dataKey} className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: p.color }} />
-          <span className="text-slate-500">{p.name}:</span>
-          <span className="font-bold text-slate-800">{formatBits(p.value)}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
+// (Chart.js canvas is used for bandwidth chart - no recharts tooltip needed)
 
 // ── Form Field ───────────────────────────────────
 
@@ -516,31 +506,50 @@ function ServicesTab({ client, session, profileData }) {
   );
 }
 
-// ── Statistics Tab ───────────────────────────────
+// ── Statistics Tab (Chart.js canvas like Splynx) ─
 
 function StatisticsTab({ client, session, username }) {
   const isOnline = client.isOnline;
-  const [chartData, setChartData] = useState([]);
+  const labelsRef = useRef([]);
+  const uploadRef = useRef([]);
+  const downloadRef = useRef([]);
+  const chartRef = useRef(null);
   const pollRef = useRef(null);
-  const MAX_POINTS = 120;
+  const [currentUpload, setCurrentUpload] = useState(0);
+  const [currentDownload, setCurrentDownload] = useState(0);
+  const MAX_POINTS = 90;
 
   useEffect(() => {
     let active = true;
 
-    const pushPoint = (upload = 0, download = 0) => {
-      if (!active) return;
-      setChartData((prev) => {
-        const next = [...prev, { time: timeLabel(), upload, download }];
-        return next.length > MAX_POINTS ? next.slice(-MAX_POINTS) : next;
-      });
-    };
-
     const poll = async () => {
+      if (!active) return;
+      let up = 0, down = 0;
       try {
         const traffic = await api.routerUserTraffic(username);
-        pushPoint(traffic?.rxBitsPerSecond || 0, traffic?.txBitsPerSecond || 0);
-      } catch {
-        pushPoint(0, 0);
+        up = traffic?.rxBitsPerSecond || 0;
+        down = traffic?.txBitsPerSecond || 0;
+      } catch { /* silent */ }
+
+      labelsRef.current.push(timeLabel());
+      uploadRef.current.push(up);
+      downloadRef.current.push(down);
+
+      if (labelsRef.current.length > MAX_POINTS) {
+        labelsRef.current.shift();
+        uploadRef.current.shift();
+        downloadRef.current.shift();
+      }
+
+      setCurrentUpload(up);
+      setCurrentDownload(down);
+
+      if (chartRef.current) {
+        const chart = chartRef.current;
+        chart.data.labels = labelsRef.current;
+        chart.data.datasets[0].data = uploadRef.current;
+        chart.data.datasets[1].data = downloadRef.current;
+        chart.update("none");
       }
     };
 
@@ -549,9 +558,102 @@ function StatisticsTab({ client, session, username }) {
     return () => { active = false; clearInterval(pollRef.current); };
   }, [username]);
 
-  const lastPoint = chartData[chartData.length - 1];
-  const currentUpload = lastPoint?.upload || 0;
-  const currentDownload = lastPoint?.download || 0;
+  const chartData = {
+    labels: labelsRef.current,
+    datasets: [
+      {
+        label: "Upload",
+        data: uploadRef.current,
+        borderColor: "rgba(220, 100, 100, 0.8)",
+        backgroundColor: (ctx) => {
+          if (!ctx.chart?.chartArea) return "rgba(255,150,150,0.3)";
+          const g = ctx.chart.ctx.createLinearGradient(0, ctx.chart.chartArea.top, 0, ctx.chart.chartArea.bottom);
+          g.addColorStop(0, "rgba(255, 130, 130, 0.55)");
+          g.addColorStop(1, "rgba(255, 200, 200, 0.05)");
+          return g;
+        },
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        borderWidth: 1.5,
+        order: 2,
+      },
+      {
+        label: "Download",
+        data: downloadRef.current,
+        borderColor: "rgba(80, 150, 240, 0.8)",
+        backgroundColor: (ctx) => {
+          if (!ctx.chart?.chartArea) return "rgba(130,180,255,0.3)";
+          const g = ctx.chart.ctx.createLinearGradient(0, ctx.chart.chartArea.top, 0, ctx.chart.chartArea.bottom);
+          g.addColorStop(0, "rgba(130, 180, 255, 0.6)");
+          g.addColorStop(1, "rgba(200, 220, 255, 0.05)");
+          return g;
+        },
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        borderWidth: 1.5,
+        order: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: "rgba(255,255,255,0.95)",
+        titleColor: "#555",
+        bodyColor: "#333",
+        borderColor: "#ddd",
+        borderWidth: 1,
+        titleFont: { size: 11 },
+        bodyFont: { size: 11 },
+        padding: 10,
+        displayColors: true,
+        callbacks: {
+          label: (ctx) => `${ctx.dataset.label}: ${formatBits(ctx.parsed.y)}`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45,
+          font: { size: 10 },
+          color: "#999",
+          maxTicksLimit: 15,
+        },
+        grid: { display: false },
+        border: { color: "#ddd" },
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          font: { size: 10 },
+          color: "#999",
+          callback: (v) => {
+            if (v === 0) return "0 bps";
+            const k = 1000;
+            const s = ["bps", "Kbps", "Mbps", "Gbps"];
+            const i = Math.floor(Math.log(v) / Math.log(k));
+            return parseFloat((v / Math.pow(k, i)).toFixed(0)) + " " + s[i];
+          },
+          maxTicksLimit: 8,
+        },
+        grid: { color: "#f0f0f0" },
+        border: { color: "#ddd" },
+      },
+    },
+  };
 
   return (
     <div className="space-y-6">
@@ -592,7 +694,7 @@ function StatisticsTab({ client, session, username }) {
         )}
       </div>
 
-      {/* Live Bandwidth Usage - Splynx style */}
+      {/* Live Bandwidth Usage - Chart.js canvas like Splynx */}
       <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
         <div className="px-6 py-3 border-b border-slate-100 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
@@ -607,52 +709,18 @@ function StatisticsTab({ client, session, username }) {
         {/* Legend */}
         <div className="flex items-center justify-center gap-6 pt-4 pb-1">
           <div className="flex items-center gap-1.5">
-            <span className="inline-block w-5 h-3 rounded-sm" style={{ backgroundColor: "rgba(255,128,128,0.5)", border: "1px solid rgba(220,80,80,0.4)" }} />
+            <span className="inline-block w-5 h-3 rounded-sm" style={{ backgroundColor: "rgba(255,130,130,0.5)", border: "1px solid rgba(220,100,100,0.5)" }} />
             <span className="text-xs text-slate-500">Upload</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="inline-block w-5 h-3 rounded-sm" style={{ backgroundColor: "rgba(130,180,255,0.5)", border: "1px solid rgba(80,140,220,0.4)" }} />
+            <span className="inline-block w-5 h-3 rounded-sm" style={{ backgroundColor: "rgba(130,180,255,0.5)", border: "1px solid rgba(80,150,240,0.5)" }} />
             <span className="text-xs text-slate-500">Download</span>
           </div>
         </div>
 
-        {/* Chart */}
-        <div className="px-2 pb-2" style={{ height: 340 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 15, left: 5, bottom: 30 }}>
-              <defs>
-                <linearGradient id="uploadFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ff9999" stopOpacity={0.6} />
-                  <stop offset="100%" stopColor="#ffcccc" stopOpacity={0.15} />
-                </linearGradient>
-                <linearGradient id="downloadFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#82b4ff" stopOpacity={0.7} />
-                  <stop offset="100%" stopColor="#c4dcff" stopOpacity={0.15} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid stroke="#eee" strokeDasharray="none" horizontal={true} vertical={false} />
-              <XAxis
-                dataKey="time"
-                tick={{ fontSize: 10, fill: "#888" }}
-                angle={-45}
-                textAnchor="end"
-                height={50}
-                interval={Math.max(1, Math.floor(chartData.length / 15))}
-                axisLine={{ stroke: "#ddd" }}
-                tickLine={{ stroke: "#ddd" }}
-              />
-              <YAxis
-                tick={{ fontSize: 10, fill: "#888" }}
-                tickFormatter={(v) => { if (v === 0) return "0 bps"; const k = 1000; const s = ["bps","Kbps","Mbps","Gbps"]; const i = Math.floor(Math.log(v)/Math.log(k)); return parseFloat((v/Math.pow(k,i)).toFixed(0)) + " " + s[i]; }}
-                width={65}
-                axisLine={{ stroke: "#ddd" }}
-                tickLine={{ stroke: "#ddd" }}
-              />
-              <Tooltip content={<ChartTooltipContent />} />
-              <Area type="monotone" dataKey="upload" name="Upload" stroke="#e08080" fill="url(#uploadFill)" strokeWidth={1} dot={false} isAnimationActive={false} />
-              <Area type="monotone" dataKey="download" name="Download" stroke="#6aadff" fill="url(#downloadFill)" strokeWidth={1} dot={false} isAnimationActive={false} />
-            </AreaChart>
-          </ResponsiveContainer>
+        {/* Chart.js Canvas */}
+        <div className="px-4 pb-2" style={{ height: 320 }}>
+          <Line ref={chartRef} data={chartData} options={chartOptions} />
         </div>
 
         {/* Upload / Download footer */}
