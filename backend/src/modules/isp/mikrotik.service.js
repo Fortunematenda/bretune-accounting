@@ -135,6 +135,7 @@ class MikroTikService {
     return {
       id: s['.id'],
       name: s.name || '',
+      password: s.password || '',
       service: s.service || 'pppoe',
       profile: s.profile || '',
       localAddress: s['local-address'] || '',

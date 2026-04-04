@@ -473,57 +473,160 @@ function InformationTab({ client, session, username, onAction, actionLoading, on
 
 // ── Services Tab ─────────────────────────────────
 
-function ServicesTab({ client, session, profileData }) {
+function ServicesTab({ client, session, profileData, profiles, username, onRefresh }) {
   const isOnline = client.isOnline;
   const profile = profileData || {};
+  const [secret, setSecret] = useState(null);
+  const [showPw, setShowPw] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [editForm, setEditForm] = useState({ profile: client.profile, password: "" });
+
+  // Fetch secret with password
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await api.routerSecret(username);
+        if (s) setSecret(s);
+      } catch {}
+    })();
+  }, [username]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const updates = {};
+      if (editForm.profile && editForm.profile !== client.profile) updates.profile = editForm.profile;
+      if (editForm.password) updates.password = editForm.password;
+      if (Object.keys(updates).length > 0) {
+        await api.routerUpdateSecret(client.id, updates);
+        // Refresh secret data
+        const s = await api.routerSecret(username);
+        if (s) setSecret(s);
+        if (onRefresh) onRefresh();
+      }
+      setEditing(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+      setEditForm((prev) => ({ ...prev, password: "" }));
+    } catch (err) {
+      alert(err.message || "Failed to update service");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="text-sm font-bold text-slate-900">Internet Services</h3>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-slate-50/80 border-b border-slate-100">
-            <tr>
-              {["ID", "Status", "Description", "Plan", "Rate Limit", "Service Login", "IPv4 Address", "Actions"].map((h) => (
-                <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="hover:bg-violet-50/30 transition-colors">
-              <td className="px-4 py-3 text-sm text-slate-600 font-mono">{client.id?.replace("*", "") || "—"}</td>
-              <td className="px-4 py-3">
-                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                  client.disabled ? "bg-red-50 text-red-600" : isOnline ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"
-                }`}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${client.disabled ? "bg-red-400" : isOnline ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
-                  {client.disabled ? "Disabled" : isOnline ? "Online" : "Offline"}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-sm text-slate-700">{client.profile}</td>
-              <td className="px-4 py-3">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 text-violet-700 rounded text-xs font-medium">
-                  <Gauge className="h-3 w-3" /> {client.profile}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-sm text-slate-600 font-mono">{profile.rateLimit || "—"}</td>
-              <td className="px-4 py-3 text-sm text-slate-700 font-mono">{client.name}</td>
-              <td className="px-4 py-3 text-sm text-slate-700 font-mono">{session?.address || "—"}</td>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-1">
-                  <span className="h-6 w-6 rounded flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer transition-colors" title="View">
-                    <Eye className="h-3.5 w-3.5" />
+    <div className="space-y-6">
+      {/* Service Table */}
+      <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-900">Internet Services</h3>
+          <div className="flex items-center gap-2">
+            {saved && <span className="text-xs text-emerald-600 font-medium">Saved!</span>}
+            {!editing ? (
+              <button onClick={() => { setEditing(true); setEditForm({ profile: client.profile, password: "" }); }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors">
+                <Pencil className="h-3 w-3" /> Change Plan
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button onClick={() => setEditing(false)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
+                  Cancel
+                </button>
+                <button onClick={handleSave} disabled={saving}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-violet-600 text-white rounded-lg text-xs font-semibold hover:bg-violet-700 transition-colors disabled:opacity-50">
+                  {saving ? <RefreshCw className="h-3 w-3 animate-spin" /> : null}
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50/80 border-b border-slate-100">
+              <tr>
+                {["ID", "Status", "Plan", "Rate Limit", "Service Login", "IPv4 Address"].map((h) => (
+                  <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="hover:bg-violet-50/30 transition-colors">
+                <td className="px-4 py-3 text-sm text-slate-600 font-mono">{client.id?.replace("*", "") || "—"}</td>
+                <td className="px-4 py-3">
+                  <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                    client.disabled ? "bg-red-50 text-red-600" : isOnline ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"
+                  }`}>
+                    <span className={`h-1.5 w-1.5 rounded-full ${client.disabled ? "bg-red-400" : isOnline ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
+                    {client.disabled ? "Blocked" : isOnline ? "Online" : "Offline"}
                   </span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+                <td className="px-4 py-3">
+                  {editing ? (
+                    <select value={editForm.profile} onChange={(e) => setEditForm((prev) => ({ ...prev, profile: e.target.value }))}
+                      className="px-2 py-1 border border-violet-300 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none bg-white">
+                      {(profiles || []).map((p) => <option key={p.name} value={p.name}>{p.name}</option>)}
+                    </select>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 text-violet-700 rounded text-xs font-medium">
+                      <Gauge className="h-3 w-3" /> {client.profile}
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-sm text-slate-600 font-mono">{profile.rateLimit || "—"}</td>
+                <td className="px-4 py-3 text-sm text-slate-700 font-mono">{client.name}</td>
+                <td className="px-4 py-3 text-sm text-slate-700 font-mono">{session?.address || "—"}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div className="px-4 py-2.5 border-t border-slate-100 text-xs text-slate-400">
-        Showing 1 to 1 of 1 entries
+
+      {/* PPPoE Credentials */}
+      <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100">
+          <h3 className="text-sm font-bold text-slate-900">PPPoE Credentials</h3>
+        </div>
+        <div className="px-6 py-4 space-y-4">
+          <div className="flex items-center justify-between py-2 border-b border-slate-100">
+            <span className="text-sm text-slate-500">PPPoE Username</span>
+            <span className="text-sm font-semibold text-violet-700 font-mono">{client.name}</span>
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-slate-100">
+            <span className="text-sm text-slate-500">PPPoE Password</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-slate-700 font-mono">
+                {showPw ? (secret?.password || "—") : "••••••••"}
+              </span>
+              <button onClick={() => setShowPw(!showPw)} className="h-7 w-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+          {editing && (
+            <div className="flex items-center justify-between py-2 border-b border-slate-100">
+              <span className="text-sm text-slate-500">New Password</span>
+              <input type="text" value={editForm.password} onChange={(e) => setEditForm((prev) => ({ ...prev, password: e.target.value }))}
+                placeholder="Leave blank to keep current"
+                className="w-64 px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none bg-white hover:border-slate-300 transition-colors" />
+            </div>
+          )}
+          <div className="flex items-center justify-between py-2 border-b border-slate-100">
+            <span className="text-sm text-slate-500">Service Type</span>
+            <span className="text-sm font-medium text-slate-700">{client.service || "pppoe"}</span>
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-slate-100">
+            <span className="text-sm text-slate-500">Local Address</span>
+            <span className="text-sm font-mono text-slate-700">{client.localAddress || "—"}</span>
+          </div>
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-slate-500">Remote Address</span>
+            <span className="text-sm font-mono text-slate-700">{client.remoteAddress || "—"}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1034,7 +1137,7 @@ export default function NetworkClientPage() {
 
       {/* Tab Content */}
       {tab === "information" && <InformationTab client={enrichedClient} session={session} username={username} onAction={handleAction} actionLoading={actionLoading} onEdit={() => setEditOpen(true)} onRefresh={() => fetchClient(true)} />}
-      {tab === "services" && <ServicesTab client={enrichedClient} session={session} profileData={profileData} />}
+      {tab === "services" && <ServicesTab client={enrichedClient} session={session} profileData={profileData} profiles={profiles} username={username} onRefresh={() => fetchClient(true)} />}
       {tab === "statistics" && <StatisticsTab client={enrichedClient} session={session} username={username} />}
 
       {/* Edit Modal */}
