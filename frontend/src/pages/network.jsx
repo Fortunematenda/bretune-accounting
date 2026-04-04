@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import {
   Wifi,
@@ -670,7 +671,7 @@ export default function NetworkPage() {
                           )}
                         </td>
                         <td className="px-3 py-2.5">
-                          <button onClick={() => { setSelectedClient(c); setDetailOpen(true); }} className="text-sm font-semibold text-violet-700 hover:text-violet-900 hover:underline">{c.name}</button>
+                          <Link to={`/network/${encodeURIComponent(c.name)}`} className="text-sm font-semibold text-violet-700 hover:text-violet-900 hover:underline">{c.name}</Link>
                         </td>
                         <td className="px-3 py-2.5">
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 text-violet-700 rounded text-xs font-medium">
@@ -715,7 +716,7 @@ export default function NetworkPage() {
                             </button>
                             {actionMenuId === c.name ? (
                               <div className="absolute right-0 top-8 z-20 bg-white border border-slate-200 rounded-lg shadow-lg py-1 w-44" onMouseLeave={() => setActionMenuId(null)}>
-                                <button onClick={() => { setSelectedClient(c); setDetailOpen(true); setActionMenuId(null); }} className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"><Eye className="h-3.5 w-3.5" /> View Details</button>
+                                <Link to={`/network/${encodeURIComponent(c.name)}`} onClick={() => setActionMenuId(null)} className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"><Eye className="h-3.5 w-3.5" /> View Details</Link>
                                 <button onClick={() => { setSelectedClient(c); setEditOpen(true); setActionMenuId(null); }} className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"><Pencil className="h-3.5 w-3.5" /> Edit User</button>
                                 {isOnline ? <button onClick={() => handleAction("disconnect", c.name)} disabled={actionLoading} className="w-full text-left px-3 py-2 text-sm text-amber-700 hover:bg-amber-50 flex items-center gap-2"><Unplug className="h-3.5 w-3.5" /> Disconnect</button> : null}
                                 {!c.disabled ? (
