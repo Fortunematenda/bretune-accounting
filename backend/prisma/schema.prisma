@@ -1758,6 +1758,63 @@ model ClientNetworkLink {
   @@map("client_network_links")
 }
 
+enum IspCustomerStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+enum IspCustomerCategory {
+  RESIDENTIAL
+  BUSINESS
+}
+
+enum IspBillingType {
+  RECURRING
+  PREPAID
+}
+
+model IspCustomer {
+  id              String              @id @default(cuid())
+  pppoeUsername    String              @unique
+  firstName       String
+  lastName        String
+  companyName     String?
+  email           String?
+  billingEmail    String?
+  phone           String?
+  street          String?
+  city            String?
+  zipCode         String?
+  province        String?
+  country         String?             @default("South Africa")
+  geoLat          String?
+  geoLng          String?
+  status          IspCustomerStatus   @default(ACTIVE)
+  category        IspCustomerCategory @default(RESIDENTIAL)
+  billingType     IspBillingType      @default(RECURRING)
+  partner         String?
+  location        String?
+  vatId           String?
+  paymentNote     String?
+  paymentDate     Int?                @default(1)
+  debitOrder      Boolean             @default(false)
+  wifiSsid        String?
+  wifiPassword    String?
+  contactPerson   String?
+  notes           String?
+  ownerCompanyName String?
+  dateAdded       DateTime            @default(now())
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([pppoeUsername])
+  @@index([status])
+  @@index([ownerCompanyName])
+  @@index([lastName, firstName])
+  @@map("isp_customers")
+}
+
 model NetworkAlert {
   id              String                @id @default(cuid())
   deviceId        String

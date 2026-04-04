@@ -305,6 +305,67 @@ class ISPService {
     // Only return links where client has overdue invoices
     return links.filter((l) => l.client?.invoices?.length > 0);
   }
+
+  // ──────────────────────────────────────────────
+  // ISP CUSTOMERS (Splynx-style profiles)
+  // ──────────────────────────────────────────────
+
+  async listIspCustomers(ownerCompanyName, { page = 1, limit = 100, status, search } = {}) {
+    const where = { ownerCompanyName };
+    if (status) where.status = status;
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { pppoeUsername: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        { street: { contains: search, mode: 'insensitive' } },
+        { companyName: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.ispCustomer.findMany({
+        where,
+        orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.ispCustomer.count({ where }),
+    ]);
+    return { items, total, page, pages: Math.ceil(total / limit) };
+  }
+
+  async getIspCustomer(id) {
+    const customer = await this.prisma.ispCustomer.findUnique({ where: { id } });
+    if (!customer) throw new NotFoundException('ISP Customer not found');
+    return customer;
+  }
+
+  async getIspCustomerByUsername(pppoeUsername) {
+    return this.prisma.ispCustomer.findUnique({ where: { pppoeUsername } });
+  }
+
+  async createIspCustomer(data) {
+    return this.prisma.ispCustomer.create({ data });
+  }
+
+  async updateIspCustomer(id, data) {
+    return this.prisma.ispCustomer.update({ where: { id }, data });
+  }
+
+  async updateIspCustomerByUsername(pppoeUsername, data) {
+    return this.prisma.ispCustomer.upsert({
+      where: { pppoeUsername },
+      update: data,
+      create: { pppoeUsername, ...data },
+    });
+  }
+
+  async deleteIspCustomer(id) {
+    return this.prisma.ispCustomer.delete({ where: { id } });
+  }
 }
 
 module.exports = { ISPService };

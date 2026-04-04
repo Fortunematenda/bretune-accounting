@@ -183,61 +183,216 @@ function ChartTooltipContent({ active, payload, label }) {
   );
 }
 
+// ── Form Field ───────────────────────────────────
+
+function FormField({ label, icon: Icon, children }) {
+  return (
+    <div className="flex items-center gap-4 py-2.5 border-b border-slate-50 last:border-0">
+      <div className="w-36 flex items-center gap-2 text-xs font-medium text-slate-400 shrink-0">
+        {Icon && <Icon className="h-3.5 w-3.5" />} {label}
+      </div>
+      <div className="flex-1">{children}</div>
+    </div>
+  );
+}
+
+function FormInput({ value, onChange, placeholder, type = "text", ...props }) {
+  return (
+    <input type={type} value={value || ""} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+      className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none bg-white hover:border-slate-300 transition-colors" {...props} />
+  );
+}
+
+function FormSelect({ value, onChange, options }) {
+  return (
+    <select value={value || ""} onChange={(e) => onChange(e.target.value)}
+      className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none bg-white hover:border-slate-300 transition-colors">
+      {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+    </select>
+  );
+}
+
 // ── Information Tab ──────────────────────────────
 
-function InformationTab({ client, session }) {
+function InformationTab({ client, session, username }) {
   const isOnline = client.isOnline;
+  const [custData, setCustData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [form, setForm] = useState({
+    firstName: "", lastName: "", companyName: "", email: "", billingEmail: "",
+    phone: "", street: "", city: "", zipCode: "", province: "", country: "South Africa",
+    geoLat: "", geoLng: "", status: "ACTIVE", category: "RESIDENTIAL", billingType: "RECURRING",
+    partner: "", location: "", vatId: "", paymentNote: "", paymentDate: 1,
+    debitOrder: false, wifiSsid: "", wifiPassword: "", contactPerson: "", notes: "",
+  });
 
-  const infoFields = [
-    { icon: User, label: "PPPoE Login", value: client.name },
-    { icon: Shield, label: "Status", value: client.disabled ? "Disabled" : isOnline ? "Online" : "Offline", badge: true },
-    { icon: Gauge, label: "Profile / Plan", value: client.profile },
-    { icon: Server, label: "Service", value: client.service || "pppoe" },
-    { icon: Hash, label: "Secret ID", value: client.id },
-    { icon: FileText, label: "Comment", value: client.comment || "—" },
-    { icon: MonitorSmartphone, label: "Last Caller ID (MAC)", value: client.lastCallerId || "—" },
-    { icon: Clock, label: "Last Logged Out", value: client.lastLoggedOut || "—" },
-  ];
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await api.ispCustomerByUsername(username);
+        if (data) {
+          setCustData(data);
+          setForm((prev) => {
+            const next = { ...prev };
+            for (const k of Object.keys(next)) {
+              if (data[k] !== undefined && data[k] !== null) next[k] = data[k];
+            }
+            return next;
+          });
+        }
+      } catch { /* no record yet */ }
+      setLoading(false);
+    })();
+  }, [username]);
+
+  const setField = (key) => (val) => setForm((prev) => ({ ...prev, [key]: val }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaved(false);
+    try {
+      const res = await api.ispCustomerUpsertByUsername(username, form);
+      setCustData(res);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      alert(err.message || "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Main Info */}
-      <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-900">Main Information</h3>
+      {/* Main Information - Left 2/3 */}
+      <div className="lg:col-span-2 space-y-5">
+        <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-900">Main Information</h3>
+            <div className="flex items-center gap-2">
+              {saved && <span className="text-xs text-emerald-600 font-medium">Saved!</span>}
+              <button onClick={handleSave} disabled={saving}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-violet-600 text-white rounded-lg text-xs font-semibold hover:bg-violet-700 transition-colors disabled:opacity-50">
+                {saving ? <RefreshCw className="h-3 w-3 animate-spin" /> : null}
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+          <div className="px-6 py-2">
+            <FormField label="PPPoE Login" icon={User}>
+              <span className="text-sm font-semibold text-violet-700 font-mono">{username}</span>
+            </FormField>
+            <FormField label="Status" icon={Shield}>
+              <FormSelect value={form.status} onChange={setField("status")} options={[
+                { value: "ACTIVE", label: "Active" }, { value: "INACTIVE", label: "Inactive" }, { value: "BLOCKED", label: "Blocked" },
+              ]} />
+            </FormField>
+            <FormField label="Billing Type" icon={FileText}>
+              <FormSelect value={form.billingType} onChange={setField("billingType")} options={[
+                { value: "RECURRING", label: "Recurring" }, { value: "PREPAID", label: "Prepaid" },
+              ]} />
+            </FormField>
+            <FormField label="First Name" icon={User}>
+              <FormInput value={form.firstName} onChange={setField("firstName")} placeholder="First name" />
+            </FormField>
+            <FormField label="Last Name" icon={User}>
+              <FormInput value={form.lastName} onChange={setField("lastName")} placeholder="Last name" />
+            </FormField>
+            <FormField label="Company" icon={Server}>
+              <FormInput value={form.companyName} onChange={setField("companyName")} placeholder="Company name" />
+            </FormField>
+            <FormField label="Email" icon={Mail}>
+              <FormInput value={form.email} onChange={setField("email")} placeholder="Email address" type="email" />
+            </FormField>
+            <FormField label="Billing Email" icon={Mail}>
+              <FormInput value={form.billingEmail} onChange={setField("billingEmail")} placeholder="Billing email" type="email" />
+            </FormField>
+            <FormField label="Phone" icon={Phone}>
+              <FormInput value={form.phone} onChange={setField("phone")} placeholder="+27..." />
+            </FormField>
+            <FormField label="Partner" icon={User}>
+              <FormInput value={form.partner} onChange={setField("partner")} placeholder="Partner / reseller" />
+            </FormField>
+            <FormField label="Location" icon={MapPin}>
+              <FormInput value={form.location} onChange={setField("location")} placeholder="Site / NAS location" />
+            </FormField>
+            <FormField label="Street" icon={MapPin}>
+              <FormInput value={form.street} onChange={setField("street")} placeholder="Street address" />
+            </FormField>
+            <FormField label="ZIP Code">
+              <FormInput value={form.zipCode} onChange={setField("zipCode")} placeholder="ZIP / Postal code" />
+            </FormField>
+            <FormField label="City">
+              <FormInput value={form.city} onChange={setField("city")} placeholder="City" />
+            </FormField>
+            <FormField label="Province">
+              <FormInput value={form.province} onChange={setField("province")} placeholder="State / Province" />
+            </FormField>
+            <FormField label="Country" icon={Globe}>
+              <FormInput value={form.country} onChange={setField("country")} placeholder="Country" />
+            </FormField>
+            <FormField label="Geo Coordinates">
+              <div className="flex gap-2">
+                <FormInput value={form.geoLat} onChange={setField("geoLat")} placeholder="Latitude" />
+                <FormInput value={form.geoLng} onChange={setField("geoLng")} placeholder="Longitude" />
+              </div>
+            </FormField>
+            <FormField label="Date Added" icon={Clock}>
+              <span className="text-sm text-slate-600">{custData?.dateAdded ? new Date(custData.dateAdded).toLocaleDateString() : "—"}</span>
+            </FormField>
+          </div>
         </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {infoFields.map((f) => {
-              const Icon = f.icon;
-              return (
-                <div key={f.label} className="flex items-center gap-4">
-                  <div className="w-40 flex items-center gap-2 text-xs font-medium text-slate-400 shrink-0">
-                    <Icon className="h-3.5 w-3.5" /> {f.label}
-                  </div>
-                  <div className="flex-1">
-                    {f.badge ? (
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                        client.disabled ? "bg-red-50 text-red-600 ring-1 ring-red-200/50" :
-                        isOnline ? "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200/50" :
-                        "bg-slate-100 text-slate-500 ring-1 ring-slate-200/50"
-                      }`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${client.disabled ? "bg-red-400" : isOnline ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
-                        {f.value}
-                      </span>
-                    ) : (
-                      <span className="text-sm font-medium text-slate-800">{f.value}</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+
+        {/* Additional Information */}
+        <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100">
+            <h3 className="text-sm font-bold text-slate-900">Additional Information</h3>
+          </div>
+          <div className="px-6 py-2">
+            <FormField label="Category">
+              <FormSelect value={form.category} onChange={setField("category")} options={[
+                { value: "RESIDENTIAL", label: "Residential" }, { value: "BUSINESS", label: "Business" },
+              ]} />
+            </FormField>
+            <FormField label="Contact Person">
+              <FormInput value={form.contactPerson} onChange={setField("contactPerson")} placeholder="Contact person name" />
+            </FormField>
+            <FormField label="VAT ID">
+              <FormInput value={form.vatId} onChange={setField("vatId")} placeholder="VAT / Tax number" />
+            </FormField>
+            <FormField label="Payment Note">
+              <FormInput value={form.paymentNote} onChange={setField("paymentNote")} placeholder="e.g. 1st D/O" />
+            </FormField>
+            <FormField label="Payment Date">
+              <FormSelect value={form.paymentDate} onChange={(v) => setField("paymentDate")(Number(v))} options={
+                Array.from({ length: 28 }, (_, i) => ({ value: i + 1, label: `${i + 1}th` }))
+              } />
+            </FormField>
+            <FormField label="Debit Order">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.debitOrder} onChange={(e) => setField("debitOrder")(e.target.checked)} className="rounded border-slate-300 text-violet-600 focus:ring-violet-500/20" />
+                <span className="text-sm text-slate-700">{form.debitOrder ? "Yes" : "No"}</span>
+              </label>
+            </FormField>
+            <FormField label="WiFi SSID">
+              <FormInput value={form.wifiSsid} onChange={setField("wifiSsid")} placeholder="WiFi network name" />
+            </FormField>
+            <FormField label="WiFi Password">
+              <FormInput value={form.wifiPassword} onChange={setField("wifiPassword")} placeholder="WiFi password" />
+            </FormField>
+            <FormField label="Notes">
+              <textarea value={form.notes || ""} onChange={(e) => setField("notes")(e.target.value)} rows={3} placeholder="Notes..."
+                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none bg-white hover:border-slate-300 transition-colors resize-y" />
+            </FormField>
           </div>
         </div>
       </div>
 
-      {/* Active Session / Quick Stats */}
+      {/* Right column */}
       <div className="space-y-4">
+        {/* Connection Status */}
         {isOnline && session ? (
           <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-slate-100">
@@ -267,20 +422,35 @@ function InformationTab({ client, session }) {
           </div>
         )}
 
-        {/* Quick Actions */}
+        {/* PPPoE Info */}
         <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
           <div className="px-5 py-3 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-900">Quick Info</h3>
+            <h3 className="text-sm font-bold text-slate-900">PPPoE Details</h3>
           </div>
           <div className="p-5 space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-400">Local Address</span>
-              <span className="text-xs font-semibold text-slate-700 font-mono">{client.localAddress || "—"}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-400">Remote Address</span>
-              <span className="text-xs font-semibold text-slate-700 font-mono">{client.remoteAddress || "—"}</span>
-            </div>
+            {[
+              ["Profile / Plan", client.profile],
+              ["Service", client.service || "pppoe"],
+              ["Secret ID", client.id],
+              ["Last Caller ID", client.lastCallerId || "—"],
+              ["Last Logged Out", client.lastLoggedOut || "—"],
+              ["Local Address", client.localAddress || "—"],
+              ["Remote Address", client.remoteAddress || "—"],
+            ].map(([l, v]) => (
+              <div key={l} className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">{l}</span>
+                <span className="text-xs font-semibold text-slate-700 font-mono truncate max-w-[140px]">{v || "—"}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Account Balance Placeholder */}
+        <div className="bg-gradient-to-br from-violet-50 to-violet-100/50 rounded-xl border border-violet-200/60 p-5">
+          <div className="text-[10px] font-semibold text-violet-400 uppercase tracking-wider">Account Balance</div>
+          <div className="text-2xl font-bold text-violet-800 mt-1">R0.00</div>
+          <div className="text-xs text-violet-500 mt-1">
+            {custData ? `${custData.firstName} ${custData.lastName}` : username}
           </div>
         </div>
       </div>
@@ -706,7 +876,7 @@ export default function NetworkClientPage() {
       </div>
 
       {/* Tab Content */}
-      {tab === "information" && <InformationTab client={enrichedClient} session={session} />}
+      {tab === "information" && <InformationTab client={enrichedClient} session={session} username={username} />}
       {tab === "services" && <ServicesTab client={enrichedClient} session={session} profileData={profileData} />}
       {tab === "statistics" && <StatisticsTab client={enrichedClient} session={session} username={username} />}
 

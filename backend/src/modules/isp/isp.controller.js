@@ -202,6 +202,72 @@ class ISPController {
     });
   }
 
+  // ── ISP Customers (Splynx-style profiles) ──────
+
+  @Get('customers')
+  async listIspCustomers(@Req() req, @Query() query) {
+    return this.ispService.listIspCustomers(req.user?.companyName || null, {
+      page: query.page ? Number(query.page) : 1,
+      limit: query.limit ? Number(query.limit) : 100,
+      status: query.status || undefined,
+      search: query.search || undefined,
+    });
+  }
+
+  @Get('customers/by-username/:username')
+  async getIspCustomerByUsername(@Param('username') username) {
+    return this.ispService.getIspCustomerByUsername(username);
+  }
+
+  @Get('customers/:id')
+  async getIspCustomer(@Param('id') id) {
+    return this.ispService.getIspCustomer(id);
+  }
+
+  @Post('customers')
+  async createIspCustomer(@Req() req, @Body() body) {
+    const fields = ['pppoeUsername', 'firstName', 'lastName', 'companyName', 'email', 'billingEmail',
+      'phone', 'street', 'city', 'zipCode', 'province', 'country', 'geoLat', 'geoLng',
+      'status', 'category', 'billingType', 'partner', 'location', 'vatId', 'paymentNote',
+      'paymentDate', 'debitOrder', 'wifiSsid', 'wifiPassword', 'contactPerson', 'notes'];
+    const data = { ownerCompanyName: req.user?.companyName || null };
+    for (const f of fields) {
+      if (body[f] !== undefined) data[f] = body[f];
+    }
+    return this.ispService.createIspCustomer(data);
+  }
+
+  @Put('customers/:id')
+  async updateIspCustomer(@Param('id') id, @Body() body) {
+    const fields = ['firstName', 'lastName', 'companyName', 'email', 'billingEmail',
+      'phone', 'street', 'city', 'zipCode', 'province', 'country', 'geoLat', 'geoLng',
+      'status', 'category', 'billingType', 'partner', 'location', 'vatId', 'paymentNote',
+      'paymentDate', 'debitOrder', 'wifiSsid', 'wifiPassword', 'contactPerson', 'notes'];
+    const data = {};
+    for (const f of fields) {
+      if (body[f] !== undefined) data[f] = body[f];
+    }
+    return this.ispService.updateIspCustomer(id, data);
+  }
+
+  @Put('customers/by-username/:username')
+  async upsertIspCustomerByUsername(@Param('username') username, @Req() req, @Body() body) {
+    const fields = ['firstName', 'lastName', 'companyName', 'email', 'billingEmail',
+      'phone', 'street', 'city', 'zipCode', 'province', 'country', 'geoLat', 'geoLng',
+      'status', 'category', 'billingType', 'partner', 'location', 'vatId', 'paymentNote',
+      'paymentDate', 'debitOrder', 'wifiSsid', 'wifiPassword', 'contactPerson', 'notes'];
+    const data = { ownerCompanyName: req.user?.companyName || null };
+    for (const f of fields) {
+      if (body[f] !== undefined) data[f] = body[f];
+    }
+    return this.ispService.updateIspCustomerByUsername(username, data);
+  }
+
+  @Delete('customers/:id')
+  async deleteIspCustomer(@Param('id') id) {
+    return this.ispService.deleteIspCustomer(id);
+  }
+
   // ── MikroTik Router Live Data ──────────────────
 
   @Get('router/dashboard')

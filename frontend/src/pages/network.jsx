@@ -80,14 +80,20 @@ function Modal({ open, onClose, title, children, wide }) {
 // ────────────────────────────────────────────────────
 
 function AddUserModal({ open, onClose, profiles, onCreated }) {
-  const [form, setForm] = useState({ name: "", password: "", profile: "", service: "pppoe", comment: "" });
+  const [form, setForm] = useState({
+    name: "", password: "", profile: "", service: "pppoe", comment: "",
+    firstName: "", lastName: "", email: "", phone: "", street: "", city: "", category: "RESIDENTIAL",
+  });
   const [showPw, setShowPw] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (open) {
-      setForm({ name: "", password: "", profile: profiles?.[0]?.name || "", service: "pppoe", comment: "" });
+      setForm({
+        name: "", password: "", profile: profiles?.[0]?.name || "", service: "pppoe", comment: "",
+        firstName: "", lastName: "", email: "", phone: "", street: "", city: "", category: "RESIDENTIAL",
+      });
       setError(null);
     }
   }, [open, profiles]);
@@ -98,10 +104,20 @@ function AddUserModal({ open, onClose, profiles, onCreated }) {
       setError("Username, password, and profile are required.");
       return;
     }
+    if (!form.firstName.trim() || !form.lastName.trim()) {
+      setError("First name and last name are required.");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
-      await api.routerCreateSecret(form);
+      await api.routerCreateSecret({ name: form.name, password: form.password, profile: form.profile, service: form.service, comment: form.comment || `${form.firstName} ${form.lastName}` });
+      try {
+        await api.ispCustomerUpsertByUsername(form.name, {
+          firstName: form.firstName, lastName: form.lastName, email: form.email,
+          phone: form.phone, street: form.street, city: form.city, category: form.category,
+        });
+      } catch { /* customer profile save failed silently */ }
       onCreated();
       onClose();
     } catch (err) {
@@ -111,47 +127,91 @@ function AddUserModal({ open, onClose, profiles, onCreated }) {
     }
   };
 
+  const inputClass = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none";
+
   return (
-    <Modal open={open} onClose={onClose} title="Add PPPoE User">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Modal open={open} onClose={onClose} title="Add PPPoE Customer" wide>
+      <form onSubmit={handleSubmit} className="space-y-5">
         {error ? <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{error}</div> : null}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
-          <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. client001" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none" autoFocus />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-          <div className="relative">
-            <input type={showPw ? "text" : "password"} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="PPPoE password" className="w-full px-3 py-2 pr-10 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none" />
-            <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-              {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
+
+        <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">PPPoE Credentials</div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Username *</label>
+            <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. client001" className={inputClass} autoFocus />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Password *</label>
+            <div className="relative">
+              <input type={showPw ? "text" : "password"} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="PPPoE password" className={inputClass + " pr-10"} />
+              <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Speed Profile *</label>
+            <select value={form.profile} onChange={(e) => setForm({ ...form, profile: e.target.value })} className={inputClass + " bg-white"}>
+              {(profiles || []).map((p) => (
+                <option key={p.name} value={p.name}>{p.name}{p.rateLimit ? ` (${p.rateLimit})` : ""}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Service</label>
+            <select value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} className={inputClass + " bg-white"}>
+              <option value="pppoe">PPPoE</option>
+              <option value="any">Any</option>
+            </select>
           </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Speed Profile</label>
-          <select value={form.profile} onChange={(e) => setForm({ ...form, profile: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none bg-white">
-            {(profiles || []).map((p) => (
-              <option key={p.name} value={p.name}>{p.name}{p.rateLimit ? ` (${p.rateLimit})` : ""}</option>
-            ))}
-          </select>
+
+        <div className="border-t border-slate-100 pt-4">
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Customer Information</div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">First Name *</label>
+              <input type="text" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} placeholder="First name" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Last Name *</label>
+              <input type="text" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} placeholder="Last name" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@example.com" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+              <input type="text" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+27..." className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Street Address</label>
+              <input type="text" value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} placeholder="123 Main Road" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">City</label>
+              <input type="text" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Cape Town" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={inputClass + " bg-white"}>
+                <option value="RESIDENTIAL">Residential</option>
+                <option value="BUSINESS">Business</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Comment</label>
+              <input type="text" value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} placeholder="Optional note" className={inputClass} />
+            </div>
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Service</label>
-          <select value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none bg-white">
-            <option value="pppoe">PPPoE</option>
-            <option value="any">Any</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Comment <span className="text-slate-400 font-normal">(optional)</span></label>
-          <input type="text" value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} placeholder="Customer name or note" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none" />
-        </div>
+
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">Cancel</button>
           <button type="submit" disabled={saving} className="flex-1 px-4 py-2.5 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
             {saving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-            {saving ? "Creating..." : "Add User"}
+            {saving ? "Creating..." : "Add Customer"}
           </button>
         </div>
       </form>
@@ -433,6 +493,7 @@ export default function NetworkPage() {
   const [selectedClient, setSelectedClient] = useState(null);
   const [actionMenuId, setActionMenuId] = useState(null);
   const [liveBw, setLiveBw] = useState({});
+  const [custMap, setCustMap] = useState({});
   const bwPollRef = useRef(null);
 
   const fetchData = useCallback(async (showRefresh = false) => {
@@ -440,8 +501,14 @@ export default function NetworkPage() {
       if (showRefresh) setRefreshing(true);
       else setLoading(true);
       setError(null);
-      const res = await api.routerDashboard();
+      const [res, custRes] = await Promise.all([
+        api.routerDashboard(),
+        api.ispCustomers().catch(() => ({ items: [] })),
+      ]);
       setData(res);
+      const map = {};
+      for (const c of (custRes.items || [])) { map[c.pppoeUsername] = c; }
+      setCustMap(map);
     } catch (err) {
       setError(err.message || "Failed to connect to router");
     } finally {
@@ -492,16 +559,23 @@ export default function NetworkPage() {
   };
 
   const rawClients = data?.clients || [];
-  // Merge live bandwidth into clients (updates every 5s)
+  // Merge live bandwidth + customer profile into clients
   const clients = rawClients.map((c) => {
     const bw = liveBw[c.name];
-    if (bw) return { ...c, bandwidth: bw };
-    return c;
+    const cust = custMap[c.name];
+    return {
+      ...c,
+      ...(bw ? { bandwidth: bw } : {}),
+      fullName: cust ? `${cust.firstName} ${cust.lastName}` : (c.comment || ""),
+      custStreet: cust?.street || "",
+      custCity: cust?.city || "",
+      custPhone: cust?.phone || "",
+    };
   });
   const filtered = clients
     .filter((c) => {
       const q = search.toLowerCase();
-      const matchesSearch = !q || c.name?.toLowerCase().includes(q) || c.profile?.toLowerCase().includes(q) || c.activeSession?.address?.includes(q) || c.lastCallerId?.toLowerCase().includes(q) || c.comment?.toLowerCase().includes(q);
+      const matchesSearch = !q || c.name?.toLowerCase().includes(q) || c.profile?.toLowerCase().includes(q) || c.activeSession?.address?.includes(q) || c.lastCallerId?.toLowerCase().includes(q) || c.comment?.toLowerCase().includes(q) || c.fullName?.toLowerCase().includes(q) || c.custStreet?.toLowerCase().includes(q) || c.custCity?.toLowerCase().includes(q);
       if (filter === "online") return matchesSearch && c.isOnline;
       if (filter === "offline") return matchesSearch && !c.isOnline && !c.disabled;
       if (filter === "disabled") return matchesSearch && c.disabled;
@@ -638,9 +712,10 @@ export default function NetworkPage() {
                   <tr>
                     <SortHeader field="status">Status</SortHeader>
                     <SortHeader field="name">Username</SortHeader>
+                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Full Name</th>
                     <SortHeader field="profile">Profile</SortHeader>
+                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Street</th>
                     <SortHeader field="ip">IP Address</SortHeader>
-                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">MAC / Caller ID</th>
                     <SortHeader field="uptime">Uptime</SortHeader>
                     <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
                       <span className="inline-flex items-center gap-1.5">Bandwidth <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[9px] font-bold ring-1 ring-emerald-200/50"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />LIVE</span></span>
@@ -673,13 +748,14 @@ export default function NetworkPage() {
                         <td className="px-3 py-2.5">
                           <Link to={`/network/${encodeURIComponent(c.name)}`} className="text-sm font-semibold text-violet-700 hover:text-violet-900 hover:underline">{c.name}</Link>
                         </td>
+                        <td className="px-3 py-2.5 text-sm text-slate-700 truncate max-w-[180px]">{c.fullName || "—"}</td>
                         <td className="px-3 py-2.5">
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 text-violet-700 rounded text-xs font-medium">
                             <Gauge className="h-3 w-3" /> {c.profile}
                           </span>
                         </td>
+                        <td className="px-3 py-2.5 text-xs text-slate-500 truncate max-w-[200px]">{c.custStreet ? `${c.custStreet}${c.custCity ? ", " + c.custCity : ""}` : "—"}</td>
                         <td className="px-3 py-2.5 text-sm text-slate-700 font-mono">{s?.address || "—"}</td>
-                        <td className="px-3 py-2.5 text-xs text-slate-500 font-mono">{s?.callerId || c.lastCallerId || "—"}</td>
                         <td className="px-3 py-2.5 text-sm text-slate-600">{s?.uptime || "—"}</td>
                         <td className="px-3 py-2.5">
                           {c.bandwidth && isOnline ? (

@@ -691,6 +691,15 @@ export const api = {
   routerInterfaceTraffic: (name) => request(`/isp/router/interfaces/${name}/traffic`),
   routerQueues: () => request("/isp/router/queues"),
   routerLogs: (limit = 50) => request(`/isp/router/logs?limit=${limit}`),
+  // ISP Customers (Splynx-style profiles)
+  ispCustomers: (params) => request(`/isp/customers${params ? "?" + new URLSearchParams(params) : ""}`),
+  ispCustomer: (id) => request(`/isp/customers/${id}`),
+  ispCustomerByUsername: (username) => request(`/isp/customers/by-username/${encodeURIComponent(username)}`),
+  ispCustomerCreate: (data) => request("/isp/customers", { method: "POST", body: data }),
+  ispCustomerUpdate: (id, data) => request(`/isp/customers/${id}`, { method: "PUT", body: data }),
+  ispCustomerUpsertByUsername: (username, data) => request(`/isp/customers/by-username/${encodeURIComponent(username)}`, { method: "PUT", body: data }),
+  ispCustomerDelete: (id) => request(`/isp/customers/${id}`, { method: "DELETE" }),
+
   routerBandwidth: () => request("/isp/router/bandwidth"),
   routerUserTraffic: (username) => request(`/isp/router/traffic/${username}`),
   routerDisconnect: (username) => request(`/isp/router/disconnect/${username}`, { method: "POST" }),
