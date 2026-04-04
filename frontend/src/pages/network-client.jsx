@@ -740,6 +740,7 @@ export default function NetworkClientPage() {
   const [tab, setTab] = useState("information");
   const [editOpen, setEditOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [custProfile, setCustProfile] = useState(null);
 
   const fetchClient = useCallback(async () => {
     try {
@@ -773,6 +774,16 @@ export default function NetworkClientPage() {
   }, [username]);
 
   useEffect(() => { fetchClient(); }, [fetchClient]);
+
+  // Fetch ISP customer profile for header display
+  useEffect(() => {
+    (async () => {
+      try {
+        const cust = await api.ispCustomerByUsername(username);
+        if (cust) setCustProfile(cust);
+      } catch { /* no profile yet */ }
+    })();
+  }, [username]);
 
   const enrichedClient = client ? { ...client, bandwidth: liveBw || client.bandwidth } : null;
   const session = enrichedClient?.activeSession;
@@ -848,8 +859,8 @@ export default function NetworkClientPage() {
             <Wifi className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-white font-bold text-lg truncate">{enrichedClient.comment || enrichedClient.name}</div>
-            <div className="text-violet-200 text-xs font-mono">{enrichedClient.name}</div>
+            <div className="text-white font-bold text-lg truncate">{custProfile ? `${custProfile.firstName} ${custProfile.lastName}` : (enrichedClient.comment || enrichedClient.name)}</div>
+            <div className="text-violet-200 text-xs font-mono">ID: {custProfile?.id?.slice(0, 8) || enrichedClient.id || "—"} &middot; {enrichedClient.name}</div>
           </div>
           {/* Nav arrows */}
           <div className="flex items-center gap-1">
