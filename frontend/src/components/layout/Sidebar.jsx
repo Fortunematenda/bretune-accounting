@@ -78,6 +78,7 @@ export const SIDEBAR_NAV = [
 
   { type: "section", label: "ISP" },
   { type: "item", to: "/network", label: "Network Monitor", icon: Wifi },
+  { type: "item", to: "/isp-billing", label: "Billing", icon: FileText },
 
   { type: "section", label: "Administration" },
   { type: "item", to: "/settings", label: "Settings", icon: Settings },

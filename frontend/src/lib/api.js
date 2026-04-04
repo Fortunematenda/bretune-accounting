@@ -705,4 +705,19 @@ export const api = {
   routerDisconnect: (username) => request(`/isp/router/disconnect/${username}`, { method: "POST" }),
   routerDisable: (username) => request(`/isp/router/disable/${username}`, { method: "POST" }),
   routerEnable: (username) => request(`/isp/router/enable/${username}`, { method: "POST" }),
+
+  // ISP Billing
+  billingSettings: () => request("/isp/billing/settings"),
+  billingSettingsUpdate: (data) => request("/isp/billing/settings", { method: "PUT", body: data }),
+  billingDashboard: () => request("/isp/billing/dashboard"),
+  billingInvoices: (params) => request(`/isp/billing/invoices${params ? "?" + new URLSearchParams(params) : ""}`),
+  billingInvoice: (id) => request(`/isp/billing/invoices/${id}`),
+  billingInvoiceCreate: (data) => request("/isp/billing/invoices", { method: "POST", body: data }),
+  billingInvoiceUpdateStatus: (id, status) => request(`/isp/billing/invoices/${id}/status`, { method: "PUT", body: { status } }),
+  billingInvoiceDelete: (id) => request(`/isp/billing/invoices/${id}`, { method: "DELETE" }),
+  billingPayments: (params) => request(`/isp/billing/payments${params ? "?" + new URLSearchParams(params) : ""}`),
+  billingPaymentCreate: (data) => request("/isp/billing/payments", { method: "POST", body: data }),
+  billingCustomer: (customerId) => request(`/isp/billing/customer/${customerId}`),
+  billingGenerateMonthly: (servicePlans) => request("/isp/billing/generate-monthly", { method: "POST", body: { servicePlans } }),
+  billingMarkOverdue: () => request("/isp/billing/mark-overdue", { method: "POST" }),
 };

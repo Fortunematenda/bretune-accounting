@@ -3,15 +3,21 @@ const { ApiBearerAuth, ApiTags } = require('@nestjs/swagger');
 const { JwtAuthGuard } = require('../auth/guards/jwt-auth.guard');
 const { ISPService } = require('./isp.service');
 const { MikroTikService } = require('./mikrotik.service');
+const { IspBillingService } = require('./isp-billing.service');
 
 @ApiTags('ISP')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('isp')
 class ISPController {
-  constructor(@Inject(ISPService) ispService, @Inject(MikroTikService) mikroTikService) {
+  constructor(
+    @Inject(ISPService) ispService,
+    @Inject(MikroTikService) mikroTikService,
+    @Inject(IspBillingService) billingService,
+  ) {
     this.ispService = ispService;
     this.mikroTik = mikroTikService;
+    this.billing = billingService;
   }
 
   // ── Dashboard ────────────────────────────────
@@ -364,6 +370,93 @@ class ISPController {
   @Post('router/enable/:username')
   async routerEnable(@Param('username') username) {
     return this.mikroTik.enableSecret(username);
+  }
+
+  // ── Billing Settings ──────────────────────────
+
+  @Get('billing/settings')
+  async billingSettings() {
+    return this.billing.getSettings();
+  }
+
+  @Put('billing/settings')
+  async updateBillingSettings(@Body() body) {
+    return this.billing.updateSettings(body);
+  }
+
+  // ── Billing Dashboard ─────────────────────────
+
+  @Get('billing/dashboard')
+  async billingDashboard() {
+    return this.billing.getDashboardStats();
+  }
+
+  // ── Invoices ──────────────────────────────────
+
+  @Get('billing/invoices')
+  async listInvoices(@Query() query) {
+    return this.billing.listInvoices({
+      page: query.page ? Number(query.page) : 1,
+      limit: query.limit ? Number(query.limit) : 50,
+      status: query.status || undefined,
+      customerId: query.customerId || undefined,
+      search: query.search || undefined,
+    });
+  }
+
+  @Get('billing/invoices/:id')
+  async getInvoice(@Param('id') id) {
+    return this.billing.getInvoice(id);
+  }
+
+  @Post('billing/invoices')
+  async createInvoice(@Body() body) {
+    return this.billing.createInvoice(body);
+  }
+
+  @Put('billing/invoices/:id/status')
+  async updateInvoiceStatus(@Param('id') id, @Body() body) {
+    return this.billing.updateInvoiceStatus(id, body.status);
+  }
+
+  @Delete('billing/invoices/:id')
+  async deleteInvoice(@Param('id') id) {
+    return this.billing.deleteInvoice(id);
+  }
+
+  // ── Payments ──────────────────────────────────
+
+  @Get('billing/payments')
+  async listPayments(@Query() query) {
+    return this.billing.listPayments({
+      page: query.page ? Number(query.page) : 1,
+      limit: query.limit ? Number(query.limit) : 50,
+      invoiceId: query.invoiceId || undefined,
+    });
+  }
+
+  @Post('billing/payments')
+  async recordPayment(@Body() body) {
+    return this.billing.recordPayment(body);
+  }
+
+  // ── Customer Billing ──────────────────────────
+
+  @Get('billing/customer/:customerId')
+  async customerBilling(@Param('customerId') customerId) {
+    return this.billing.getCustomerBillingSummary(customerId);
+  }
+
+  // ── Auto-generate & Overdue ───────────────────
+
+  @Post('billing/generate-monthly')
+  async generateMonthly(@Body() body) {
+    return this.billing.generateMonthlyInvoices(body.servicePlans || {});
+  }
+
+  @Post('billing/mark-overdue')
+  async markOverdue() {
+    return this.billing.markOverdueInvoices();
   }
 }
 

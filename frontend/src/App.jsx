@@ -61,6 +61,7 @@ import LoansPage from "./pages/loans";
 import LoanDetailPage from "./pages/loan-detail";
 import NetworkPage from "./pages/network";
 import NetworkClientPage from "./pages/network-client";
+import IspBillingPage from "./pages/isp-billing";
 
 function LegacyProductRedirect() {
   const { id } = useParams();
@@ -125,6 +126,7 @@ function ProtectedLayout() {
         <Route path="/loans/:id" element={<LoanDetailPage />} />
         <Route path="/network" element={<NetworkPage />} />
         <Route path="/network/:username" element={<NetworkClientPage />} />
+        <Route path="/isp-billing" element={<IspBillingPage />} />
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/scheduler" element={<SchedulerPage />} />
         <Route path="/settings" element={<SettingsPage />} />
