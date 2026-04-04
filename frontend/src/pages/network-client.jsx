@@ -233,12 +233,30 @@ function InformationTab({ client, session, username, onAction, actionLoading, on
     })();
   }, [username]);
 
+  // Sync form status with MikroTik disabled state
+  useEffect(() => {
+    if (client.disabled && form.status === "ACTIVE") {
+      setForm((prev) => ({ ...prev, status: "BLOCKED" }));
+    } else if (!client.disabled && form.status === "BLOCKED") {
+      setForm((prev) => ({ ...prev, status: "ACTIVE" }));
+    }
+  }, [client.disabled]);
+
   const setField = (key) => (val) => setForm((prev) => ({ ...prev, [key]: val }));
 
   const handleSave = async () => {
     setSaving(true);
     setSaved(false);
     try {
+      // If status changed to BLOCKED or INACTIVE, disable PPPoE on MikroTik
+      const prevStatus = custData?.status || "ACTIVE";
+      if ((form.status === "BLOCKED" || form.status === "INACTIVE") && prevStatus === "ACTIVE") {
+        try { await api.routerDisable(username); } catch {}
+      }
+      // If status changed to ACTIVE from blocked/inactive, enable PPPoE on MikroTik
+      if (form.status === "ACTIVE" && (prevStatus === "BLOCKED" || prevStatus === "INACTIVE")) {
+        try { await api.routerEnable(username); } catch {}
+      }
       const res = await api.ispCustomerUpsertByUsername(username, form);
       setCustData(res);
       setSaved(true);
