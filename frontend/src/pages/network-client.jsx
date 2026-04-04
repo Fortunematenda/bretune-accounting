@@ -4,10 +4,8 @@ import { api } from "../lib/api";
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, PointElement, LineElement,
-  TimeScale, Filler, Tooltip as ChartTooltip, Legend as ChartLegend,
+  Filler, Tooltip as ChartTooltip, Legend as ChartLegend,
 } from "chart.js";
-import "chartjs-adapter-luxon";
-import StreamingPlugin from "chartjs-plugin-streaming";
 import { Line } from "react-chartjs-2";
 
 import {
@@ -45,7 +43,7 @@ import {
   MonitorSmartphone,
 } from "lucide-react";
 
-ChartJS.register(CategoryScale, LinearScale, TimeScale, PointElement, LineElement, Filler, ChartTooltip, ChartLegend, StreamingPlugin);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, ChartTooltip, ChartLegend);
 
 // ── Helpers ──────────────────────────────────────
 
@@ -508,30 +506,55 @@ function ServicesTab({ client, session, profileData }) {
   );
 }
 
-// ── Statistics Tab (Chart.js streaming canvas like Splynx) ─
+// ── Bandwidth formatter for Y-axis ──────────────
+function fmtBps(v) {
+  if (v == null || v < 1) return "0 bps";
+  if (v >= 1e9) return (v / 1e9).toFixed(1) + " Gbps";
+  if (v >= 1e6) return (v / 1e6).toFixed(1) + " Mbps";
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + " Kbps";
+  return Math.round(v) + " bps";
+}
+
+// ── Statistics Tab (Chart.js canvas marquee) ─────
 
 function StatisticsTab({ client, session, username }) {
   const isOnline = client.isOnline;
   const chartRef = useRef(null);
-  const latestData = useRef({ upload: 0, download: 0 });
+  const MAX_POINTS = 60;
+  const labelsRef = useRef(Array(MAX_POINTS).fill(""));
+  const uploadRef = useRef(Array(MAX_POINTS).fill(0));
+  const downloadRef = useRef(Array(MAX_POINTS).fill(0));
   const [currentUpload, setCurrentUpload] = useState(0);
   const [currentDownload, setCurrentDownload] = useState(0);
 
-  // Poll traffic data every 2s and store latest values
   useEffect(() => {
     let active = true;
     const poll = async () => {
       if (!active) return;
+      let up = 0, down = 0;
       try {
         const traffic = await api.routerUserTraffic(username);
-        latestData.current.upload = traffic?.rxBitsPerSecond || 0;
-        latestData.current.download = traffic?.txBitsPerSecond || 0;
-      } catch {
-        latestData.current.upload = 0;
-        latestData.current.download = 0;
+        up = traffic?.rxBitsPerSecond || 0;
+        down = traffic?.txBitsPerSecond || 0;
+      } catch { /* silent */ }
+
+      labelsRef.current.push(timeLabel());
+      uploadRef.current.push(up);
+      downloadRef.current.push(down);
+      labelsRef.current.shift();
+      uploadRef.current.shift();
+      downloadRef.current.shift();
+
+      setCurrentUpload(up);
+      setCurrentDownload(down);
+
+      const chart = chartRef.current;
+      if (chart) {
+        chart.data.labels = labelsRef.current;
+        chart.data.datasets[0].data = uploadRef.current;
+        chart.data.datasets[1].data = downloadRef.current;
+        chart.update("none");
       }
-      setCurrentUpload(latestData.current.upload);
-      setCurrentDownload(latestData.current.download);
     };
     poll();
     const id = setInterval(poll, 2000);
@@ -539,26 +562,27 @@ function StatisticsTab({ client, session, username }) {
   }, [username]);
 
   const chartData = {
+    labels: labelsRef.current,
     datasets: [
       {
         label: "Upload",
+        data: uploadRef.current,
         borderColor: "rgba(220, 100, 100, 0.8)",
         backgroundColor: "rgba(255, 140, 140, 0.25)",
         fill: true,
         tension: 0.4,
         pointRadius: 0,
         borderWidth: 1.5,
-        data: [],
       },
       {
         label: "Download",
+        data: downloadRef.current,
         borderColor: "rgba(80, 150, 240, 0.8)",
         backgroundColor: "rgba(130, 180, 255, 0.35)",
         fill: true,
         tension: 0.4,
         pointRadius: 0,
         borderWidth: 1.5,
-        data: [],
       },
     ],
   };
@@ -566,6 +590,7 @@ function StatisticsTab({ client, session, username }) {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: false,
     interaction: { mode: "index", intersect: false },
     plugins: {
       legend: { display: false },
@@ -580,35 +605,20 @@ function StatisticsTab({ client, session, username }) {
         padding: 10,
         displayColors: true,
         callbacks: {
-          label: (ctx) => `${ctx.dataset.label}: ${formatBits(ctx.parsed.y)}`,
+          label: function(ctx) { return ctx.dataset.label + ": " + fmtBps(ctx.parsed.y); },
         },
-      },
-      streaming: {
-        frameRate: 30,
       },
     },
     scales: {
       x: {
-        type: "realtime",
-        realtime: {
-          duration: 120000,
-          refresh: 2000,
-          delay: 500,
-          onRefresh: (chart) => {
-            const now = Date.now();
-            chart.data.datasets[0].data.push({ x: now, y: latestData.current.upload });
-            chart.data.datasets[1].data.push({ x: now, y: latestData.current.download });
-          },
-        },
         ticks: {
           maxRotation: 45,
           minRotation: 45,
           font: { size: 10 },
           color: "#999",
-          source: "auto",
-          callback: (val) => {
-            const d = new Date(val);
-            return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+          maxTicksLimit: 15,
+          callback: function(val, idx) {
+            return labelsRef.current[idx] || "";
           },
         },
         grid: { display: false },
@@ -620,14 +630,8 @@ function StatisticsTab({ client, session, username }) {
         ticks: {
           font: { size: 10 },
           color: "#999",
-          callback: function(v) {
-            if (v == null || v < 1) return "0 bps";
-            if (v >= 1000000000) return (v / 1000000000).toFixed(1) + " Gbps";
-            if (v >= 1000000) return (v / 1000000).toFixed(1) + " Mbps";
-            if (v >= 1000) return (v / 1000).toFixed(1) + " Kbps";
-            return Math.round(v) + " bps";
-          },
           maxTicksLimit: 8,
+          callback: function(v) { return fmtBps(v); },
         },
         grid: { color: "#f0f0f0" },
         border: { color: "#ddd" },
