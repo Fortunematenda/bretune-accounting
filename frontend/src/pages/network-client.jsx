@@ -36,6 +36,8 @@ import {
   BarChart3,
   Settings2,
   MonitorSmartphone,
+  ShieldBan,
+  ShieldCheck,
 } from "lucide-react";
 
 
@@ -887,19 +889,36 @@ export default function NetworkClientPage() {
   const profileData = profiles.find((p) => p.name === enrichedClient?.profile);
 
   const handleAction = async (action) => {
-    const msgs = { disconnect: `Disconnect ${username}?`, disable: `Disable ${username}?`, delete: `Delete PPPoE user ${username}?` };
+    const msgs = {
+      disconnect: `Disconnect ${username}?`,
+      block: `Block client ${username}? This will disable their PPPoE account and disconnect them immediately.`,
+      activate: `Activate client ${username}? This will re-enable their PPPoE account.`,
+      delete: `Delete PPPoE user ${username}? This cannot be undone.`,
+    };
     if (msgs[action] && !confirm(msgs[action])) return;
     setActionLoading(true);
     try {
-      if (action === "disconnect") await api.routerDisconnect(username);
-      else if (action === "disable") await api.routerDisable(username);
-      else if (action === "enable") await api.routerEnable(username);
-      else if (action === "delete") {
+      if (action === "disconnect") {
+        await api.routerDisconnect(username);
+      } else if (action === "block") {
+        await api.routerDisable(username);
+        // Update ISP customer status to blocked
+        try { await api.ispCustomerUpsertByUsername(username, { status: "blocked" }); } catch {}
+      } else if (action === "activate") {
+        await api.routerEnable(username);
+        // Update ISP customer status to active
+        try { await api.ispCustomerUpsertByUsername(username, { status: "active" }); } catch {}
+      } else if (action === "delete") {
         if (client?.id) await api.routerDeleteSecret(client.id);
         navigate("/network");
         return;
       }
       await fetchClient();
+      // Refresh customer profile
+      try {
+        const cust = await api.ispCustomerByUsername(username);
+        if (cust) setCustProfile(cust);
+      } catch {}
     } catch (err) {
       alert(err.message || `Failed to ${action}`);
     } finally {
@@ -956,7 +975,18 @@ export default function NetworkClientPage() {
             <Wifi className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-white font-bold text-lg truncate">{custProfile ? `${custProfile.firstName} ${custProfile.lastName}` : (enrichedClient.comment || enrichedClient.name)}</div>
+            <div className="flex items-center gap-2">
+              <span className="text-white font-bold text-lg truncate">{custProfile ? `${custProfile.firstName} ${custProfile.lastName}` : (enrichedClient.comment || enrichedClient.name)}</span>
+              {enrichedClient.disabled ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/30 text-red-100 border border-red-400/30">
+                  <ShieldBan className="h-3 w-3" /> BLOCKED
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/30 text-emerald-100 border border-emerald-400/30">
+                  <ShieldCheck className="h-3 w-3" /> ACTIVE
+                </span>
+              )}
+            </div>
             <div className="text-violet-200 text-xs font-mono">ID: {custProfile?.id?.slice(0, 8) || enrichedClient.id || "—"} &middot; {enrichedClient.name}</div>
           </div>
           {/* Nav arrows */}
@@ -992,12 +1022,12 @@ export default function NetworkClientPage() {
               </button>
             ) : null}
             {!enrichedClient.disabled ? (
-              <button onClick={() => handleAction("disable")} disabled={actionLoading} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50">
-                <PowerOff className="h-3 w-3" /> Disable
+              <button onClick={() => handleAction("block")} disabled={actionLoading} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50">
+                <ShieldBan className="h-3 w-3" /> Block
               </button>
             ) : (
-              <button onClick={() => handleAction("enable")} disabled={actionLoading} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-50">
-                <Power className="h-3 w-3" /> Enable
+              <button onClick={() => handleAction("activate")} disabled={actionLoading} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-50">
+                <ShieldCheck className="h-3 w-3" /> Activate
               </button>
             )}
           </div>

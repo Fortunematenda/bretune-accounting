@@ -539,14 +539,23 @@ export default function NetworkPage() {
 
   const handleAction = async (action, username) => {
     setActionMenuId(null);
-    const msgs = { disconnect: `Disconnect ${username}?`, disable: `Disable ${username}? This prevents reconnection.`, delete: `Permanently delete PPPoE user ${username}?` };
+    const msgs = {
+      disconnect: `Disconnect ${username}?`,
+      block: `Block ${username}? This will disable their account and disconnect them.`,
+      activate: `Activate ${username}? This will re-enable their account.`,
+      delete: `Permanently delete PPPoE user ${username}?`,
+    };
     if (msgs[action] && !confirm(msgs[action])) return;
     setActionLoading(true);
     try {
       if (action === "disconnect") await api.routerDisconnect(username);
-      else if (action === "disable") await api.routerDisable(username);
-      else if (action === "enable") await api.routerEnable(username);
-      else if (action === "delete") {
+      else if (action === "block") {
+        await api.routerDisable(username);
+        try { await api.ispCustomerUpsertByUsername(username, { status: "blocked" }); } catch {}
+      } else if (action === "activate") {
+        await api.routerEnable(username);
+        try { await api.ispCustomerUpsertByUsername(username, { status: "active" }); } catch {}
+      } else if (action === "delete") {
         const secret = data?.clients?.find((c) => c.name === username);
         if (secret?.id) await api.routerDeleteSecret(secret.id);
       }
@@ -796,9 +805,9 @@ export default function NetworkPage() {
                                 <button onClick={() => { setSelectedClient(c); setEditOpen(true); setActionMenuId(null); }} className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"><Pencil className="h-3.5 w-3.5" /> Edit User</button>
                                 {isOnline ? <button onClick={() => handleAction("disconnect", c.name)} disabled={actionLoading} className="w-full text-left px-3 py-2 text-sm text-amber-700 hover:bg-amber-50 flex items-center gap-2"><Unplug className="h-3.5 w-3.5" /> Disconnect</button> : null}
                                 {!c.disabled ? (
-                                  <button onClick={() => handleAction("disable", c.name)} disabled={actionLoading} className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"><PowerOff className="h-3.5 w-3.5" /> Disable</button>
+                                  <button onClick={() => handleAction("block", c.name)} disabled={actionLoading} className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"><PowerOff className="h-3.5 w-3.5" /> Block</button>
                                 ) : (
-                                  <button onClick={() => handleAction("enable", c.name)} disabled={actionLoading} className="w-full text-left px-3 py-2 text-sm text-emerald-600 hover:bg-emerald-50 flex items-center gap-2"><Power className="h-3.5 w-3.5" /> Enable</button>
+                                  <button onClick={() => handleAction("activate", c.name)} disabled={actionLoading} className="w-full text-left px-3 py-2 text-sm text-emerald-600 hover:bg-emerald-50 flex items-center gap-2"><Power className="h-3.5 w-3.5" /> Activate</button>
                                 )}
                                 <div className="my-1 border-t border-slate-100" />
                                 <button onClick={() => handleAction("delete", c.name)} disabled={actionLoading} className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"><Trash2 className="h-3.5 w-3.5" /> Delete User</button>
