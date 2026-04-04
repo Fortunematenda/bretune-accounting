@@ -351,27 +351,27 @@ function ServicesTab({ client, session, profileData }) {
 function StatisticsTab({ client, session, username }) {
   const isOnline = client.isOnline;
   const [chartData, setChartData] = useState([]);
-  const [interval, setInterval_] = useState("1 minute");
   const pollRef = useRef(null);
-  const MAX_POINTS = 60;
+  const MAX_POINTS = 90;
 
   useEffect(() => {
     let active = true;
 
+    const pushPoint = (upload = 0, download = 0) => {
+      if (!active) return;
+      setChartData((prev) => {
+        const next = [...prev, { time: timeLabel(), upload, download }];
+        return next.length > MAX_POINTS ? next.slice(-MAX_POINTS) : next;
+      });
+    };
+
     const poll = async () => {
       try {
         const traffic = await api.routerUserTraffic(username);
-        if (active && traffic) {
-          setChartData((prev) => {
-            const next = [...prev, {
-              time: timeLabel(),
-              upload: traffic.txBitsPerSecond || 0,
-              download: traffic.rxBitsPerSecond || 0,
-            }];
-            return next.length > MAX_POINTS ? next.slice(-MAX_POINTS) : next;
-          });
-        }
-      } catch { /* silent */ }
+        pushPoint(traffic?.txBitsPerSecond || 0, traffic?.rxBitsPerSecond || 0);
+      } catch {
+        pushPoint(0, 0);
+      }
     };
 
     poll();
@@ -451,32 +451,26 @@ function StatisticsTab({ client, session, username }) {
 
         {/* Chart */}
         <div className="px-4 py-4" style={{ height: 300 }}>
-          {chartData.length > 1 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="uploadGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="downloadGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#94a3b8" }} interval="preserveStartEnd" />
-                <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickFormatter={(v) => formatBits(v)} width={70} />
-                <Tooltip content={<ChartTooltipContent />} />
-                <Area type="monotone" dataKey="upload" name="Upload" stroke="#f43f5e" fill="url(#uploadGrad)" strokeWidth={2} dot={false} animationDuration={300} />
-                <Area type="monotone" dataKey="download" name="Download" stroke="#3b82f6" fill="url(#downloadGrad)" strokeWidth={2} dot={false} animationDuration={300} />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex items-center justify-center h-full text-sm text-slate-400">
-              <RefreshCw className="h-4 w-4 animate-spin mr-2" /> Collecting bandwidth data...
-            </div>
-          )}
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="uploadGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.02} />
+                </linearGradient>
+                <linearGradient id="downloadGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+              <XAxis dataKey="time" tick={{ fontSize: 9, fill: "#94a3b8" }} interval={Math.max(1, Math.floor(chartData.length / 10))} axisLine={{ stroke: "#e2e8f0" }} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickFormatter={(v) => formatBits(v)} width={70} axisLine={false} tickLine={false} />
+              <Tooltip content={<ChartTooltipContent />} />
+              <Area type="monotone" dataKey="upload" name="Upload" stroke="#f43f5e" fill="url(#uploadGrad)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+              <Area type="monotone" dataKey="download" name="Download" stroke="#3b82f6" fill="url(#downloadGrad)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
 
         {/* Current Speed Footer */}
