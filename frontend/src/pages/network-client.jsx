@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../lib/api";
 import {
@@ -508,11 +508,21 @@ function ServicesTab({ client, session, profileData }) {
 
 // ── Bandwidth formatter for Y-axis ──────────────
 function fmtBps(v) {
-  if (v == null || v < 1) return "0 bps";
+  if (typeof v !== "number" || isNaN(v) || v < 1) return "0 bps";
   if (v >= 1e9) return (v / 1e9).toFixed(1) + " Gbps";
   if (v >= 1e6) return (v / 1e6).toFixed(1) + " Mbps";
   if (v >= 1e3) return (v / 1e3).toFixed(1) + " Kbps";
   return Math.round(v) + " bps";
+}
+
+function initLabels(count) {
+  const arr = [];
+  const now = Date.now();
+  for (let i = count - 1; i >= 0; i--) {
+    const d = new Date(now - i * 2000);
+    arr.push(d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+  }
+  return arr;
 }
 
 // ── Statistics Tab (Chart.js canvas marquee) ─────
@@ -521,7 +531,7 @@ function StatisticsTab({ client, session, username }) {
   const isOnline = client.isOnline;
   const chartRef = useRef(null);
   const MAX_POINTS = 60;
-  const labelsRef = useRef(Array(MAX_POINTS).fill(""));
+  const labelsRef = useRef(initLabels(MAX_POINTS));
   const uploadRef = useRef(Array(MAX_POINTS).fill(0));
   const downloadRef = useRef(Array(MAX_POINTS).fill(0));
   const [currentUpload, setCurrentUpload] = useState(0);
@@ -561,7 +571,7 @@ function StatisticsTab({ client, session, username }) {
     return () => { active = false; clearInterval(id); };
   }, [username]);
 
-  const chartData = {
+  const chartData = useMemo(() => ({
     labels: labelsRef.current,
     datasets: [
       {
@@ -585,9 +595,9 @@ function StatisticsTab({ client, session, username }) {
         borderWidth: 1.5,
       },
     ],
-  };
+  }), []);
 
-  const chartOptions = {
+  const chartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     animation: false,
@@ -617,9 +627,6 @@ function StatisticsTab({ client, session, username }) {
           font: { size: 10 },
           color: "#999",
           maxTicksLimit: 15,
-          callback: function(val, idx) {
-            return labelsRef.current[idx] || "";
-          },
         },
         grid: { display: false },
         border: { color: "#ddd" },
@@ -637,7 +644,7 @@ function StatisticsTab({ client, session, username }) {
         border: { color: "#ddd" },
       },
     },
-  };
+  }), []);
 
   return (
     <div className="space-y-6">
