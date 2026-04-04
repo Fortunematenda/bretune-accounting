@@ -360,14 +360,13 @@ function StatisticsTab({ client, session, username }) {
 
     const poll = async () => {
       try {
-        const bw = await api.routerBandwidth();
-        const userBw = bw?.[username];
-        if (active && userBw) {
+        const traffic = await api.routerUserTraffic(username);
+        if (active && traffic) {
           setChartData((prev) => {
             const next = [...prev, {
               time: timeLabel(),
-              upload: (userBw.txRate || 0) * 8,
-              download: (userBw.rxRate || 0) * 8,
+              upload: traffic.txBitsPerSecond || 0,
+              download: traffic.rxBitsPerSecond || 0,
             }];
             return next.length > MAX_POINTS ? next.slice(-MAX_POINTS) : next;
           });
