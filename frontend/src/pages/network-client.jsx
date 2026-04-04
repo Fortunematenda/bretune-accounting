@@ -52,11 +52,11 @@ function formatBytes(bytes) {
 }
 
 function formatBits(bits) {
-  if (!bits) return "0 bps";
-  const k = 1000;
-  const sizes = ["bps", "Kbps", "Mbps", "Gbps"];
-  const i = Math.floor(Math.log(bits) / Math.log(k));
-  return parseFloat((bits / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  if (!bits || bits < 1) return "0 bps";
+  if (bits >= 1e9) return (bits / 1e9).toFixed(1) + " Gbps";
+  if (bits >= 1e6) return (bits / 1e6).toFixed(1) + " Mbps";
+  if (bits >= 1e3) return (bits / 1e3).toFixed(1) + " Kbps";
+  return Math.round(bits) + " bps";
 }
 
 function formatRate(bytesPerSec) {
@@ -645,7 +645,7 @@ function StatisticsTab({ client, session, username }) {
               </defs>
               <CartesianGrid stroke="#f0f0f0" horizontal={true} vertical={false} />
               <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#999" }} angle={-45} textAnchor="end" height={50} interval={Math.max(1, Math.floor(chartData.length / 12))} axisLine={{ stroke: "#ddd" }} tickLine={{ stroke: "#ddd" }} />
-              <YAxis tick={{ fontSize: 10, fill: "#999" }} tickFormatter={(v) => formatBits(v)} width={70} axisLine={{ stroke: "#ddd" }} tickLine={{ stroke: "#ddd" }} />
+              <YAxis tick={{ fontSize: 10, fill: "#999" }} tickFormatter={(v) => formatBits(v)} width={70} axisLine={{ stroke: "#ddd" }} tickLine={{ stroke: "#ddd" }} domain={[0, (max) => Math.max(max || 0, 10000)]} />
               <Tooltip content={<BwTooltip />} />
               <Area type="monotone" dataKey="upload" name="Upload" stroke="#e08080" fill="url(#upFill)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
               <Area type="monotone" dataKey="download" name="Download" stroke="#6aadff" fill="url(#downFill)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
