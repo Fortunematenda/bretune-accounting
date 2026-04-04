@@ -200,7 +200,7 @@ function FormSelect({ value, onChange, options }) {
 
 // ── Information Tab ──────────────────────────────
 
-function InformationTab({ client, session, username, onAction, actionLoading, onEdit }) {
+function InformationTab({ client, session, username, onAction, actionLoading, onEdit, onRefresh }) {
   const isOnline = client.isOnline;
   const [custData, setCustData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -261,6 +261,8 @@ function InformationTab({ client, session, username, onAction, actionLoading, on
       setCustData(res);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+      // Refresh parent to update header badge and MikroTik state
+      if (onRefresh) await onRefresh();
     } catch (err) {
       alert(err.message || "Failed to save");
     } finally {
@@ -1069,7 +1071,7 @@ export default function NetworkClientPage() {
       </div>
 
       {/* Tab Content */}
-      {tab === "information" && <InformationTab client={enrichedClient} session={session} username={username} onAction={handleAction} actionLoading={actionLoading} onEdit={() => setEditOpen(true)} />}
+      {tab === "information" && <InformationTab client={enrichedClient} session={session} username={username} onAction={handleAction} actionLoading={actionLoading} onEdit={() => setEditOpen(true)} onRefresh={fetchClient} />}
       {tab === "services" && <ServicesTab client={enrichedClient} session={session} profileData={profileData} />}
       {tab === "statistics" && <StatisticsTab client={enrichedClient} session={session} username={username} />}
 
