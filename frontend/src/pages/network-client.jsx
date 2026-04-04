@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../lib/api";
 import {
-  Chart as ChartJS,
-  CategoryScale, LinearScale, PointElement, LineElement,
-  Filler, Tooltip as ChartTooltip, Legend as ChartLegend,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from "recharts";
 
 import {
   ArrowLeft,
@@ -43,7 +40,6 @@ import {
   MonitorSmartphone,
 } from "lucide-react";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, ChartTooltip, ChartLegend);
 
 // ── Helpers ──────────────────────────────────────
 
@@ -506,36 +502,44 @@ function ServicesTab({ client, session, profileData }) {
   );
 }
 
-// ── Bandwidth formatter for Y-axis ──────────────
-function fmtBps(v) {
-  if (typeof v !== "number" || isNaN(v) || v < 1) return "0 bps";
-  if (v >= 1e9) return (v / 1e9).toFixed(1) + " Gbps";
-  if (v >= 1e6) return (v / 1e6).toFixed(1) + " Mbps";
-  if (v >= 1e3) return (v / 1e3).toFixed(1) + " Kbps";
-  return Math.round(v) + " bps";
+// ── Custom Tooltip ───────────────────────────────
+function BwTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{ background: "#fff", border: "1px solid #ddd", borderRadius: 6, padding: "8px 12px", fontSize: 11, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+      <div style={{ fontWeight: 600, color: "#555", marginBottom: 4 }}>{label}</div>
+      {payload.map((p) => (
+        <div key={p.dataKey} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: p.color, display: "inline-block" }} />
+          <span style={{ color: "#888" }}>{p.name}:</span>
+          <span style={{ fontWeight: 700, color: "#333" }}>{formatBits(p.value)}</span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
-function initLabels(count) {
+// ── Statistics Tab (recharts marquee) ────────────
+
+function initChartData(count) {
   const arr = [];
   const now = Date.now();
   for (let i = count - 1; i >= 0; i--) {
     const d = new Date(now - i * 2000);
-    arr.push(d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+    arr.push({
+      time: d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+      upload: 0,
+      download: 0,
+    });
   }
   return arr;
 }
 
-// ── Statistics Tab (Chart.js canvas marquee) ─────
-
 function StatisticsTab({ client, session, username }) {
   const isOnline = client.isOnline;
-  const chartRef = useRef(null);
   const MAX_POINTS = 60;
-  const labelsRef = useRef(initLabels(MAX_POINTS));
-  const uploadRef = useRef(Array(MAX_POINTS).fill(0));
-  const downloadRef = useRef(Array(MAX_POINTS).fill(0));
-  const [currentUpload, setCurrentUpload] = useState(0);
-  const [currentDownload, setCurrentDownload] = useState(0);
+  const [chartData, setChartData] = useState(() => initChartData(MAX_POINTS));
+  const pollRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -548,103 +552,19 @@ function StatisticsTab({ client, session, username }) {
         down = traffic?.txBitsPerSecond || 0;
       } catch { /* silent */ }
 
-      labelsRef.current.push(timeLabel());
-      uploadRef.current.push(up);
-      downloadRef.current.push(down);
-      labelsRef.current.shift();
-      uploadRef.current.shift();
-      downloadRef.current.shift();
-
-      setCurrentUpload(up);
-      setCurrentDownload(down);
-
-      const chart = chartRef.current;
-      if (chart) {
-        chart.data.labels = labelsRef.current;
-        chart.data.datasets[0].data = uploadRef.current;
-        chart.data.datasets[1].data = downloadRef.current;
-        chart.update("none");
-      }
+      setChartData((prev) => {
+        const next = [...prev.slice(1), { time: timeLabel(), upload: up, download: down }];
+        return next;
+      });
     };
     poll();
-    const id = setInterval(poll, 2000);
-    return () => { active = false; clearInterval(id); };
+    pollRef.current = setInterval(poll, 2000);
+    return () => { active = false; clearInterval(pollRef.current); };
   }, [username]);
 
-  const chartData = useMemo(() => ({
-    labels: labelsRef.current,
-    datasets: [
-      {
-        label: "Upload",
-        data: uploadRef.current,
-        borderColor: "rgba(220, 100, 100, 0.8)",
-        backgroundColor: "rgba(255, 140, 140, 0.25)",
-        fill: true,
-        tension: 0.4,
-        pointRadius: 0,
-        borderWidth: 1.5,
-      },
-      {
-        label: "Download",
-        data: downloadRef.current,
-        borderColor: "rgba(80, 150, 240, 0.8)",
-        backgroundColor: "rgba(130, 180, 255, 0.35)",
-        fill: true,
-        tension: 0.4,
-        pointRadius: 0,
-        borderWidth: 1.5,
-      },
-    ],
-  }), []);
-
-  const chartOptions = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: false,
-    interaction: { mode: "index", intersect: false },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: "rgba(255,255,255,0.95)",
-        titleColor: "#555",
-        bodyColor: "#333",
-        borderColor: "#ddd",
-        borderWidth: 1,
-        titleFont: { size: 11 },
-        bodyFont: { size: 11 },
-        padding: 10,
-        displayColors: true,
-        callbacks: {
-          label: function(ctx) { return ctx.dataset.label + ": " + fmtBps(ctx.parsed.y); },
-        },
-      },
-    },
-    scales: {
-      x: {
-        ticks: {
-          maxRotation: 45,
-          minRotation: 45,
-          font: { size: 10 },
-          color: "#999",
-          maxTicksLimit: 15,
-        },
-        grid: { display: false },
-        border: { color: "#ddd" },
-      },
-      y: {
-        beginAtZero: true,
-        suggestedMax: 10000,
-        ticks: {
-          font: { size: 10 },
-          color: "#999",
-          maxTicksLimit: 8,
-          callback: function(v) { return fmtBps(v); },
-        },
-        grid: { color: "#f0f0f0" },
-        border: { color: "#ddd" },
-      },
-    },
-  }), []);
+  const lastPoint = chartData[chartData.length - 1];
+  const currentUpload = lastPoint?.upload || 0;
+  const currentDownload = lastPoint?.download || 0;
 
   return (
     <div className="space-y-6">
@@ -685,7 +605,7 @@ function StatisticsTab({ client, session, username }) {
         )}
       </div>
 
-      {/* Live Bandwidth Usage - Chart.js canvas like Splynx */}
+      {/* Live Bandwidth Usage - Splynx style */}
       <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
         <div className="px-6 py-3 border-b border-slate-100 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
@@ -693,7 +613,7 @@ function StatisticsTab({ client, session, username }) {
           </h3>
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded px-2 py-1">{client.profile}</span>
-            <span className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded px-2 py-1">1 minute</span>
+            <span className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded px-2 py-1">2 minute</span>
           </div>
         </div>
 
@@ -709,9 +629,28 @@ function StatisticsTab({ client, session, username }) {
           </div>
         </div>
 
-        {/* Chart.js Canvas */}
-        <div className="px-4 pb-2" style={{ height: 320 }}>
-          <Line ref={chartRef} data={chartData} options={chartOptions} />
+        {/* Recharts Marquee */}
+        <div className="px-2 pb-2" style={{ height: 320 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 10, right: 15, left: 5, bottom: 30 }}>
+              <defs>
+                <linearGradient id="upFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ff9999" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="#ffcccc" stopOpacity={0.05} />
+                </linearGradient>
+                <linearGradient id="downFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#82b4ff" stopOpacity={0.6} />
+                  <stop offset="100%" stopColor="#c4dcff" stopOpacity={0.05} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke="#f0f0f0" horizontal={true} vertical={false} />
+              <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#999" }} angle={-45} textAnchor="end" height={50} interval={Math.max(1, Math.floor(chartData.length / 12))} axisLine={{ stroke: "#ddd" }} tickLine={{ stroke: "#ddd" }} />
+              <YAxis tick={{ fontSize: 10, fill: "#999" }} tickFormatter={(v) => formatBits(v)} width={70} axisLine={{ stroke: "#ddd" }} tickLine={{ stroke: "#ddd" }} />
+              <Tooltip content={<BwTooltip />} />
+              <Area type="monotone" dataKey="upload" name="Upload" stroke="#e08080" fill="url(#upFill)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+              <Area type="monotone" dataKey="download" name="Download" stroke="#6aadff" fill="url(#downFill)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
 
         {/* Upload / Download footer */}
