@@ -27,10 +27,12 @@ async function bootstrap() {
   // Enable CORS - support multiple origins (comma-separated in FRONTEND_URL)
   const corsOrigins = process.env.FRONTEND_URL
     ? process.env.FRONTEND_URL.split(',').map((o) => o.trim()).filter(Boolean)
-    : ['http://localhost:3001'];
+    : ['http://localhost:3001', 'http://161.97.120.107:3003', 'http://localhost:3003'];
   app.enableCors({
     origin: corsOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   });
 
   // Global validation pipe
