@@ -64,7 +64,7 @@ async function bootstrap() {
 
   for (const p of candidatePorts) {
     try {
-      await app.listen(p);
+      await app.listen(p, '0.0.0.0');
       boundPort = p;
       break;
     } catch (e) {
