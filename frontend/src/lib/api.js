@@ -691,6 +691,7 @@ export const api = {
   routerInterfaceTraffic: (name) => request(`/isp/router/interfaces/${name}/traffic`),
   routerQueues: () => request("/isp/router/queues"),
   routerLogs: (limit = 50) => request(`/isp/router/logs?limit=${limit}`),
+  routerBandwidth: () => request("/isp/router/bandwidth"),
   routerUserTraffic: (username) => request(`/isp/router/traffic/${username}`),
   routerDisconnect: (username) => request(`/isp/router/disconnect/${username}`, { method: "POST" }),
   routerDisable: (username) => request(`/isp/router/disable/${username}`, { method: "POST" }),

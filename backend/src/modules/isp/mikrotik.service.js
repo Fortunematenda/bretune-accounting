@@ -340,6 +340,33 @@ class MikroTikService {
     }
   }
 
+  async getAllBandwidth() {
+    try {
+      const [ifaceStats, queueStats] = await Promise.all([
+        this.getPPPoEInterfaceStats(),
+        this.getDynamicQueueStats(),
+      ]);
+      const usernames = new Set([...Object.keys(ifaceStats), ...Object.keys(queueStats)]);
+      const result = {};
+      for (const name of usernames) {
+        const iStats = ifaceStats[name] || null;
+        const qStats = queueStats[name] || null;
+        result[name] = {
+          txBytes: iStats?.txBytes || qStats?.txBytes || 0,
+          rxBytes: iStats?.rxBytes || qStats?.rxBytes || 0,
+          txRate: qStats?.txRate || 0,
+          rxRate: qStats?.rxRate || 0,
+          maxLimitUp: qStats?.maxLimitUp || '',
+          maxLimitDown: qStats?.maxLimitDown || '',
+        };
+      }
+      return result;
+    } catch (err) {
+      this.logger.warn(`Failed to get all bandwidth: ${err.message}`);
+      return {};
+    }
+  }
+
   async getLiveTrafficForUser(username) {
     try {
       const ifaces = await this.execute('/interface/print', [

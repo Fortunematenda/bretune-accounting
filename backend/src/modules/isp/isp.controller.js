@@ -275,6 +275,11 @@ class ISPController {
     return this.mikroTik.getLogs(query.limit ? Number(query.limit) : 50);
   }
 
+  @Get('router/bandwidth')
+  async routerBandwidth() {
+    return this.mikroTik.getAllBandwidth();
+  }
+
   @Get('router/traffic/:username')
   async routerUserTraffic(@Param('username') username) {
     return this.mikroTik.getLiveTrafficForUser(username);

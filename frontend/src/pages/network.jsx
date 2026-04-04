@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { api } from "../lib/api";
 import {
   Wifi,
@@ -431,6 +431,8 @@ export default function NetworkPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [actionMenuId, setActionMenuId] = useState(null);
+  const [liveBw, setLiveBw] = useState({});
+  const bwPollRef = useRef(null);
 
   const fetchData = useCallback(async (showRefresh = false) => {
     try {
@@ -453,6 +455,20 @@ export default function NetworkPage() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+  // Fast bandwidth poll every 5 seconds
+  useEffect(() => {
+    let active = true;
+    const poll = async () => {
+      try {
+        const bw = await api.routerBandwidth();
+        if (active && bw) setLiveBw(bw);
+      } catch { /* silent */ }
+    };
+    poll();
+    bwPollRef.current = setInterval(poll, 5000);
+    return () => { active = false; clearInterval(bwPollRef.current); };
+  }, []);
+
   const handleAction = async (action, username) => {
     setActionMenuId(null);
     const msgs = { disconnect: `Disconnect ${username}?`, disable: `Disable ${username}? This prevents reconnection.`, delete: `Permanently delete PPPoE user ${username}?` };
@@ -474,7 +490,13 @@ export default function NetworkPage() {
     }
   };
 
-  const clients = data?.clients || [];
+  const rawClients = data?.clients || [];
+  // Merge live bandwidth into clients (updates every 5s)
+  const clients = rawClients.map((c) => {
+    const bw = liveBw[c.name];
+    if (bw) return { ...c, bandwidth: bw };
+    return c;
+  });
   const filtered = clients
     .filter((c) => {
       const q = search.toLowerCase();
@@ -619,7 +641,9 @@ export default function NetworkPage() {
                     <SortHeader field="ip">IP Address</SortHeader>
                     <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">MAC / Caller ID</th>
                     <SortHeader field="uptime">Uptime</SortHeader>
-                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Bandwidth</th>
+                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                      <span className="inline-flex items-center gap-1.5">Bandwidth <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[9px] font-bold ring-1 ring-emerald-200/50"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />LIVE</span></span>
+                    </th>
                     <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Usage</th>
                     <th className="px-3 py-2.5 text-right text-[10px] font-semibold text-slate-400 uppercase tracking-wider w-20">Actions</th>
                   </tr>
@@ -713,7 +737,7 @@ export default function NetworkPage() {
             </div>
           )}
           <div className="px-4 py-2.5 border-t border-slate-100 text-xs text-slate-400">
-            Showing {filtered.length} of {clients.length} PPPoE users · Auto-refresh every 30s
+            Showing {filtered.length} of {clients.length} PPPoE users · Dashboard refresh 30s · <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />Bandwidth live every 5s</span>
           </div>
         </div>
       ) : null}
