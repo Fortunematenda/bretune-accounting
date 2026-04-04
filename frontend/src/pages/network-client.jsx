@@ -4,8 +4,10 @@ import { api } from "../lib/api";
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, PointElement, LineElement,
-  Filler, Tooltip as ChartTooltip, Legend as ChartLegend,
+  TimeScale, Filler, Tooltip as ChartTooltip, Legend as ChartLegend,
 } from "chart.js";
+import "chartjs-adapter-luxon";
+import StreamingPlugin from "chartjs-plugin-streaming";
 import { Line } from "react-chartjs-2";
 
 import {
@@ -43,7 +45,7 @@ import {
   MonitorSmartphone,
 } from "lucide-react";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, ChartTooltip, ChartLegend);
+ChartJS.register(CategoryScale, LinearScale, TimeScale, PointElement, LineElement, Filler, ChartTooltip, ChartLegend, StreamingPlugin);
 
 // ── Helpers ──────────────────────────────────────
 
@@ -506,94 +508,57 @@ function ServicesTab({ client, session, profileData }) {
   );
 }
 
-// ── Statistics Tab (Chart.js canvas like Splynx) ─
+// ── Statistics Tab (Chart.js streaming canvas like Splynx) ─
 
 function StatisticsTab({ client, session, username }) {
   const isOnline = client.isOnline;
-  const labelsRef = useRef([]);
-  const uploadRef = useRef([]);
-  const downloadRef = useRef([]);
   const chartRef = useRef(null);
-  const pollRef = useRef(null);
+  const latestData = useRef({ upload: 0, download: 0 });
   const [currentUpload, setCurrentUpload] = useState(0);
   const [currentDownload, setCurrentDownload] = useState(0);
-  const MAX_POINTS = 90;
 
+  // Poll traffic data every 2s and store latest values
   useEffect(() => {
     let active = true;
-
     const poll = async () => {
       if (!active) return;
-      let up = 0, down = 0;
       try {
         const traffic = await api.routerUserTraffic(username);
-        up = traffic?.rxBitsPerSecond || 0;
-        down = traffic?.txBitsPerSecond || 0;
-      } catch { /* silent */ }
-
-      labelsRef.current.push(timeLabel());
-      uploadRef.current.push(up);
-      downloadRef.current.push(down);
-
-      if (labelsRef.current.length > MAX_POINTS) {
-        labelsRef.current.shift();
-        uploadRef.current.shift();
-        downloadRef.current.shift();
+        latestData.current.upload = traffic?.rxBitsPerSecond || 0;
+        latestData.current.download = traffic?.txBitsPerSecond || 0;
+      } catch {
+        latestData.current.upload = 0;
+        latestData.current.download = 0;
       }
-
-      setCurrentUpload(up);
-      setCurrentDownload(down);
-
-      if (chartRef.current) {
-        const chart = chartRef.current;
-        chart.data.labels = labelsRef.current;
-        chart.data.datasets[0].data = uploadRef.current;
-        chart.data.datasets[1].data = downloadRef.current;
-        chart.update("none");
-      }
+      setCurrentUpload(latestData.current.upload);
+      setCurrentDownload(latestData.current.download);
     };
-
     poll();
-    pollRef.current = setInterval(poll, 2000);
-    return () => { active = false; clearInterval(pollRef.current); };
+    const id = setInterval(poll, 2000);
+    return () => { active = false; clearInterval(id); };
   }, [username]);
 
   const chartData = {
-    labels: labelsRef.current,
     datasets: [
       {
         label: "Upload",
-        data: uploadRef.current,
         borderColor: "rgba(220, 100, 100, 0.8)",
-        backgroundColor: (ctx) => {
-          if (!ctx.chart?.chartArea) return "rgba(255,150,150,0.3)";
-          const g = ctx.chart.ctx.createLinearGradient(0, ctx.chart.chartArea.top, 0, ctx.chart.chartArea.bottom);
-          g.addColorStop(0, "rgba(255, 130, 130, 0.55)");
-          g.addColorStop(1, "rgba(255, 200, 200, 0.05)");
-          return g;
-        },
+        backgroundColor: "rgba(255, 140, 140, 0.25)",
         fill: true,
-        tension: 0.3,
+        tension: 0.4,
         pointRadius: 0,
         borderWidth: 1.5,
-        order: 2,
+        data: [],
       },
       {
         label: "Download",
-        data: downloadRef.current,
         borderColor: "rgba(80, 150, 240, 0.8)",
-        backgroundColor: (ctx) => {
-          if (!ctx.chart?.chartArea) return "rgba(130,180,255,0.3)";
-          const g = ctx.chart.ctx.createLinearGradient(0, ctx.chart.chartArea.top, 0, ctx.chart.chartArea.bottom);
-          g.addColorStop(0, "rgba(130, 180, 255, 0.6)");
-          g.addColorStop(1, "rgba(200, 220, 255, 0.05)");
-          return g;
-        },
+        backgroundColor: "rgba(130, 180, 255, 0.35)",
         fill: true,
-        tension: 0.3,
+        tension: 0.4,
         pointRadius: 0,
         borderWidth: 1.5,
-        order: 1,
+        data: [],
       },
     ],
   };
@@ -601,11 +566,7 @@ function StatisticsTab({ client, session, username }) {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: false,
-    interaction: {
-      mode: "index",
-      intersect: false,
-    },
+    interaction: { mode: "index", intersect: false },
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -622,15 +583,33 @@ function StatisticsTab({ client, session, username }) {
           label: (ctx) => `${ctx.dataset.label}: ${formatBits(ctx.parsed.y)}`,
         },
       },
+      streaming: {
+        frameRate: 30,
+      },
     },
     scales: {
       x: {
+        type: "realtime",
+        realtime: {
+          duration: 120000,
+          refresh: 2000,
+          delay: 500,
+          onRefresh: (chart) => {
+            const now = Date.now();
+            chart.data.datasets[0].data.push({ x: now, y: latestData.current.upload });
+            chart.data.datasets[1].data.push({ x: now, y: latestData.current.download });
+          },
+        },
         ticks: {
           maxRotation: 45,
           minRotation: 45,
           font: { size: 10 },
           color: "#999",
-          maxTicksLimit: 15,
+          source: "auto",
+          callback: (val) => {
+            const d = new Date(val);
+            return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+          },
         },
         grid: { display: false },
         border: { color: "#ddd" },
