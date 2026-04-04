@@ -32,6 +32,7 @@ import {
   Landmark,
   PanelLeftClose,
   PanelLeftOpen,
+  Wifi,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -74,6 +75,9 @@ export const SIDEBAR_NAV = [
 
   { type: "section", label: "Analytics" },
   { type: "item", to: "/reports", label: "Reports", icon: BarChart3 },
+
+  { type: "section", label: "ISP" },
+  { type: "item", to: "/network", label: "Network Monitor", icon: Wifi },
 
   { type: "section", label: "Administration" },
   { type: "item", to: "/settings", label: "Settings", icon: Settings },

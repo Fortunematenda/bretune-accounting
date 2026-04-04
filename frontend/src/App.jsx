@@ -59,6 +59,7 @@ import FixedAssetsPage from "./pages/fixed-assets";
 import PayrollPage from "./pages/payroll";
 import LoansPage from "./pages/loans";
 import LoanDetailPage from "./pages/loan-detail";
+import NetworkPage from "./pages/network";
 
 function LegacyProductRedirect() {
   const { id } = useParams();
@@ -121,6 +122,7 @@ function ProtectedLayout() {
         <Route path="/payroll" element={<PayrollPage />} />
         <Route path="/loans" element={<LoansPage />} />
         <Route path="/loans/:id" element={<LoanDetailPage />} />
+        <Route path="/network" element={<NetworkPage />} />
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/scheduler" element={<SchedulerPage />} />
         <Route path="/settings" element={<SettingsPage />} />
