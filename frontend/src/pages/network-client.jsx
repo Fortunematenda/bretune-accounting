@@ -375,7 +375,7 @@ function StatisticsTab({ client, session, username }) {
     };
 
     poll();
-    pollRef.current = setInterval(poll, 5000);
+    pollRef.current = setInterval(poll, 2000);
     return () => { active = false; clearInterval(pollRef.current); };
   }, [username]);
 
