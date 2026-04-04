@@ -200,7 +200,7 @@ function FormSelect({ value, onChange, options }) {
 
 // ── Information Tab ──────────────────────────────
 
-function InformationTab({ client, session, username }) {
+function InformationTab({ client, session, username, onAction, actionLoading, onEdit }) {
   const isOnline = client.isOnline;
   const [custData, setCustData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -437,6 +437,24 @@ function InformationTab({ client, session, username }) {
           <div className="text-2xl font-bold text-violet-800 mt-1">R0.00</div>
           <div className="text-xs text-violet-500 mt-1">
             {custData ? `${custData.firstName} ${custData.lastName}` : username}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+          <div className="px-5 py-3 border-b border-slate-100">
+            <h3 className="text-sm font-bold text-slate-900">Actions</h3>
+          </div>
+          <div className="p-4 space-y-2">
+            {!client.disabled ? (
+              <button onClick={() => onAction("block")} disabled={actionLoading} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50">
+                <ShieldBan className="h-4 w-4" /> Block Client
+              </button>
+            ) : (
+              <button onClick={() => onAction("activate")} disabled={actionLoading} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-50">
+                <ShieldCheck className="h-4 w-4" /> Activate Client
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -1011,31 +1029,11 @@ export default function NetworkClientPage() {
             );
           })}
 
-          {/* Actions on right */}
-          <div className="ml-auto flex items-center gap-2 py-2">
-            <button onClick={() => setEditOpen(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors">
-              <Pencil className="h-3 w-3" /> Edit
-            </button>
-            {isOnline ? (
-              <button onClick={() => handleAction("disconnect")} disabled={actionLoading} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50">
-                <Unplug className="h-3 w-3" /> Disconnect
-              </button>
-            ) : null}
-            {!enrichedClient.disabled ? (
-              <button onClick={() => handleAction("block")} disabled={actionLoading} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50">
-                <ShieldBan className="h-3 w-3" /> Block
-              </button>
-            ) : (
-              <button onClick={() => handleAction("activate")} disabled={actionLoading} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-50">
-                <ShieldCheck className="h-3 w-3" /> Activate
-              </button>
-            )}
-          </div>
         </div>
       </div>
 
       {/* Tab Content */}
-      {tab === "information" && <InformationTab client={enrichedClient} session={session} username={username} />}
+      {tab === "information" && <InformationTab client={enrichedClient} session={session} username={username} onAction={handleAction} actionLoading={actionLoading} onEdit={() => setEditOpen(true)} />}
       {tab === "services" && <ServicesTab client={enrichedClient} session={session} profileData={profileData} />}
       {tab === "statistics" && <StatisticsTab client={enrichedClient} session={session} username={username} />}
 
