@@ -1,10 +1,15 @@
 const { Inject, Injectable, Logger, NotFoundException, BadRequestException } = require('@nestjs/common');
 const { PrismaService } = require('../../config/prisma.service');
+const { MikroTikService } = require('./mikrotik.service');
 
 @Injectable()
 class IspBillingService {
-  constructor(@Inject(PrismaService) prismaService) {
+  constructor(
+    @Inject(PrismaService) prismaService,
+    @Inject(MikroTikService) mikroTikService,
+  ) {
     this.prisma = prismaService;
+    this.mikroTik = mikroTikService;
     this.logger = new Logger(IspBillingService.name);
   }
 
@@ -208,6 +213,15 @@ class IspBillingService {
       }),
     ]);
 
+    // Auto-reactivate: if invoice is now PAID, check if customer has no more overdue invoices
+    if (newStatus === 'PAID' && invoice.customer) {
+      try {
+        await this.tryAutoReactivate(invoice.customer.id);
+      } catch (err) {
+        this.logger.warn(`Auto-reactivate failed for customer ${invoice.customer.id}: ${err.message}`);
+      }
+    }
+
     return payment;
   }
 
@@ -387,6 +401,191 @@ class IspBillingService {
       totalPaid,
       totalOutstanding,
       overdueCount,
+    };
+  }
+
+  // ──────────────────────────────────────────────
+  // AUTO-SUSPENSION
+  // ──────────────────────────────────────────────
+
+  async autoSuspendOverdueClients() {
+    const settings = await this.getSettings();
+    if (!settings.enableAutoSuspend) {
+      return { suspended: 0, message: 'Auto-suspend is disabled' };
+    }
+
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - settings.autoSuspendDays);
+
+    // Find active customers who have overdue invoices past the cutoff
+    const overdueCustomers = await this.prisma.ispCustomer.findMany({
+      where: {
+        status: 'ACTIVE',
+        invoices: {
+          some: {
+            status: 'OVERDUE',
+            dueDate: { lt: cutoffDate },
+            balanceDue: { gt: 0 },
+          },
+        },
+      },
+      include: {
+        invoices: {
+          where: { status: 'OVERDUE', balanceDue: { gt: 0 } },
+          select: { id: true, invoiceNumber: true, balanceDue: true, dueDate: true },
+          orderBy: { dueDate: 'asc' },
+          take: 5,
+        },
+      },
+    });
+
+    const results = { suspended: 0, errors: [], details: [] };
+
+    for (const cust of overdueCustomers) {
+      try {
+        // Disable PPPoE secret on MikroTik
+        await this.mikroTik.disableSecret(cust.pppoeUsername);
+
+        // Update customer status to BLOCKED
+        await this.prisma.ispCustomer.update({
+          where: { id: cust.id },
+          data: { status: 'BLOCKED' },
+        });
+
+        results.suspended++;
+        results.details.push({
+          customerId: cust.id,
+          username: cust.pppoeUsername,
+          name: `${cust.firstName} ${cust.lastName}`,
+          overdueInvoices: cust.invoices.length,
+          totalOwed: cust.invoices.reduce((s, inv) => s + Number(inv.balanceDue), 0),
+        });
+
+        this.logger.log(`Auto-suspended: ${cust.pppoeUsername} (${cust.invoices.length} overdue invoices)`);
+      } catch (err) {
+        results.errors.push({ username: cust.pppoeUsername, error: err.message });
+        this.logger.warn(`Failed to suspend ${cust.pppoeUsername}: ${err.message}`);
+      }
+    }
+
+    this.logger.log(`Auto-suspension: ${results.suspended} suspended, ${results.errors.length} errors`);
+    return results;
+  }
+
+  async tryAutoReactivate(customerId) {
+    const customer = await this.prisma.ispCustomer.findUnique({
+      where: { id: customerId },
+      include: {
+        invoices: {
+          where: { status: 'OVERDUE', balanceDue: { gt: 0 } },
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!customer || customer.status !== 'BLOCKED') return null;
+
+    // Only reactivate if no more overdue invoices with balance
+    if (customer.invoices.length > 0) return null;
+
+    // Re-enable PPPoE secret on MikroTik
+    await this.mikroTik.enableSecret(customer.pppoeUsername);
+
+    // Update customer status to ACTIVE
+    await this.prisma.ispCustomer.update({
+      where: { id: customerId },
+      data: { status: 'ACTIVE' },
+    });
+
+    this.logger.log(`Auto-reactivated: ${customer.pppoeUsername} (all overdue invoices cleared)`);
+    return { reactivated: true, username: customer.pppoeUsername };
+  }
+
+  // ── Manual suspend / unsuspend ─────────────────
+
+  async suspendClient(customerId) {
+    const customer = await this.prisma.ispCustomer.findUnique({ where: { id: customerId } });
+    if (!customer) throw new NotFoundException('Customer not found');
+    if (customer.status === 'BLOCKED') {
+      return { message: 'Customer is already suspended' };
+    }
+
+    await this.mikroTik.disableSecret(customer.pppoeUsername);
+    await this.prisma.ispCustomer.update({
+      where: { id: customerId },
+      data: { status: 'BLOCKED' },
+    });
+
+    this.logger.log(`Manually suspended: ${customer.pppoeUsername}`);
+    return { success: true, message: `${customer.pppoeUsername} suspended` };
+  }
+
+  async unsuspendClient(customerId) {
+    const customer = await this.prisma.ispCustomer.findUnique({ where: { id: customerId } });
+    if (!customer) throw new NotFoundException('Customer not found');
+    if (customer.status === 'ACTIVE') {
+      return { message: 'Customer is already active' };
+    }
+
+    await this.mikroTik.enableSecret(customer.pppoeUsername);
+    await this.prisma.ispCustomer.update({
+      where: { id: customerId },
+      data: { status: 'ACTIVE' },
+    });
+
+    this.logger.log(`Manually unsuspended: ${customer.pppoeUsername}`);
+    return { success: true, message: `${customer.pppoeUsername} reactivated` };
+  }
+
+  // ── Suspension summary ─────────────────────────
+
+  async getSuspensionSummary() {
+    const settings = await this.getSettings();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - settings.autoSuspendDays);
+
+    const [suspendedCount, atRiskCount, recentlySuspended] = await Promise.all([
+      // Currently suspended
+      this.prisma.ispCustomer.count({ where: { status: 'BLOCKED' } }),
+      // Active but have overdue invoices (at risk of suspension)
+      this.prisma.ispCustomer.count({
+        where: {
+          status: 'ACTIVE',
+          invoices: {
+            some: { status: 'OVERDUE', balanceDue: { gt: 0 } },
+          },
+        },
+      }),
+      // Blocked customers with details
+      this.prisma.ispCustomer.findMany({
+        where: { status: 'BLOCKED' },
+        select: {
+          id: true,
+          pppoeUsername: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          email: true,
+          invoices: {
+            where: { status: { in: ['OVERDUE', 'PARTIALLY_PAID'] }, balanceDue: { gt: 0 } },
+            select: { invoiceNumber: true, balanceDue: true, dueDate: true },
+            orderBy: { dueDate: 'asc' },
+          },
+        },
+        orderBy: { lastName: 'asc' },
+        take: 100,
+      }),
+    ]);
+
+    return {
+      suspendedCount,
+      atRiskCount,
+      autoSuspendEnabled: settings.enableAutoSuspend,
+      autoSuspendDays: settings.autoSuspendDays,
+      recentlySuspended: recentlySuspended.map((c) => ({
+        ...c,
+        totalOwed: c.invoices.reduce((s, inv) => s + Number(inv.balanceDue), 0),
+      })),
     };
   }
 }

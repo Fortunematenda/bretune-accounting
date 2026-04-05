@@ -458,6 +458,28 @@ class ISPController {
   async markOverdue() {
     return this.billing.markOverdueInvoices();
   }
+
+  // ── Suspension ────────────────────────────────
+
+  @Get('billing/suspension-summary')
+  async suspensionSummary() {
+    return this.billing.getSuspensionSummary();
+  }
+
+  @Post('billing/auto-suspend')
+  async autoSuspend() {
+    return this.billing.autoSuspendOverdueClients();
+  }
+
+  @Post('billing/suspend/:customerId')
+  async suspendClient(@Param('customerId') customerId) {
+    return this.billing.suspendClient(customerId);
+  }
+
+  @Post('billing/unsuspend/:customerId')
+  async unsuspendClient(@Param('customerId') customerId) {
+    return this.billing.unsuspendClient(customerId);
+  }
 }
 
 module.exports = { ISPController };

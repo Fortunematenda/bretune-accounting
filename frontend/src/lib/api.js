@@ -720,4 +720,8 @@ export const api = {
   billingCustomer: (customerId) => request(`/isp/billing/customer/${customerId}`),
   billingGenerateMonthly: (servicePlans) => request("/isp/billing/generate-monthly", { method: "POST", body: { servicePlans } }),
   billingMarkOverdue: () => request("/isp/billing/mark-overdue", { method: "POST" }),
+  billingSuspensionSummary: () => request("/isp/billing/suspension-summary"),
+  billingAutoSuspend: () => request("/isp/billing/auto-suspend", { method: "POST" }),
+  billingSuspendClient: (customerId) => request(`/isp/billing/suspend/${customerId}`, { method: "POST" }),
+  billingUnsuspendClient: (customerId) => request(`/isp/billing/unsuspend/${customerId}`, { method: "POST" }),
 };

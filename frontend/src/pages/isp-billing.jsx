@@ -19,6 +19,12 @@ import {
   TrendingUp,
   Users,
   Ban,
+  ShieldOff,
+  ShieldCheck,
+  Zap,
+  Phone,
+  Mail,
+  Settings,
 } from "lucide-react";
 
 // ── Helpers ──────────────────────────────────────
@@ -335,9 +341,295 @@ function InvoiceDetail({ invoice, onBack, onRefresh }) {
   );
 }
 
+// ── Suspension Tab ───────────────────────────────
+
+function SuspensionTab() {
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const fetchSummary = useCallback(async () => {
+    try {
+      const data = await api.billingSuspensionSummary();
+      setSummary(data);
+    } catch (err) {
+      console.error("Suspension load error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchSummary(); }, [fetchSummary]);
+
+  const handleAutoSuspend = async () => {
+    if (!confirm("Run auto-suspension? This will disable PPPoE for all overdue clients past the cutoff.")) return;
+    setActionLoading(true);
+    try {
+      const res = await api.billingAutoSuspend();
+      alert(`${res.suspended} client(s) suspended${res.errors?.length ? `, ${res.errors.length} error(s)` : ""}`);
+      fetchSummary();
+    } catch (err) {
+      alert(err.message || "Failed");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleUnsuspend = async (customerId, username) => {
+    if (!confirm(`Unsuspend ${username}? This will re-enable their PPPoE connection.`)) return;
+    try {
+      await api.billingUnsuspendClient(customerId);
+      fetchSummary();
+    } catch (err) {
+      alert(err.message || "Failed");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[300px]">
+        <RefreshCw className="h-5 w-5 animate-spin text-slate-400" />
+      </div>
+    );
+  }
+
+  if (!summary) return null;
+
+  return (
+    <div className="space-y-5">
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl border border-red-200/60 shadow-sm p-5">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-red-50 flex items-center justify-center">
+              <ShieldOff className="h-5 w-5 text-red-500" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-red-700">{summary.suspendedCount}</div>
+              <div className="text-[10px] text-red-400 uppercase tracking-wider font-semibold">Suspended</div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border border-amber-200/60 shadow-sm p-5">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-amber-700">{summary.atRiskCount}</div>
+              <div className="text-[10px] text-amber-400 uppercase tracking-wider font-semibold">At Risk</div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5">
+          <div className="flex items-center gap-3">
+            <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${summary.autoSuspendEnabled ? "bg-emerald-50" : "bg-slate-100"}`}>
+              <Zap className={`h-5 w-5 ${summary.autoSuspendEnabled ? "text-emerald-500" : "text-slate-400"}`} />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-slate-800">
+                {summary.autoSuspendEnabled ? "Enabled" : "Disabled"}
+              </div>
+              <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+                Auto-suspend ({summary.autoSuspendDays} days)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action button */}
+      <div className="flex items-center gap-3">
+        <button onClick={handleAutoSuspend} disabled={actionLoading || !summary.autoSuspendEnabled}
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50">
+          <ShieldOff className="h-4 w-4" /> {actionLoading ? "Running..." : "Run Auto-Suspend"}
+        </button>
+        <span className="text-xs text-slate-400">
+          Suspends active clients with overdue invoices older than {summary.autoSuspendDays} days
+        </span>
+      </div>
+
+      {/* Suspended clients table */}
+      <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-900">Suspended Clients</h3>
+          <span className="text-xs text-slate-400">{summary.recentlySuspended?.length || 0} clients</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50/80 border-b border-slate-100">
+              <tr>
+                {["Client", "PPPoE Username", "Contact", "Overdue Invoices", "Total Owed", "Actions"].map((h) => (
+                  <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(!summary.recentlySuspended || summary.recentlySuspended.length === 0) ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-400">
+                    <ShieldCheck className="h-8 w-8 mx-auto mb-2 text-emerald-300" />
+                    No suspended clients
+                  </td>
+                </tr>
+              ) : summary.recentlySuspended.map((c) => (
+                <tr key={c.id} className="border-b border-slate-50 hover:bg-red-50/20 transition-colors">
+                  <td className="px-4 py-3 text-sm font-semibold text-slate-800">
+                    {c.firstName} {c.lastName}
+                  </td>
+                  <td className="px-4 py-3 text-sm font-mono text-slate-600">{c.pppoeUsername}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      {c.phone && <span className="inline-flex items-center gap-0.5"><Phone className="h-3 w-3" />{c.phone}</span>}
+                      {c.email && <span className="inline-flex items-center gap-0.5"><Mail className="h-3 w-3" />{c.email}</span>}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="space-y-0.5">
+                      {(c.invoices || []).map((inv) => (
+                        <div key={inv.invoiceNumber} className="text-[10px] text-red-500 font-mono">
+                          {inv.invoiceNumber} — {formatCurrency(inv.balanceDue)} (due {formatDate(inv.dueDate)})
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm font-mono font-semibold text-red-600">
+                    {formatCurrency(c.totalOwed)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button onClick={() => handleUnsuspend(c.id, c.pppoeUsername)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 transition-colors">
+                      <ShieldCheck className="h-3 w-3" /> Unsuspend
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Settings Tab ─────────────────────────────────
+
+function BillingSettingsTab() {
+  const [settings, setSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    api.billingSettings().then((s) => { setSettings(s); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const updated = await api.billingSettingsUpdate({
+        autoGenerateDay: Number(settings.autoGenerateDay),
+        paymentTermsDays: Number(settings.paymentTermsDays),
+        autoSuspendDays: Number(settings.autoSuspendDays),
+        taxRate: Number(settings.taxRate),
+        invoicePrefix: settings.invoicePrefix,
+        reminderDaysBefore: Number(settings.reminderDaysBefore),
+        enableAutoSuspend: settings.enableAutoSuspend,
+        enableAutoReminders: settings.enableAutoReminders,
+        companyName: settings.companyName || null,
+        companyAddress: settings.companyAddress || null,
+        companyPhone: settings.companyPhone || null,
+        companyEmail: settings.companyEmail || null,
+        bankName: settings.bankName || null,
+        bankAccountNumber: settings.bankAccountNumber || null,
+        bankBranchCode: settings.bankBranchCode || null,
+      });
+      setSettings(updated);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      alert(err.message || "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading || !settings) {
+    return <div className="flex items-center justify-center min-h-[300px]"><RefreshCw className="h-5 w-5 animate-spin text-slate-400" /></div>;
+  }
+
+  const field = (label, key, type = "text", opts = {}) => (
+    <div>
+      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</label>
+      {type === "toggle" ? (
+        <button onClick={() => setSettings({ ...settings, [key]: !settings[key] })}
+          className={`mt-1 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings[key] ? "bg-violet-600" : "bg-slate-300"}`}>
+          <span className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${settings[key] ? "translate-x-6" : "translate-x-1"}`} />
+        </button>
+      ) : (
+        <input type={type} value={settings[key] || ""} onChange={(e) => setSettings({ ...settings, [key]: e.target.value })}
+          className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none"
+          {...opts} />
+      )}
+    </div>
+  );
+
+  return (
+    <div className="space-y-6 max-w-3xl">
+      <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 space-y-5">
+        <h3 className="text-sm font-bold text-slate-900">Invoice Settings</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {field("Invoice Prefix", "invoicePrefix")}
+          {field("Auto-Generate Day", "autoGenerateDay", "number", { min: 1, max: 28 })}
+          {field("Payment Terms (days)", "paymentTermsDays", "number")}
+          {field("Tax Rate (decimal)", "taxRate", "number", { step: "0.01" })}
+          {field("Reminder Days Before", "reminderDaysBefore", "number")}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 space-y-5">
+        <h3 className="text-sm font-bold text-slate-900">Automation</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {field("Auto-Suspend Enabled", "enableAutoSuspend", "toggle")}
+          {field("Auto-Suspend After (days overdue)", "autoSuspendDays", "number")}
+          {field("Auto Reminders", "enableAutoReminders", "toggle")}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 space-y-5">
+        <h3 className="text-sm font-bold text-slate-900">Company Details (on invoices)</h3>
+        <div className="grid grid-cols-2 gap-4">
+          {field("Company Name", "companyName")}
+          {field("Address", "companyAddress")}
+          {field("Phone", "companyPhone")}
+          {field("Email", "companyEmail")}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 space-y-5">
+        <h3 className="text-sm font-bold text-slate-900">Bank Details (on invoices)</h3>
+        <div className="grid grid-cols-3 gap-4">
+          {field("Bank Name", "bankName")}
+          {field("Account Number", "bankAccountNumber")}
+          {field("Branch Code", "bankBranchCode")}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button onClick={handleSave} disabled={saving}
+          className="px-5 py-2 bg-violet-600 text-white rounded-lg text-sm font-semibold hover:bg-violet-700 disabled:opacity-50 transition-colors">
+          {saving ? "Saving..." : "Save Settings"}
+        </button>
+        {saved && <span className="text-sm text-emerald-600 font-medium">Saved!</span>}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Billing Page ────────────────────────────
 
 export default function IspBillingPage() {
+  const [tab, setTab] = useState("invoices");
   const [stats, setStats] = useState(null);
   const [invoices, setInvoices] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -433,110 +725,143 @@ export default function IspBillingPage() {
     );
   }
 
+  const tabs = [
+    { id: "invoices", label: "Invoices", icon: FileText },
+    { id: "suspension", label: "Suspension", icon: ShieldOff },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-slate-900">ISP Billing</h1>
-          <p className="text-sm text-slate-500">Invoices, payments & billing management</p>
+          <p className="text-sm text-slate-500">Invoices, payments, suspension & billing management</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={handleMarkOverdue} disabled={actionLoading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50">
-            <AlertTriangle className="h-3.5 w-3.5" /> Mark Overdue
-          </button>
-          <button onClick={() => setCreateOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-violet-600 text-white hover:bg-violet-700 transition-colors">
-            <Plus className="h-4 w-4" /> New Invoice
-          </button>
-        </div>
+        {tab === "invoices" && (
+          <div className="flex items-center gap-2">
+            <button onClick={handleMarkOverdue} disabled={actionLoading}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50">
+              <AlertTriangle className="h-3.5 w-3.5" /> Mark Overdue
+            </button>
+            <button onClick={() => setCreateOpen(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-violet-600 text-white hover:bg-violet-700 transition-colors">
+              <Plus className="h-4 w-4" /> New Invoice
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Stats */}
       {stats && <StatsCards stats={stats} />}
 
-      {/* Filters */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input type="text" placeholder="Search invoices..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none" />
-        </div>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none">
-          <option value="">All Statuses</option>
-          {["DRAFT", "SENT", "PAID", "PARTIALLY_PAID", "OVERDUE", "CANCELLED"].map((s) => (
-            <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
-          ))}
-        </select>
+      {/* Tabs */}
+      <div className="flex items-center gap-1 border-b border-slate-200">
+        {tabs.map((t) => {
+          const Icon = t.icon;
+          return (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+                tab === t.id
+                  ? "border-violet-600 text-violet-700"
+                  : "border-transparent text-slate-400 hover:text-slate-600"
+              }`}>
+              <Icon className="h-3.5 w-3.5" /> {t.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Invoice Table */}
-      <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50/80 border-b border-slate-100">
-              <tr>
-                {["Invoice #", "Customer", "Issue Date", "Due Date", "Total", "Paid", "Balance", "Status", "Actions"].map((h) => (
-                  <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-sm text-slate-400">
-                    <Receipt className="h-8 w-8 mx-auto mb-2 text-slate-300" />
-                    No invoices found
-                  </td>
-                </tr>
-              ) : invoices.map((inv) => {
-                const cust = inv.customer;
-                return (
-                  <tr key={inv.id} className="border-b border-slate-50 hover:bg-violet-50/20 transition-colors">
-                    <td className="px-4 py-3 text-sm font-mono font-semibold text-violet-700 cursor-pointer hover:underline" onClick={() => handleViewDetail(inv)}>
-                      {inv.invoiceNumber}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-700">
-                      {cust ? `${cust.firstName} ${cust.lastName}` : "—"}
-                      <div className="text-[10px] text-slate-400 font-mono">{cust?.pppoeUsername}</div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">{formatDate(inv.issueDate)}</td>
-                    <td className="px-4 py-3 text-sm text-slate-600">{formatDate(inv.dueDate)}</td>
-                    <td className="px-4 py-3 text-sm font-mono font-semibold text-slate-800">{formatCurrency(inv.totalAmount)}</td>
-                    <td className="px-4 py-3 text-sm font-mono text-emerald-600">{formatCurrency(inv.amountPaid)}</td>
-                    <td className="px-4 py-3 text-sm font-mono text-red-600 font-semibold">{formatCurrency(inv.balanceDue)}</td>
-                    <td className="px-4 py-3">{statusBadge(inv.status)}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => handleViewDetail(inv)} title="View" className="h-7 w-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100">
-                          <Eye className="h-3.5 w-3.5" />
-                        </button>
-                        {inv.status !== "PAID" && inv.status !== "CANCELLED" && (
-                          <button onClick={() => setPayInvoice(inv)} title="Record Payment" className="h-7 w-7 rounded-md flex items-center justify-center text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50">
-                            <CreditCard className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                        {inv.status === "DRAFT" && (
-                          <button onClick={() => handleSendInvoice(inv)} title="Mark as Sent" className="h-7 w-7 rounded-md flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50">
-                            <Send className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                        {inv.status === "DRAFT" && (
-                          <button onClick={() => handleDeleteInvoice(inv)} title="Delete" className="h-7 w-7 rounded-md flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
+      {/* Tab content */}
+      {tab === "invoices" && (
+        <>
+          {/* Filters */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input type="text" placeholder="Search invoices..." value={search} onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none" />
+            </div>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none">
+              <option value="">All Statuses</option>
+              {["DRAFT", "SENT", "PAID", "PARTIALLY_PAID", "OVERDUE", "CANCELLED"].map((s) => (
+                <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Invoice Table */}
+          <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50/80 border-b border-slate-100">
+                  <tr>
+                    {["Invoice #", "Customer", "Issue Date", "Due Date", "Total", "Paid", "Balance", "Status", "Actions"].map((h) => (
+                      <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{h}</th>
+                    ))}
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                </thead>
+                <tbody>
+                  {invoices.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="px-4 py-12 text-center text-sm text-slate-400">
+                        <Receipt className="h-8 w-8 mx-auto mb-2 text-slate-300" />
+                        No invoices found
+                      </td>
+                    </tr>
+                  ) : invoices.map((inv) => {
+                    const cust = inv.customer;
+                    return (
+                      <tr key={inv.id} className="border-b border-slate-50 hover:bg-violet-50/20 transition-colors">
+                        <td className="px-4 py-3 text-sm font-mono font-semibold text-violet-700 cursor-pointer hover:underline" onClick={() => handleViewDetail(inv)}>
+                          {inv.invoiceNumber}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-slate-700">
+                          {cust ? `${cust.firstName} ${cust.lastName}` : "—"}
+                          <div className="text-[10px] text-slate-400 font-mono">{cust?.pppoeUsername}</div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-slate-600">{formatDate(inv.issueDate)}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600">{formatDate(inv.dueDate)}</td>
+                        <td className="px-4 py-3 text-sm font-mono font-semibold text-slate-800">{formatCurrency(inv.totalAmount)}</td>
+                        <td className="px-4 py-3 text-sm font-mono text-emerald-600">{formatCurrency(inv.amountPaid)}</td>
+                        <td className="px-4 py-3 text-sm font-mono text-red-600 font-semibold">{formatCurrency(inv.balanceDue)}</td>
+                        <td className="px-4 py-3">{statusBadge(inv.status)}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => handleViewDetail(inv)} title="View" className="h-7 w-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+                              <Eye className="h-3.5 w-3.5" />
+                            </button>
+                            {inv.status !== "PAID" && inv.status !== "CANCELLED" && (
+                              <button onClick={() => setPayInvoice(inv)} title="Record Payment" className="h-7 w-7 rounded-md flex items-center justify-center text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50">
+                                <CreditCard className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                            {inv.status === "DRAFT" && (
+                              <button onClick={() => handleSendInvoice(inv)} title="Mark as Sent" className="h-7 w-7 rounded-md flex items-center justify-center text-blue-400 hover:text-blue-600 hover:bg-blue-50">
+                                <Send className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                            {inv.status === "DRAFT" && (
+                              <button onClick={() => handleDeleteInvoice(inv)} title="Delete" className="h-7 w-7 rounded-md flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      {tab === "suspension" && <SuspensionTab />}
+      {tab === "settings" && <BillingSettingsTab />}
 
       {/* Modals */}
       <CreateInvoiceModal open={createOpen} onClose={() => setCreateOpen(false)} customers={customers} onCreated={fetchData} />
