@@ -63,6 +63,7 @@ import NetworkPage from "./pages/network";
 import NetworkClientPage from "./pages/network-client";
 import IspBillingPage from "./pages/isp-billing";
 import IspLeadsPage from "./pages/isp-leads";
+import IspCustomerDetailPage from "./pages/isp-customer-detail";
 import IspNotificationsPage from "./pages/isp-notifications";
 
 function LegacyProductRedirect() {
@@ -130,6 +131,7 @@ function ProtectedLayout() {
         <Route path="/network/:username" element={<NetworkClientPage />} />
         <Route path="/isp-billing" element={<IspBillingPage />} />
         <Route path="/isp-customers" element={<IspLeadsPage />} />
+        <Route path="/isp-customers/:id" element={<IspCustomerDetailPage />} />
         <Route path="/isp-notifications" element={<IspNotificationsPage />} />
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/scheduler" element={<SchedulerPage />} />

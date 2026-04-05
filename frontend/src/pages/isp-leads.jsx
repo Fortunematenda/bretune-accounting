@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import {
   UserPlus,
@@ -195,19 +196,20 @@ function ConvertLeadModal({ open, onClose, lead, profiles, onConverted }) {
 // ── Main Leads Page ──────────────────────────────
 
 export default function IspLeadsPage() {
+  const navigate = useNavigate();
   const [leads, setLeads] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [tab, setTab] = useState("leads");
+  const [tab, setTab] = useState("customers");
   const [addOpen, setAddOpen] = useState(false);
   const [convertLead, setConvertLead] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
       const [custData, profileData] = await Promise.all([
-        api.ispCustomers(),
+        api.ispCustomers({ limit: 500 }),
         api.routerProfiles().catch(() => ({ items: [] })),
       ]);
       const all = custData.items || [];
@@ -367,7 +369,10 @@ export default function IspLeadsPage() {
                   </td>
                 </tr>
               ) : filtered.map((c) => (
-                <tr key={c.id} className="border-b border-slate-50 hover:bg-violet-50/20 transition-colors">
+                <tr key={c.id}
+                  className={`border-b border-slate-50 transition-colors ${tab === "customers" ? "hover:bg-violet-50/30 cursor-pointer" : "hover:bg-violet-50/20"}`}
+                  onClick={tab === "customers" ? () => navigate(`/isp-customers/${c.id}`) : undefined}
+                >
                   <td className="px-4 py-3 text-sm font-semibold text-slate-800">
                     {c.firstName} {c.lastName}
                     {c.companyName && <div className="text-[10px] text-slate-400">{c.companyName}</div>}
