@@ -654,9 +654,16 @@ export default function NetworkPage() {
         </div>
       ) : null}
       {data && !data.connected ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-          <WifiOff className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-          <div><div className="text-sm font-medium text-amber-800">Router Offline</div><div className="text-sm text-amber-600 mt-0.5">{data.error || "Cannot reach MikroTik."}</div></div>
+        <div className={`${data.radiusFallback ? "bg-blue-50 border-blue-200" : "bg-amber-50 border-amber-200"} border rounded-xl p-4 flex items-start gap-3`}>
+          <WifiOff className={`h-5 w-5 ${data.radiusFallback ? "text-blue-500" : "text-amber-500"} shrink-0 mt-0.5`} />
+          <div>
+            <div className={`text-sm font-medium ${data.radiusFallback ? "text-blue-800" : "text-amber-800"}`}>
+              {data.radiusFallback ? "Router Offline · Showing RADIUS Database" : "Router Offline"}
+            </div>
+            <div className={`text-sm ${data.radiusFallback ? "text-blue-600" : "text-amber-600"} mt-0.5`}>
+              {data.radiusFallback ? "Client list loaded from FreeRADIUS database. Live bandwidth and session data unavailable." : (data.error || "Cannot reach MikroTik.")}
+            </div>
+          </div>
         </div>
       ) : null}
 

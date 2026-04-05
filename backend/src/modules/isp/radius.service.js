@@ -321,6 +321,98 @@ class RadiusService {
     await this.setUserCredentials(username, newPassword);
     this.logger.log(`RADIUS password changed for ${username}`);
   }
+
+  // ──────────────────────────────────────────────
+  // DASHBOARD: Build client list from RADIUS DB
+  // Used as fallback when MikroTik API is offline
+  // ──────────────────────────────────────────────
+
+  async getRadiusDashboard() {
+    // Get all users with Cleartext-Password (these are PPPoE users)
+    const credentials = await this.prisma.radcheck.findMany({
+      where: { attribute: 'Cleartext-Password' },
+    });
+
+    // Get disabled users (Auth-Type = Reject)
+    const rejected = await this.prisma.radcheck.findMany({
+      where: { attribute: 'Auth-Type', value: 'Reject' },
+    });
+    const disabledSet = new Set(rejected.map((r) => r.username));
+
+    // Get user-group mappings (plan/profile)
+    const userGroups = await this.prisma.radusergroup.findMany();
+    const groupMap = {};
+    for (const ug of userGroups) { groupMap[ug.username] = ug.groupname; }
+
+    // Get active sessions from radacct
+    const activeSessions = await this.prisma.radacct.findMany({
+      where: { acctstoptime: null },
+    });
+    const activeMap = {};
+    for (const s of activeSessions) { activeMap[s.username] = s; }
+
+    // Get plan group speed limits
+    const groupReplies = await this.prisma.radgroupreply.findMany({
+      where: { attribute: 'Mikrotik-Rate-Limit' },
+    });
+    const planSpeeds = {};
+    for (const gr of groupReplies) { planSpeeds[gr.groupname] = gr.value; }
+
+    // Build client list matching MikroTik dashboard format
+    const clients = credentials.map((cred) => {
+      const username = cred.username;
+      const isDisabled = disabledSet.has(username);
+      const profile = groupMap[username] || 'default';
+      const session = activeMap[username] || null;
+      const isOnline = !!session;
+
+      return {
+        id: `radius-${cred.id}`,
+        name: username,
+        profile,
+        service: 'pppoe',
+        disabled: isDisabled,
+        isOnline,
+        comment: '',
+        lastCallerId: session?.callingstationid || '',
+        activeSession: session ? {
+          address: session.framedipaddress || '',
+          callerId: session.callingstationid || '',
+          uptime: session.acctsessiontime ? `${Math.floor(session.acctsessiontime / 3600)}h${Math.floor((session.acctsessiontime % 3600) / 60)}m` : '',
+          sessionId: session.acctsessionid || '',
+        } : null,
+        bandwidth: null,
+        rateLimit: planSpeeds[profile] || '',
+      };
+    });
+
+    const onlineCount = clients.filter((c) => c.isOnline).length;
+    const disabledCount = clients.filter((c) => c.disabled).length;
+    const offlineCount = clients.filter((c) => !c.isOnline && !c.disabled).length;
+
+    // Build profiles list from plan groups
+    const profiles = groupReplies.map((gr) => ({
+      id: `radius-${gr.id}`,
+      name: gr.groupname,
+      rateLimit: gr.value,
+      comment: '',
+    }));
+
+    return {
+      connected: false,
+      radiusFallback: true,
+      identity: { name: 'RADIUS Database' },
+      system: null,
+      activeConnections: onlineCount,
+      totalSecrets: clients.length,
+      onlineClients: onlineCount,
+      offlineClients: offlineCount,
+      disabledClients: disabledCount,
+      clients,
+      profiles,
+      interfaces: [],
+    };
+  }
 }
 
 module.exports = { RadiusService };

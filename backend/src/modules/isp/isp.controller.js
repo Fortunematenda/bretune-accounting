@@ -298,8 +298,21 @@ class ISPController {
 
   @Get('router/dashboard')
   async routerDashboard() {
-    try { return await this.mikroTik.getRouterDashboard(); }
-    catch (err) { return this._routerOffline(err); }
+    try {
+      const result = await this.mikroTik.getRouterDashboard();
+      // If MikroTik returned offline/empty, fall back to RADIUS DB
+      if (!result.connected && this.radius) {
+        const radiusData = await this.radius.getRadiusDashboard();
+        return radiusData;
+      }
+      return result;
+    } catch (err) {
+      // Router unreachable — serve clients from RADIUS database
+      try {
+        if (this.radius) return await this.radius.getRadiusDashboard();
+      } catch (e) { this.logger.error?.(`RADIUS fallback failed: ${e.message}`); }
+      return this._routerOffline(err);
+    }
   }
 
   @Get('router/system')
