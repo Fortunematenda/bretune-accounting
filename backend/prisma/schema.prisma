@@ -2050,9 +2050,9 @@ model Radacct {
   acctsessionid     String   @default("")
   acctuniqueid      String   @default("") @unique
   username          String   @default("")
-  groupname         String   @default("")
-  realm             String   @default("")
-  nasipaddress      String   @default("")
+  groupname         String?
+  realm             String?
+  nasipaddress      String?
   nasportid         String?
   nasporttype       String?
   acctstarttime     DateTime?
@@ -2065,16 +2065,16 @@ model Radacct {
   connectinfo_stop  String?
   acctinputoctets   BigInt?
   acctoutputoctets  BigInt?
-  calledstationid   String   @default("")
-  callingstationid  String   @default("")
-  acctterminatecause String  @default("")
+  calledstationid   String?
+  callingstationid  String?
+  acctterminatecause String?
   servicetype       String?
   framedprotocol    String?
-  framedipaddress   String   @default("")
-  framedipv6address String   @default("")
-  framedipv6prefix  String   @default("")
-  framedinterfaceid String   @default("")
-  delegatedipv6prefix String @default("")
+  framedipaddress   String?
+  framedipv6address String?
+  framedipv6prefix  String?
+  framedinterfaceid String?
+  delegatedipv6prefix String?
 
   @@index([username])
   @@index([acctsessionid])
