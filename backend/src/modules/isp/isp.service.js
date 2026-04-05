@@ -311,19 +311,25 @@ class ISPService {
   // ──────────────────────────────────────────────
 
   async listIspCustomers(ownerCompanyName, { page = 1, limit = 100, status, search } = {}) {
-    const where = { ownerCompanyName };
-    if (status) where.status = status;
-    if (search) {
-      where.OR = [
-        { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } },
-        { pppoeUsername: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
-        { phone: { contains: search, mode: 'insensitive' } },
-        { street: { contains: search, mode: 'insensitive' } },
-        { companyName: { contains: search, mode: 'insensitive' } },
-      ];
+    const conditions = [];
+    if (ownerCompanyName) {
+      conditions.push({ OR: [{ ownerCompanyName }, { ownerCompanyName: null }] });
     }
+    if (status) conditions.push({ status });
+    if (search) {
+      conditions.push({
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { pppoeUsername: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search, mode: 'insensitive' } },
+          { street: { contains: search, mode: 'insensitive' } },
+          { companyName: { contains: search, mode: 'insensitive' } },
+        ],
+      });
+    }
+    const where = conditions.length > 0 ? { AND: conditions } : {};
 
     const [items, total] = await Promise.all([
       this.prisma.ispCustomer.findMany({
