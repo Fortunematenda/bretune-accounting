@@ -24,6 +24,9 @@ async function request(path, { method = "GET", body, headers } = {}) {
       return request(path, { method, body, headers });
     }
     clearTokens();
+    const err = new Error("Session expired. Please log in again.");
+    err.status = 401;
+    throw err;
   }
 
   const contentType = res.headers.get("content-type") || "";

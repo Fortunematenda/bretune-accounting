@@ -28,6 +28,15 @@ export function AuthProvider({ children }) {
     if (!token) return undefined;
 
     // Always fetch profile when we have a token - user identity is by email/id, not cached name
+    // Restore cached user immediately to prevent flash of empty state
+    try {
+      const cached = localStorage.getItem("ba_user");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === "object") setUser(parsed);
+      }
+    } catch { /* ignore */ }
+
     api
       .profile()
       .then((payload) => {
@@ -42,16 +51,15 @@ export function AuthProvider({ children }) {
           }
         }
       })
-      .catch(() => {
+      .catch((err) => {
         if (!mounted) return;
-        clearTokens();
-        try {
-          localStorage.removeItem("ba_user");
-        } catch {
-          // ignore
+        // Only log out on 401 (auth failure). Network errors / 500s should not force logout.
+        if (err?.status === 401) {
+          clearTokens();
+          try { localStorage.removeItem("ba_user"); } catch { /* ignore */ }
+          setIsAuthenticated(false);
+          setUser(null);
         }
-        setIsAuthenticated(false);
-        setUser(null);
       });
 
     return () => {
