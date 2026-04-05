@@ -502,7 +502,13 @@ export default function NetworkPage() {
       else setLoading(true);
       setError(null);
       const [res, custRes] = await Promise.all([
-        api.routerDashboard(),
+        api.routerDashboard().catch((err) => ({
+          connected: false,
+          radiusFallback: false,
+          error: err?.message || 'Failed to fetch',
+          activeConnections: 0, totalSecrets: 0, onlineClients: 0,
+          offlineClients: 0, disabledClients: 0, clients: [], profiles: [], interfaces: [],
+        })),
         api.ispCustomers().catch(() => ({ items: [] })),
       ]);
       setData(res);
