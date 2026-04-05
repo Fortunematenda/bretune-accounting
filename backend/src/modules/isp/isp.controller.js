@@ -269,6 +269,14 @@ class ISPController {
     return this.ispService.updateIspCustomerByUsername(username, data);
   }
 
+  @Post('customers/:id/convert')
+  async convertLeadToCustomer(@Param('id') id, @Body() body) {
+    return this.ispService.convertLeadToCustomer(id, {
+      pppoePassword: body.pppoePassword,
+      profile: body.profile,
+    });
+  }
+
   @Delete('customers/:id')
   async deleteIspCustomer(@Param('id') id) {
     return this.ispService.deleteIspCustomer(id);

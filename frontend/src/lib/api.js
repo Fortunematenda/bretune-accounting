@@ -698,6 +698,7 @@ export const api = {
   ispCustomerCreate: (data) => request("/isp/customers", { method: "POST", body: data }),
   ispCustomerUpdate: (id, data) => request(`/isp/customers/${id}`, { method: "PUT", body: data }),
   ispCustomerUpsertByUsername: (username, data) => request(`/isp/customers/by-username/${encodeURIComponent(username)}`, { method: "PUT", body: data }),
+  ispCustomerConvert: (id, data) => request(`/isp/customers/${id}/convert`, { method: "POST", body: data }),
   ispCustomerDelete: (id) => request(`/isp/customers/${id}`, { method: "DELETE" }),
 
   routerBandwidth: () => request("/isp/router/bandwidth"),

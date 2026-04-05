@@ -1,10 +1,15 @@
-const { Inject, Injectable, Logger, NotFoundException } = require('@nestjs/common');
+const { Inject, Injectable, Logger, NotFoundException, BadRequestException } = require('@nestjs/common');
 const { PrismaService } = require('../../config/prisma.service');
+const { MikroTikService } = require('./mikrotik.service');
 
 @Injectable()
 class ISPService {
-  constructor(@Inject(PrismaService) prismaService) {
+  constructor(
+    @Inject(PrismaService) prismaService,
+    @Inject(MikroTikService) mikroTikService,
+  ) {
     this.prisma = prismaService;
+    this.mikroTik = mikroTikService;
     this.logger = new Logger(ISPService.name);
   }
 
@@ -366,6 +371,31 @@ class ISPService {
       where: { pppoeUsername },
       update: data,
       create: { pppoeUsername, ...data },
+    });
+  }
+
+  async convertLeadToCustomer(id, { pppoePassword, profile }) {
+    const customer = await this.prisma.ispCustomer.findUnique({ where: { id } });
+    if (!customer) throw new NotFoundException('ISP Customer not found');
+    if (customer.status !== 'LEAD') {
+      throw new BadRequestException('Only leads can be converted to customers');
+    }
+    if (!pppoePassword || !profile) {
+      throw new BadRequestException('PPPoE password and profile are required');
+    }
+
+    // Create PPPoE secret on MikroTik
+    await this.mikroTik.createSecret({
+      name: customer.pppoeUsername,
+      password: pppoePassword,
+      profile,
+      comment: `${customer.firstName} ${customer.lastName}`,
+    });
+
+    // Update status to ACTIVE
+    return this.prisma.ispCustomer.update({
+      where: { id },
+      data: { status: 'ACTIVE' },
     });
   }
 

@@ -1759,6 +1759,7 @@ model ClientNetworkLink {
 }
 
 enum IspCustomerStatus {
+  LEAD
   ACTIVE
   INACTIVE
   BLOCKED

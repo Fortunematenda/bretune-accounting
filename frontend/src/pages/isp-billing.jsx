@@ -650,7 +650,7 @@ export default function IspBillingPage() {
       ]);
       setStats(dashData);
       setInvoices(invData.items || []);
-      setCustomers(custData.items || []);
+      setCustomers((custData.items || []).filter((c) => c.status === "ACTIVE"));
     } catch (err) {
       console.error("Billing load error:", err);
     } finally {
