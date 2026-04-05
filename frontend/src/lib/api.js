@@ -725,4 +725,9 @@ export const api = {
   billingAutoSuspend: () => request("/isp/billing/auto-suspend", { method: "POST" }),
   billingSuspendClient: (customerId) => request(`/isp/billing/suspend/${customerId}`, { method: "POST" }),
   billingUnsuspendClient: (customerId) => request(`/isp/billing/unsuspend/${customerId}`, { method: "POST" }),
+
+  // ISP Notifications
+  notificationLog: (params) => request(`/isp/notifications/log${params ? "?" + new URLSearchParams(params) : ""}`),
+  notificationStats: () => request("/isp/notifications/stats"),
+  notificationTest: (customerId) => request("/isp/notifications/test", { method: "POST", body: { customerId } }),
 };

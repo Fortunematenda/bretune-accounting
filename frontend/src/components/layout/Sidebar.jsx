@@ -80,6 +80,7 @@ export const SIDEBAR_NAV = [
   { type: "item", to: "/network", label: "Network Monitor", icon: Wifi },
   { type: "item", to: "/isp-customers", label: "Customers", icon: Users },
   { type: "item", to: "/isp-billing", label: "Billing", icon: FileText },
+  { type: "item", to: "/isp-notifications", label: "Notifications", icon: Bell },
 
   { type: "section", label: "Administration" },
   { type: "item", to: "/settings", label: "Settings", icon: Settings },

@@ -1,9 +1,10 @@
-const { Controller, Get, Post, Put, Delete, Inject, Query, Param, Body, UseGuards, Req } = require('@nestjs/common');
+const { Controller, Get, Post, Put, Delete, Inject, Query, Param, Body, UseGuards, Req, Optional } = require('@nestjs/common');
 const { ApiBearerAuth, ApiTags } = require('@nestjs/swagger');
 const { JwtAuthGuard } = require('../auth/guards/jwt-auth.guard');
 const { ISPService } = require('./isp.service');
 const { MikroTikService } = require('./mikrotik.service');
 const { IspBillingService } = require('./isp-billing.service');
+const { IspNotificationService } = require('./isp-notification.service');
 
 @ApiTags('ISP')
 @ApiBearerAuth()
@@ -14,10 +15,12 @@ class ISPController {
     @Inject(ISPService) ispService,
     @Inject(MikroTikService) mikroTikService,
     @Inject(IspBillingService) billingService,
+    @Optional() @Inject(IspNotificationService) notificationService = null,
   ) {
     this.ispService = ispService;
     this.mikroTik = mikroTikService;
     this.billing = billingService;
+    this.notifications = notificationService;
   }
 
   // ── Dashboard ────────────────────────────────
@@ -487,6 +490,37 @@ class ISPController {
   @Post('billing/unsuspend/:customerId')
   async unsuspendClient(@Param('customerId') customerId) {
     return this.billing.unsuspendClient(customerId);
+  }
+
+  // ── Notifications ──────────────────────────────
+
+  @Get('notifications/log')
+  async notificationLog(@Req() req, @Query() query) {
+    if (!this.notifications) return { items: [], total: 0 };
+    return this.notifications.getNotificationLog(req.user?.companyName || null, {
+      page: query.page ? Number(query.page) : 1,
+      limit: query.limit ? Number(query.limit) : 50,
+      type: query.type || undefined,
+      channel: query.channel || undefined,
+      customerId: query.customerId || undefined,
+    });
+  }
+
+  @Get('notifications/stats')
+  async notificationStats(@Req() req) {
+    if (!this.notifications) return { total: 0, sentToday: 0, sentThisMonth: 0, failed: 0 };
+    return this.notifications.getNotificationStats(req.user?.companyName || null);
+  }
+
+  @Post('notifications/test')
+  async sendTestNotification(@Req() req, @Body() body) {
+    if (!this.notifications) return { error: 'Notification service not available' };
+    const customer = await this.ispService.getIspCustomer(body.customerId);
+    return this.notifications.notify(customer, 'INVOICE_CREATED', {
+      subject: 'Test Notification from Bretune ISP',
+      html: '<h2>Test Notification</h2><p>This is a test notification from your ISP billing system. If you received this, notifications are working correctly!</p>',
+      smsMessage: 'Test notification from Bretune ISP. Notifications are working correctly!',
+    });
   }
 }
 

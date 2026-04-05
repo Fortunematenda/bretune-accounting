@@ -1809,7 +1809,8 @@ model IspCustomer {
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
 
-  invoices IspInvoice[]
+  invoices      IspInvoice[]
+  notifications IspNotificationLog[]
 
   @@index([pppoeUsername])
   @@index([status])
@@ -1918,6 +1919,20 @@ model IspBillingSettings {
   reminderDaysBefore  Int     @default(3)
   enableAutoSuspend   Boolean @default(true)
   enableAutoReminders Boolean @default(true)
+  enableEmailNotifications  Boolean @default(true)
+  enableSmsNotifications    Boolean @default(false)
+  enableWhatsappNotifications Boolean @default(false)
+  notifyOnInvoice     Boolean @default(true)
+  notifyOnPayment     Boolean @default(true)
+  notifyOnOverdue     Boolean @default(true)
+  notifyOnSuspension  Boolean @default(true)
+  smsApiProvider      String?
+  smsApiKey           String?
+  smsApiSecret        String?
+  smsSenderId         String?
+  whatsappApiUrl      String?
+  whatsappApiKey      String?
+  whatsappFromNumber  String?
   companyName         String?
   companyAddress      String?
   companyPhone        String?
@@ -1930,6 +1945,46 @@ model IspBillingSettings {
   updatedAt           DateTime @updatedAt
 
   @@map("isp_billing_settings")
+}
+
+enum IspNotificationType {
+  INVOICE_CREATED
+  PAYMENT_RECEIVED
+  OVERDUE_REMINDER
+  SUSPENSION_WARNING
+  SUSPENDED
+  REACTIVATED
+}
+
+enum IspNotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+}
+
+model IspNotificationLog {
+  id              String                @id @default(cuid())
+  customerId      String
+  type            IspNotificationType
+  channel         IspNotificationChannel
+  recipient       String
+  subject         String?
+  message         String
+  status          String                @default("SENT")
+  errorMessage    String?
+  invoiceId       String?
+  ownerCompanyName String?
+  createdAt       DateTime              @default(now())
+
+  customer IspCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([type])
+  @@index([channel])
+  @@index([status])
+  @@index([createdAt])
+  @@index([ownerCompanyName])
+  @@map("isp_notification_logs")
 }
 
 model NetworkAlert {

@@ -1,15 +1,18 @@
-const { Inject, Injectable, Logger, NotFoundException, BadRequestException } = require('@nestjs/common');
+const { Inject, Injectable, Logger, NotFoundException, BadRequestException, Optional } = require('@nestjs/common');
 const { PrismaService } = require('../../config/prisma.service');
 const { MikroTikService } = require('./mikrotik.service');
+const { IspNotificationService } = require('./isp-notification.service');
 
 @Injectable()
 class IspBillingService {
   constructor(
     @Inject(PrismaService) prismaService,
     @Inject(MikroTikService) mikroTikService,
+    @Optional() @Inject(IspNotificationService) notificationService = null,
   ) {
     this.prisma = prismaService;
     this.mikroTik = mikroTikService;
+    this.notifications = notificationService;
     this.logger = new Logger(IspBillingService.name);
   }
 
@@ -129,7 +132,7 @@ class IspBillingService {
     const now = new Date();
     const due = dueDate ? new Date(dueDate) : new Date(now.getTime() + settings.paymentTermsDays * 86400000);
 
-    return this.prisma.ispInvoice.create({
+    const invoice = await this.prisma.ispInvoice.create({
       data: {
         invoiceNumber,
         customerId,
@@ -149,6 +152,14 @@ class IspBillingService {
       },
       include: { customer: true, items: true },
     });
+
+    // Send invoice notification
+    if (this.notifications) {
+      this.notifications.notifyInvoiceCreated(customer, invoice, settings).catch((e) =>
+        this.logger.error(`Invoice notification failed: ${e.message}`));
+    }
+
+    return invoice;
   }
 
   async updateInvoiceStatus(id, status) {
@@ -212,6 +223,12 @@ class IspBillingService {
         },
       }),
     ]);
+
+    // Send payment notification
+    if (this.notifications && invoice.customer) {
+      this.notifications.notifyPaymentReceived(invoice.customer, payment, invoice).catch((e) =>
+        this.logger.error(`Payment notification failed: ${e.message}`));
+    }
 
     // Auto-reactivate: if invoice is now PAID, check if customer has no more overdue invoices
     if (newStatus === 'PAID' && invoice.customer) {
@@ -317,14 +334,34 @@ class IspBillingService {
 
   async markOverdueInvoices() {
     const now = new Date();
-    const result = await this.prisma.ispInvoice.updateMany({
+
+    // Find overdue invoices with customer info before updating
+    const overdueInvoices = await this.prisma.ispInvoice.findMany({
       where: {
         status: { in: ['DRAFT', 'SENT'] },
         dueDate: { lt: now },
         balanceDue: { gt: 0 },
       },
+      include: { customer: true },
+    });
+
+    if (overdueInvoices.length === 0) return { count: 0 };
+
+    const result = await this.prisma.ispInvoice.updateMany({
+      where: { id: { in: overdueInvoices.map((i) => i.id) } },
       data: { status: 'OVERDUE' },
     });
+
+    // Send overdue notifications
+    if (this.notifications) {
+      for (const inv of overdueInvoices) {
+        if (inv.customer) {
+          this.notifications.notifyOverdueReminder(inv.customer, inv).catch((e) =>
+            this.logger.error(`Overdue notification failed for ${inv.invoiceNumber}: ${e.message}`));
+        }
+      }
+    }
+
     this.logger.log(`Marked ${result.count} invoices as overdue`);
     return { count: result.count };
   }
@@ -461,6 +498,12 @@ class IspBillingService {
           totalOwed: cust.invoices.reduce((s, inv) => s + Number(inv.balanceDue), 0),
         });
 
+        // Send suspension notification
+        if (this.notifications) {
+          this.notifications.notifySuspended(cust).catch((e) =>
+            this.logger.error(`Suspension notification failed for ${cust.pppoeUsername}: ${e.message}`));
+        }
+
         this.logger.log(`Auto-suspended: ${cust.pppoeUsername} (${cust.invoices.length} overdue invoices)`);
       } catch (err) {
         results.errors.push({ username: cust.pppoeUsername, error: err.message });
@@ -497,6 +540,12 @@ class IspBillingService {
       data: { status: 'ACTIVE' },
     });
 
+    // Send reactivation notification
+    if (this.notifications) {
+      this.notifications.notifyReactivated(customer).catch((e) =>
+        this.logger.error(`Reactivation notification failed for ${customer.pppoeUsername}: ${e.message}`));
+    }
+
     this.logger.log(`Auto-reactivated: ${customer.pppoeUsername} (all overdue invoices cleared)`);
     return { reactivated: true, username: customer.pppoeUsername };
   }
@@ -516,6 +565,11 @@ class IspBillingService {
       data: { status: 'BLOCKED' },
     });
 
+    if (this.notifications) {
+      this.notifications.notifySuspended(customer).catch((e) =>
+        this.logger.error(`Manual suspend notification failed: ${e.message}`));
+    }
+
     this.logger.log(`Manually suspended: ${customer.pppoeUsername}`);
     return { success: true, message: `${customer.pppoeUsername} suspended` };
   }
@@ -532,6 +586,11 @@ class IspBillingService {
       where: { id: customerId },
       data: { status: 'ACTIVE' },
     });
+
+    if (this.notifications) {
+      this.notifications.notifyReactivated(customer).catch((e) =>
+        this.logger.error(`Manual unsuspend notification failed: ${e.message}`));
+    }
 
     this.logger.log(`Manually unsuspended: ${customer.pppoeUsername}`);
     return { success: true, message: `${customer.pppoeUsername} reactivated` };
