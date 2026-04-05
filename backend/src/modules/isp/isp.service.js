@@ -1,15 +1,18 @@
 const { Inject, Injectable, Logger, NotFoundException, BadRequestException } = require('@nestjs/common');
 const { PrismaService } = require('../../config/prisma.service');
 const { MikroTikService } = require('./mikrotik.service');
+const { RadiusService } = require('./radius.service');
 
 @Injectable()
 class ISPService {
   constructor(
     @Inject(PrismaService) prismaService,
     @Inject(MikroTikService) mikroTikService,
+    @Inject(RadiusService) radiusService,
   ) {
     this.prisma = prismaService;
     this.mikroTik = mikroTikService;
+    this.radius = radiusService;
     this.logger = new Logger(ISPService.name);
   }
 
@@ -384,13 +387,24 @@ class ISPService {
       throw new BadRequestException('PPPoE password and profile are required');
     }
 
-    // Create PPPoE secret on MikroTik
-    await this.mikroTik.createSecret({
-      name: customer.pppoeUsername,
-      password: pppoePassword,
-      profile,
-      comment: `${customer.firstName} ${customer.lastName}`,
-    });
+    // RADIUS: provision user in radcheck + assign plan group
+    try {
+      await this.radius.provisionUser(customer.pppoeUsername, pppoePassword, profile);
+    } catch (e) {
+      this.logger.warn(`RADIUS provision failed for ${customer.pppoeUsername}: ${e.message}`);
+    }
+
+    // MikroTik API: create PPPoE secret (legacy/fallback)
+    try {
+      await this.mikroTik.createSecret({
+        name: customer.pppoeUsername,
+        password: pppoePassword,
+        profile,
+        comment: `${customer.firstName} ${customer.lastName}`,
+      });
+    } catch (e) {
+      this.logger.warn(`MikroTik createSecret failed for ${customer.pppoeUsername}: ${e.message}`);
+    }
 
     // Update status to ACTIVE
     return this.prisma.ispCustomer.update({

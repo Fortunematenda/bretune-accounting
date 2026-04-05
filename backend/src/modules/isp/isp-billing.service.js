@@ -1,6 +1,7 @@
 const { Inject, Injectable, Logger, NotFoundException, BadRequestException, Optional } = require('@nestjs/common');
 const { PrismaService } = require('../../config/prisma.service');
 const { MikroTikService } = require('./mikrotik.service');
+const { RadiusService } = require('./radius.service');
 const { IspNotificationService } = require('./isp-notification.service');
 
 @Injectable()
@@ -8,10 +9,12 @@ class IspBillingService {
   constructor(
     @Inject(PrismaService) prismaService,
     @Inject(MikroTikService) mikroTikService,
+    @Inject(RadiusService) radiusService,
     @Optional() @Inject(IspNotificationService) notificationService = null,
   ) {
     this.prisma = prismaService;
     this.mikroTik = mikroTikService;
+    this.radius = radiusService;
     this.notifications = notificationService;
     this.logger = new Logger(IspBillingService.name);
   }
@@ -559,7 +562,15 @@ class IspBillingService {
       return { message: 'Customer is already suspended' };
     }
 
-    await this.mikroTik.disableSecret(customer.pppoeUsername);
+    // RADIUS: block authentication
+    try { await this.radius.suspendUser(customer.pppoeUsername); } catch (e) {
+      this.logger.warn(`RADIUS suspend failed for ${customer.pppoeUsername}: ${e.message}`);
+    }
+    // MikroTik API: disable secret + disconnect (fallback / legacy)
+    try { await this.mikroTik.disableSecret(customer.pppoeUsername); } catch (e) {
+      this.logger.warn(`MikroTik suspend failed for ${customer.pppoeUsername}: ${e.message}`);
+    }
+
     await this.prisma.ispCustomer.update({
       where: { id: customerId },
       data: { status: 'BLOCKED' },
@@ -581,7 +592,15 @@ class IspBillingService {
       return { message: 'Customer is already active' };
     }
 
-    await this.mikroTik.enableSecret(customer.pppoeUsername);
+    // RADIUS: allow authentication
+    try { await this.radius.reactivateUser(customer.pppoeUsername); } catch (e) {
+      this.logger.warn(`RADIUS reactivate failed for ${customer.pppoeUsername}: ${e.message}`);
+    }
+    // MikroTik API: enable secret (fallback / legacy)
+    try { await this.mikroTik.enableSecret(customer.pppoeUsername); } catch (e) {
+      this.logger.warn(`MikroTik reactivate failed for ${customer.pppoeUsername}: ${e.message}`);
+    }
+
     await this.prisma.ispCustomer.update({
       where: { id: customerId },
       data: { status: 'ACTIVE' },

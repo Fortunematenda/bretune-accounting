@@ -1987,6 +1987,131 @@ model IspNotificationLog {
   @@map("isp_notification_logs")
 }
 
+// ── FREERADIUS TABLES ─────────────────────────────
+// These tables follow the FreeRADIUS SQL schema exactly
+// so FreeRADIUS can read/write them directly.
+
+model Radcheck {
+  id        Int    @id @default(autoincrement())
+  username  String @default("")
+  attribute String @default("")
+  op        String @default(":=")
+  value     String @default("")
+
+  @@index([username])
+  @@map("radcheck")
+}
+
+model Radreply {
+  id        Int    @id @default(autoincrement())
+  username  String @default("")
+  attribute String @default("")
+  op        String @default(":=")
+  value     String @default("")
+
+  @@index([username])
+  @@map("radreply")
+}
+
+model Radgroupcheck {
+  id        Int    @id @default(autoincrement())
+  groupname String @default("")
+  attribute String @default("")
+  op        String @default(":=")
+  value     String @default("")
+
+  @@index([groupname])
+  @@map("radgroupcheck")
+}
+
+model Radgroupreply {
+  id        Int    @id @default(autoincrement())
+  groupname String @default("")
+  attribute String @default("")
+  op        String @default(":=")
+  value     String @default("")
+
+  @@index([groupname])
+  @@map("radgroupreply")
+}
+
+model Radusergroup {
+  id        Int    @id @default(autoincrement())
+  username  String @default("")
+  groupname String @default("")
+  priority  Int    @default(1)
+
+  @@index([username])
+  @@map("radusergroup")
+}
+
+model Radacct {
+  radacctid         BigInt   @id @default(autoincrement())
+  acctsessionid     String   @default("")
+  acctuniqueid      String   @default("") @unique
+  username          String   @default("")
+  groupname         String   @default("")
+  realm             String   @default("")
+  nasipaddress      String   @default("")
+  nasportid         String?
+  nasporttype       String?
+  acctstarttime     DateTime?
+  acctupdatetime    DateTime?
+  acctstoptime      DateTime?
+  acctinterval      Int?
+  acctsessiontime   Int?
+  acctauthentic     String?
+  connectinfo_start String?
+  connectinfo_stop  String?
+  acctinputoctets   BigInt?
+  acctoutputoctets  BigInt?
+  calledstationid   String   @default("")
+  callingstationid  String   @default("")
+  acctterminatecause String  @default("")
+  servicetype       String?
+  framedprotocol    String?
+  framedipaddress   String   @default("")
+  framedipv6address String   @default("")
+  framedipv6prefix  String   @default("")
+  framedinterfaceid String   @default("")
+  delegatedipv6prefix String @default("")
+
+  @@index([username])
+  @@index([acctsessionid])
+  @@index([nasipaddress])
+  @@index([acctstarttime])
+  @@index([acctstoptime])
+  @@index([framedipaddress])
+  @@map("radacct")
+}
+
+model Radpostauth {
+  id        Int      @id @default(autoincrement())
+  username  String   @default("")
+  pass      String   @default("")
+  reply     String   @default("")
+  authdate  DateTime @default(now())
+
+  @@index([username])
+  @@index([authdate])
+  @@map("radpostauth")
+}
+
+model Nas {
+  id          Int    @id @default(autoincrement())
+  nasname     String @default("")
+  shortname   String?
+  type        String @default("mikrotik")
+  ports       Int?
+  secret      String @default("secret")
+  server      String?
+  community   String?
+  description String?
+
+  @@index([nasname])
+  @@map("nas")
+}
+
 model NetworkAlert {
   id              String                @id @default(cuid())
   deviceId        String

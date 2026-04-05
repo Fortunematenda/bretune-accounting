@@ -3,6 +3,7 @@ const { ApiBearerAuth, ApiTags } = require('@nestjs/swagger');
 const { JwtAuthGuard } = require('../auth/guards/jwt-auth.guard');
 const { ISPService } = require('./isp.service');
 const { MikroTikService } = require('./mikrotik.service');
+const { RadiusService } = require('./radius.service');
 const { IspBillingService } = require('./isp-billing.service');
 const { IspNotificationService } = require('./isp-notification.service');
 
@@ -14,11 +15,13 @@ class ISPController {
   constructor(
     @Inject(ISPService) ispService,
     @Inject(MikroTikService) mikroTikService,
+    @Inject(RadiusService) radiusService,
     @Inject(IspBillingService) billingService,
     @Optional() @Inject(IspNotificationService) notificationService = null,
   ) {
     this.ispService = ispService;
     this.mikroTik = mikroTikService;
+    this.radius = radiusService;
     this.billing = billingService;
     this.notifications = notificationService;
   }
@@ -546,6 +549,120 @@ class ISPController {
       html: '<h2>Test Notification</h2><p>This is a test notification from your ISP billing system. If you received this, notifications are working correctly!</p>',
       smsMessage: 'Test notification from Bretune ISP. Notifications are working correctly!',
     });
+  }
+
+  // ── RADIUS ───────────────────────────────────────
+
+  @Get('radius/nas')
+  async listNas() {
+    return this.radius.listNas();
+  }
+
+  @Post('radius/nas')
+  async addNas(@Body() body) {
+    return this.radius.addNas({
+      nasname: body.nasname,
+      shortname: body.shortname || body.nasname,
+      secret: body.secret,
+      type: body.type || 'mikrotik',
+      description: body.description || '',
+    });
+  }
+
+  @Put('radius/nas/:id')
+  async updateNas(@Param('id') id, @Body() body) {
+    return this.radius.updateNas(Number(id), body);
+  }
+
+  @Delete('radius/nas/:id')
+  async deleteNas(@Param('id') id) {
+    return this.radius.deleteNas(Number(id));
+  }
+
+  @Get('radius/sessions')
+  async radiusActiveSessions() {
+    return this.radius.getActiveSessions();
+  }
+
+  @Get('radius/sessions/:username')
+  async radiusUserSessions(@Param('username') username, @Query() query) {
+    return this.radius.getUserSessions(username, { limit: query.limit ? Number(query.limit) : 50 });
+  }
+
+  @Get('radius/usage/:username')
+  async radiusUserUsage(@Param('username') username, @Query() query) {
+    return this.radius.getUserUsage(username, {
+      startDate: query.startDate,
+      endDate: query.endDate,
+    });
+  }
+
+  @Get('radius/usage-summary')
+  async radiusUsageSummary(@Query() query) {
+    return this.radius.getUsageSummary({
+      startDate: query.startDate,
+      endDate: query.endDate,
+    });
+  }
+
+  @Get('radius/auth-logs')
+  async radiusAuthLogs(@Query() query) {
+    return this.radius.getAuthLogs({
+      limit: query.limit ? Number(query.limit) : 100,
+      username: query.username || undefined,
+    });
+  }
+
+  @Post('radius/provision/:username')
+  async radiusProvision(@Param('username') username, @Body() body) {
+    await this.radius.provisionUser(username, body.password, body.planGroup, {
+      staticIp: body.staticIp,
+    });
+    return { success: true, message: `User ${username} provisioned in RADIUS` };
+  }
+
+  @Post('radius/suspend/:username')
+  async radiusSuspend(@Param('username') username) {
+    await this.radius.suspendUser(username);
+    return { success: true, message: `User ${username} suspended in RADIUS` };
+  }
+
+  @Post('radius/reactivate/:username')
+  async radiusReactivate(@Param('username') username) {
+    await this.radius.reactivateUser(username);
+    return { success: true, message: `User ${username} reactivated in RADIUS` };
+  }
+
+  @Post('radius/change-plan/:username')
+  async radiusChangePlan(@Param('username') username, @Body() body) {
+    await this.radius.changeUserPlan(username, body.planGroup);
+    return { success: true, message: `User ${username} plan changed to ${body.planGroup}` };
+  }
+
+  @Post('radius/change-password/:username')
+  async radiusChangePassword(@Param('username') username, @Body() body) {
+    await this.radius.changeUserPassword(username, body.password);
+    return { success: true, message: `Password changed for ${username}` };
+  }
+
+  @Delete('radius/deprovision/:username')
+  async radiusDeprovision(@Param('username') username) {
+    await this.radius.deprovisionUser(username);
+    return { success: true, message: `User ${username} deprovisioned from RADIUS` };
+  }
+
+  @Post('radius/plan-group')
+  async radiusCreatePlanGroup(@Body() body) {
+    await this.radius.createPlanGroup(body.planName, {
+      downloadKbps: body.downloadKbps,
+      uploadKbps: body.uploadKbps,
+      burstDownKbps: body.burstDownKbps,
+      burstUpKbps: body.burstUpKbps,
+      burstThresholdDown: body.burstThresholdDown,
+      burstThresholdUp: body.burstThresholdUp,
+      burstTime: body.burstTime,
+    });
+    return { success: true, message: `Plan group ${body.planName} created` };
   }
 }
 
