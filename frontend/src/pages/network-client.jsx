@@ -975,10 +975,37 @@ export default function NetworkClientPage() {
     try {
       if (!silent) { setLoading(true); setError(null); }
       const [dashData] = await Promise.all([api.routerDashboard()]);
-      const found = dashData.clients?.find((c) => c.name === username);
-      if (!found && !silent) { setError("PPPoE user not found"); return; }
-      if (found) setClient(found);
+      let found = dashData.clients?.find((c) => c.name === username);
       setProfiles(dashData.profiles || []);
+
+      if (!found) {
+        // Not in MikroTik secrets (removed for RADIUS auth) — build from ISP customer + RADIUS session
+        try {
+          const cust = await api.ispCustomerByUsername(username);
+          if (cust) {
+            setCustProfile(cust);
+            // Try to find active RADIUS session in the dashboard's RADIUS fallback clients
+            const radiusClient = dashData.clients?.find((c) => c.name === username);
+            found = {
+              id: `radius-${cust.id}`,
+              name: username,
+              profile: cust.pppoeProfile || 'default',
+              service: 'pppoe',
+              disabled: cust.status === 'BLOCKED',
+              isOnline: !!radiusClient?.isOnline,
+              comment: `${cust.firstName || ''} ${cust.lastName || ''}`.trim(),
+              activeSession: radiusClient?.activeSession || null,
+              bandwidth: null,
+              radiusManaged: true,
+            };
+            setClient(found);
+          }
+        } catch {}
+        if (!found && !silent) { setError("PPPoE user not found"); return; }
+        return;
+      }
+
+      setClient(found);
       // Also refresh customer profile
       try {
         const cust = await api.ispCustomerByUsername(username);
