@@ -241,7 +241,7 @@ class ISPController {
     const fields = ['pppoeUsername', 'firstName', 'lastName', 'companyName', 'email', 'billingEmail',
       'phone', 'street', 'city', 'zipCode', 'province', 'country', 'geoLat', 'geoLng',
       'status', 'category', 'billingType', 'partner', 'location', 'vatId', 'paymentNote',
-      'paymentDate', 'debitOrder', 'wifiSsid', 'wifiPassword', 'contactPerson', 'notes'];
+      'paymentDate', 'debitOrder', 'wifiSsid', 'wifiPassword', 'contactPerson', 'notes', 'leadStage'];
     const data = { ownerCompanyName: req.user?.companyName || null };
     for (const f of fields) {
       if (body[f] !== undefined) data[f] = body[f];
@@ -254,7 +254,7 @@ class ISPController {
     const fields = ['firstName', 'lastName', 'companyName', 'email', 'billingEmail',
       'phone', 'street', 'city', 'zipCode', 'province', 'country', 'geoLat', 'geoLng',
       'status', 'category', 'billingType', 'partner', 'location', 'vatId', 'paymentNote',
-      'paymentDate', 'debitOrder', 'wifiSsid', 'wifiPassword', 'contactPerson', 'notes'];
+      'paymentDate', 'debitOrder', 'wifiSsid', 'wifiPassword', 'contactPerson', 'notes', 'leadStage'];
     const data = {};
     for (const f of fields) {
       if (body[f] !== undefined) data[f] = body[f];
@@ -267,7 +267,7 @@ class ISPController {
     const fields = ['firstName', 'lastName', 'companyName', 'email', 'billingEmail',
       'phone', 'street', 'city', 'zipCode', 'province', 'country', 'geoLat', 'geoLng',
       'status', 'category', 'billingType', 'partner', 'location', 'vatId', 'paymentNote',
-      'paymentDate', 'debitOrder', 'wifiSsid', 'wifiPassword', 'contactPerson', 'notes'];
+      'paymentDate', 'debitOrder', 'wifiSsid', 'wifiPassword', 'contactPerson', 'notes', 'leadStage'];
     const data = { ownerCompanyName: req.user?.companyName || null };
     for (const f of fields) {
       if (body[f] !== undefined) data[f] = body[f];

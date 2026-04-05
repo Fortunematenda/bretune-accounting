@@ -63,6 +63,7 @@ import NetworkPage from "./pages/network";
 import NetworkClientPage from "./pages/network-client";
 import IspBillingPage from "./pages/isp-billing";
 import IspLeadsPage from "./pages/isp-leads";
+import IspLeadsPipelinePage from "./pages/isp-leads-pipeline";
 import IspCustomerDetailPage from "./pages/isp-customer-detail";
 import IspNotificationsPage from "./pages/isp-notifications";
 
@@ -131,6 +132,7 @@ function ProtectedLayout() {
         <Route path="/network/:username" element={<NetworkClientPage />} />
         <Route path="/isp-billing" element={<IspBillingPage />} />
         <Route path="/isp-customers" element={<IspLeadsPage />} />
+        <Route path="/isp-leads" element={<IspLeadsPipelinePage />} />
         <Route path="/isp-customers/:id" element={<IspCustomerDetailPage />} />
         <Route path="/isp-notifications" element={<IspNotificationsPage />} />
         <Route path="/tasks" element={<TasksPage />} />

@@ -643,14 +643,15 @@ export default function IspBillingPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [dashData, invData, custData] = await Promise.all([
+      const [dashRes, invRes, custRes] = await Promise.allSettled([
         api.billingDashboard(),
         api.billingInvoices({ status: statusFilter || undefined, search: search || undefined }),
-        api.ispCustomers(),
+        api.ispCustomers({ limit: 500 }),
       ]);
-      setStats(dashData);
-      setInvoices(invData.items || []);
-      setCustomers((custData.items || []).filter((c) => c.status === "ACTIVE"));
+      if (dashRes.status === "fulfilled") setStats(dashRes.value);
+      if (invRes.status === "fulfilled") setInvoices(invRes.value?.items || []);
+      if (custRes.status === "fulfilled") setCustomers((custRes.value?.items || []).filter((c) => c.status === "ACTIVE"));
+      else console.error("Customers load error:", custRes.reason);
     } catch (err) {
       console.error("Billing load error:", err);
     } finally {

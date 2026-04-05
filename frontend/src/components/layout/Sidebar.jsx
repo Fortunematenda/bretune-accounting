@@ -64,7 +64,7 @@ export const SIDEBAR_NAV = [
   {
     type: "group", label: "Leads", icon: UserPlus,
     children: [
-      { to: "/isp-customers?tab=leads", label: "All Leads" },
+      { to: "/isp-leads", label: "Pipeline" },
     ],
   },
   {

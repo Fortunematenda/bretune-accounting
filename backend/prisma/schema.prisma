@@ -1804,6 +1804,7 @@ model IspCustomer {
   wifiPassword    String?
   contactPerson   String?
   notes           String?
+  leadStage       String?             @default("NEW")
   ownerCompanyName String?
   dateAdded       DateTime            @default(now())
   createdAt       DateTime            @default(now())
