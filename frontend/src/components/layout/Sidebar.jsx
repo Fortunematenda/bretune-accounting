@@ -42,6 +42,11 @@ import {
   Banknote,
   ClipboardList,
   Cog,
+  Search,
+  Map,
+  ListFilter,
+  BarChart2,
+  Wrench,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -52,17 +57,14 @@ export const SIDEBAR_NAV = [
   {
     type: "group", label: "Customers", icon: Users,
     children: [
+      { to: "/isp-customers", label: "Search" },
       { to: "/customers", label: "List" },
-      { to: "/invoices", label: "Invoices" },
-      { to: "/quotes", label: "Quotes" },
-      { to: "/recurring", label: "Recurring" },
-      { to: "/statements", label: "Statements" },
     ],
   },
   {
     type: "group", label: "Leads", icon: UserPlus,
     children: [
-      { to: "/isp-customers", label: "ISP Leads & Customers" },
+      { to: "/isp-customers?tab=leads", label: "All Leads" },
     ],
   },
   {
@@ -76,60 +78,61 @@ export const SIDEBAR_NAV = [
   {
     type: "group", label: "Finance", icon: DollarSign,
     children: [
+      { to: "/invoices", label: "Invoices" },
+      { to: "/quotes", label: "Quotes" },
+      { to: "/recurring", label: "Recurring" },
       { to: "/payments", label: "Payments" },
+      { to: "/statements", label: "Statements" },
+      { to: "/items", label: "Products & Services" },
       { to: "/suppliers", label: "Suppliers" },
       { to: "/bills", label: "Bills" },
       { to: "/expenses", label: "Expenses" },
       { to: "/expense-categories", label: "Categories" },
       { to: "/loans", label: "Loans Given" },
-      { to: "/items", label: "Products & Services" },
     ],
   },
 
-  { type: "section", label: "ISP" },
+  { type: "section", label: "Company" },
   {
     type: "group", label: "Networking", icon: Globe,
     children: [
       { to: "/network", label: "Network Monitor" },
-    ],
-  },
-  {
-    type: "group", label: "Billing", icon: Banknote,
-    children: [
-      { to: "/isp-billing", label: "Invoices & Payments" },
+      { to: "/isp-billing", label: "ISP Billing" },
       { to: "/isp-notifications", label: "Notifications" },
     ],
   },
-
-  { type: "section", label: "Accounting" },
   {
-    type: "group", label: "Bookkeeping", icon: BookOpen,
+    type: "group", label: "Scheduling", icon: Calendar,
+    children: [
+      { to: "/scheduler", label: "Calendar" },
+      { to: "/tasks", label: "Task Board" },
+    ],
+  },
+
+  { type: "section", label: "System" },
+  {
+    type: "group", label: "Administration", icon: Settings,
+    children: [
+      { to: "/settings", label: "General Settings" },
+      { to: "/settings/users", label: "Users" },
+      { to: "/settings/roles", label: "Roles" },
+      { to: "/reports", label: "Reports" },
+    ],
+  },
+  {
+    type: "group", label: "Config", icon: Wrench,
     children: [
       { to: "/chart-of-accounts", label: "Chart of Accounts" },
       { to: "/journal", label: "Journal" },
       { to: "/recurring-journal", label: "Recurring Journal" },
       { to: "/accounting-periods", label: "Period Close" },
       { to: "/currencies", label: "Currencies" },
-    ],
-  },
-  {
-    type: "group", label: "Banking", icon: Building2,
-    children: [
-      { to: "/bank-accounts", label: "Accounts" },
+      { to: "/bank-accounts", label: "Bank Accounts" },
       { to: "/bank-reconciliation", label: "Reconciliation" },
-    ],
-  },
-  {
-    type: "group", label: "Assets & Payroll", icon: Package,
-    children: [
       { to: "/fixed-assets", label: "Fixed Assets" },
       { to: "/payroll", label: "Payroll" },
     ],
   },
-  { type: "item", to: "/reports", label: "Reports", icon: BarChart3 },
-
-  { type: "section", label: "System" },
-  { type: "item", to: "/settings", label: "Administration", icon: Settings },
 ];
 
 export const SETTINGS_NAV = [
@@ -149,13 +152,13 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
   const location = useLocation();
   const isSettingsPage = location.pathname === "/settings" || location.pathname.startsWith("/settings/");
 
-  // Auto-expand group that contains the current path
   const findActiveGroup = () => {
     const navItems = isSettingsPage ? SETTINGS_NAV : SIDEBAR_NAV;
     for (const item of navItems) {
       if (item.type === "group" && item.children) {
         for (const child of item.children) {
-          if (location.pathname === child.to || location.pathname.startsWith(child.to + "/")) {
+          const childPath = child.to.split("?")[0];
+          if (location.pathname === childPath || location.pathname.startsWith(childPath + "/")) {
             return item.label;
           }
         }
@@ -169,7 +172,6 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
     return active ? { [active]: true } : {};
   });
 
-  // Keep active group expanded when navigating
   React.useEffect(() => {
     const active = findActiveGroup();
     if (active && !expandedGroups[active]) {
@@ -204,51 +206,15 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
   };
 
   const isGroupActive = (group) => {
-    return group.children?.some(
-      (child) => location.pathname === child.to || location.pathname.startsWith(child.to + "/")
-    );
+    return group.children?.some((child) => {
+      const childPath = child.to.split("?")[0];
+      return location.pathname === childPath || location.pathname.startsWith(childPath + "/");
+    });
   };
 
-  const renderItem = (item, indent = false) => {
-    if (!item.icon && !indent) return null;
-    const Icon = item.icon;
-    const to = useSettingsNav
-      ? getSettingsItemTo(item)
-      : item.to;
-
-    return (
-      <NavLink
-        key={item.to + (item.section || "")}
-        to={to}
-        className={({ isActive }) => {
-          const active = useSettingsNav ? isSettingsItemActive(item) : isActive;
-          return cn(
-            "flex items-center font-medium transition-all duration-150",
-            collapsed
-              ? "justify-center rounded-lg h-9 w-9 mx-auto text-[0px]"
-              : indent
-                ? "rounded-lg pl-10 pr-2.5 py-[6px] text-[12.5px] gap-2"
-                : "rounded-lg px-2.5 py-[7px] text-[13px] gap-2.5",
-            active
-              ? "bg-violet-50 text-violet-700 font-semibold"
-              : indent
-                ? "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
-                : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/60"
-          );
-        }}
-        end={item.to === "/" || item.to === "/dashboard"}
-        onClick={onNavigate}
-        title={collapsed ? item.label : undefined}
-      >
-        {Icon && (
-          <Icon
-            className={cn("shrink-0", collapsed ? "h-[17px] w-[17px]" : "h-[15px] w-[15px]")}
-            strokeWidth={collapsed ? 1.6 : 1.7}
-          />
-        )}
-        {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
-      </NavLink>
-    );
+  const isChildActive = (child) => {
+    const childPath = child.to.split("?")[0];
+    return location.pathname === childPath || location.pathname.startsWith(childPath + "/");
   };
 
   const renderGroup = (group) => {
@@ -257,65 +223,67 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
     const active = isGroupActive(group);
 
     if (collapsed) {
-      // In collapsed mode, show only the icon, link to first child
+      const firstChild = group.children[0];
       return (
         <NavLink
           key={group.label}
-          to={group.children[0]?.to || "/"}
+          to={firstChild?.to || "/"}
           className={cn(
-            "flex items-center justify-center rounded-lg h-9 w-9 mx-auto transition-all duration-150",
+            "flex items-center justify-center rounded-lg h-10 w-10 mx-auto transition-all duration-150",
             active
-              ? "bg-violet-100/80 text-violet-700"
-              : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/40"
+              ? "bg-violet-600 text-white shadow-sm"
+              : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
           )}
           title={group.label}
           onClick={onNavigate}
         >
-          <Icon className="h-[17px] w-[17px]" strokeWidth={1.6} />
+          <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
         </NavLink>
       );
     }
 
     return (
-      <div key={group.label}>
+      <div key={group.label} className="relative">
         <button
           onClick={() => toggleGroup(group.label)}
           className={cn(
-            "w-full flex items-center rounded-lg px-2.5 py-[7px] text-[13px] font-medium gap-2.5 transition-all duration-150",
+            "w-full flex items-center px-3 py-2.5 text-[13.5px] font-medium gap-3 transition-all duration-150 rounded-lg",
             active
-              ? "bg-violet-50 text-violet-700 font-semibold"
-              : "text-slate-600 hover:text-slate-800 hover:bg-slate-100/60"
+              ? "bg-violet-600 text-white shadow-sm"
+              : "text-slate-600 hover:bg-slate-100"
           )}
         >
-          <Icon className="h-[15px] w-[15px] shrink-0" strokeWidth={1.7} />
-          <span className="flex-1 truncate text-left">{group.label}</span>
+          <Icon className={cn("h-[18px] w-[18px] shrink-0", active ? "text-white" : "text-slate-400")} strokeWidth={1.8} />
+          <span className="flex-1 text-left">{group.label}</span>
           <ChevronDown
             className={cn(
-              "h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform duration-200",
+              "h-4 w-4 shrink-0 transition-transform duration-200",
+              active ? "text-white/70" : "text-slate-400",
               isExpanded ? "" : "-rotate-90"
             )}
             strokeWidth={2}
           />
         </button>
         {isExpanded && (
-          <div className="mt-0.5 space-y-0.5">
-            {group.children.map((child) => (
-              <NavLink
-                key={child.to}
-                to={child.to}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center rounded-lg pl-10 pr-2.5 py-[5px] text-[12.5px] font-medium transition-all duration-150",
-                    isActive
-                      ? "text-violet-700 font-semibold"
-                      : "text-slate-400 hover:text-slate-600"
-                  )
-                }
-                onClick={onNavigate}
-              >
-                <span className="truncate">{child.label}</span>
-              </NavLink>
-            ))}
+          <div className="relative ml-6 mt-0.5 mb-1 border-l-2 border-violet-100">
+            {group.children.map((child) => {
+              const childActive = isChildActive(child);
+              return (
+                <NavLink
+                  key={child.to}
+                  to={child.to}
+                  className={cn(
+                    "block pl-4 pr-3 py-[6px] text-[13px] font-medium transition-all duration-150 relative",
+                    childActive
+                      ? "text-violet-700 font-semibold before:absolute before:left-[-2px] before:top-1 before:bottom-1 before:w-[2px] before:bg-violet-600 before:rounded-full"
+                      : "text-slate-400 hover:text-slate-700"
+                  )}
+                  onClick={onNavigate}
+                >
+                  {child.label}
+                </NavLink>
+              );
+            })}
           </div>
         )}
       </div>
@@ -323,11 +291,11 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-slate-50/70 backdrop-blur-sm">
+    <div className="h-full flex flex-col overflow-hidden bg-white">
       {showBrand ? (
         <div
           className={cn(
-            "relative h-16 flex items-center border-b border-slate-200/50 shrink-0",
+            "relative h-16 flex items-center border-b border-slate-100 shrink-0",
             collapsed ? "px-2 justify-center" : "px-4"
           )}
         >
@@ -345,14 +313,14 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
             )}>
               <img
                 src="/bretune-logo.png"
-                alt="Bretune Accounting"
+                alt="Bretune"
                 className="h-full w-full object-contain"
               />
             </div>
             {!collapsed ? (
               <div className="leading-tight min-w-0">
-                <div className="text-sm font-bold text-slate-800 truncate tracking-tight">Bretune</div>
-                <div className="text-[11px] font-medium text-slate-400 truncate">Accounting</div>
+                <div className="text-[15px] font-bold text-slate-800 truncate tracking-tight">Bretune</div>
+                <div className="text-[10px] font-medium text-slate-400 truncate">ISP & Accounting</div>
               </div>
             ) : null}
           </Link>
@@ -360,7 +328,7 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
             <button
               type="button"
               onClick={() => onToggleCollapsed()}
-              className="ml-auto shrink-0 h-7 w-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 transition-colors"
+              className="ml-auto shrink-0 h-7 w-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
               title="Collapse sidebar"
             >
               <PanelLeftClose className="h-[14px] w-[14px]" strokeWidth={1.5} />
@@ -374,7 +342,7 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
           <button
             type="button"
             onClick={() => onToggleCollapsed()}
-            className="w-full h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 transition-colors"
+            className="w-full h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
             title="Expand sidebar"
           >
             <PanelLeftOpen className="h-[14px] w-[14px]" strokeWidth={1.5} />
@@ -383,7 +351,7 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
       ) : null}
 
       <nav
-        className={cn("flex-1 overflow-y-auto py-2", collapsed ? "px-1.5" : "px-2.5")}
+        className={cn("flex-1 overflow-y-auto py-3", collapsed ? "px-2" : "px-3")}
         aria-label={isSettingsPage ? "Settings navigation" : "Primary navigation"}
       >
         <div className={cn("space-y-0.5", collapsed && "space-y-1")}>
@@ -393,7 +361,7 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
               return (
                 <div
                   key={`section-${item.label}-${idx}`}
-                  className="px-2.5 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-violet-500/70"
+                  className="px-3 pt-6 pb-2 text-[11px] font-bold uppercase tracking-widest text-emerald-500"
                 >
                   {item.label}
                 </div>
@@ -405,7 +373,50 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
             }
 
             if (item.type === "item") {
-              return renderItem(item);
+              const Icon = item.icon;
+              if (!Icon) return null;
+              const to = useSettingsNav ? getSettingsItemTo(item) : item.to;
+              const isActive = useSettingsNav
+                ? isSettingsItemActive(item)
+                : location.pathname === item.to;
+
+              if (collapsed) {
+                return (
+                  <NavLink
+                    key={item.to + (item.section || "")}
+                    to={to}
+                    className={cn(
+                      "flex items-center justify-center rounded-lg h-10 w-10 mx-auto transition-all duration-150",
+                      isActive
+                        ? "bg-violet-600 text-white shadow-sm"
+                        : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                    )}
+                    end={item.to === "/" || item.to === "/dashboard"}
+                    onClick={onNavigate}
+                    title={item.label}
+                  >
+                    <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                  </NavLink>
+                );
+              }
+
+              return (
+                <NavLink
+                  key={item.to + (item.section || "")}
+                  to={to}
+                  className={cn(
+                    "flex items-center px-3 py-2.5 text-[13.5px] font-medium gap-3 rounded-lg transition-all duration-150",
+                    isActive
+                      ? "bg-violet-600 text-white shadow-sm"
+                      : "text-slate-600 hover:bg-slate-100"
+                  )}
+                  end={item.to === "/" || item.to === "/dashboard"}
+                  onClick={onNavigate}
+                >
+                  <Icon className={cn("h-[18px] w-[18px] shrink-0", isActive ? "text-white" : "text-slate-400")} strokeWidth={1.8} />
+                  <span className="flex-1 truncate">{item.label}</span>
+                </NavLink>
+              );
             }
 
             return null;
