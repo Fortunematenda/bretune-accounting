@@ -1,5 +1,6 @@
 const { Injectable, Logger } = require('@nestjs/common');
 const { RouterOSAPI } = require('node-routeros');
+const net = require('net');
 
 @Injectable()
 class MikroTikService {
@@ -15,13 +16,23 @@ class MikroTikService {
     };
   }
 
+  isReachable() {
+    return new Promise((resolve) => {
+      const socket = new net.Socket();
+      socket.setTimeout(2000);
+      socket.once('connect', () => { socket.destroy(); resolve(true); });
+      socket.once('error', () => { socket.destroy(); resolve(false); });
+      socket.once('timeout', () => { socket.destroy(); resolve(false); });
+      socket.connect(this.config.port, this.config.host);
+    });
+  }
+
   async getConnection() {
     try {
       if (this.conn && this.conn.connected) {
         return this.conn;
       }
       this.conn = new RouterOSAPI(this.config);
-      // Absorb EventEmitter 'error' events so they don't become uncaughtExceptions
       this.conn.on('error', (err) => {
         this.logger.warn(`MikroTik connection error event: ${err?.message || err}`);
         this.conn = null;
@@ -30,33 +41,26 @@ class MikroTikService {
       this.logger.log(`Connected to MikroTik at ${this.config.host}:${this.config.port}`);
       return this.conn;
     } catch (err) {
-      this.logger.error(`Failed to connect to MikroTik: ${err.message}`);
+      this.logger.warn(`Failed to connect to MikroTik: ${err?.message || err}`);
       this.conn = null;
       throw err;
     }
   }
 
   async execute(command, params = []) {
+    const reachable = await this.isReachable();
+    if (!reachable) {
+      this.conn = null;
+      throw new Error('MikroTik unreachable');
+    }
     const conn = await this.getConnection();
-    return new Promise((resolve, reject) => {
-      const onConnError = (err) => {
-        this.conn = null;
-        reject(err);
-      };
-      // Catch error events emitted by internal Connector/Channel objects
-      conn.once('error', onConnError);
-      conn.write(command, params)
-        .then((result) => {
-          conn.removeListener('error', onConnError);
-          resolve(result);
-        })
-        .catch((err) => {
-          conn.removeListener('error', onConnError);
-          this.conn = null;
-          this.logger.error(`MikroTik command failed: ${command} - ${err.message}`);
-          reject(err);
-        });
-    });
+    try {
+      return await conn.write(command, params);
+    } catch (err) {
+      this.conn = null;
+      this.logger.warn(`MikroTik command failed: ${command} - ${err?.message || err}`);
+      throw err;
+    }
   }
 
   // ──────────────────────────────────────────────
