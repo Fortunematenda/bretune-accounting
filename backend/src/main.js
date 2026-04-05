@@ -1,5 +1,26 @@
 require('reflect-metadata');
 
+// Prevent node-routeros / other third-party EventEmitter errors from crashing the process
+process.on('uncaughtException', (err) => {
+  const ignorable = ['SOCKTMOUT', 'UNKNOWNREPLY', 'ECONNREFUSED', 'ETIMEDOUT', 'ECONNRESET'];
+  if (ignorable.some((code) => err?.errno === code || err?.message?.includes(code))) {
+    console.warn(`[MikroTik] Absorbed uncaughtException: ${err.message}`);
+    return;
+  }
+  console.error('[FATAL] Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  const msg = reason?.message || String(reason);
+  const ignorable = ['SOCKTMOUT', 'UNKNOWNREPLY', 'ECONNREFUSED', 'ETIMEDOUT', 'ECONNRESET'];
+  if (ignorable.some((code) => msg.includes(code))) {
+    console.warn(`[MikroTik] Absorbed unhandledRejection: ${msg}`);
+    return;
+  }
+  console.error('[WARN] Unhandled Rejection:', reason);
+});
+
 const express = require('express');
 const helmet = require('helmet');
 const { NestFactory } = require('@nestjs/core');
