@@ -33,57 +33,103 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Wifi,
+  Globe,
+  UserPlus,
+  Ticket,
+  DollarSign,
+  Network,
+  Router,
+  Banknote,
+  ClipboardList,
+  Cog,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 export const SIDEBAR_NAV = [
   { type: "item", to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
 
-  { type: "section", label: "Sales" },
-  { type: "item", to: "/customers", label: "Customers", icon: Users },
-  { type: "item", to: "/items", label: "Items", icon: Package },
-  { type: "item", to: "/quotes", label: "Quotes", icon: FileText },
-  { type: "item", to: "/invoices", label: "Invoices", icon: Receipt },
-  { type: "item", to: "/recurring", label: "Recurring", icon: Repeat },
-  { type: "item", to: "/payments", label: "Payments", icon: CreditCard },
-  { type: "item", to: "/statements", label: "Statements", icon: ScrollText },
-
-  { type: "section", label: "Purchases" },
-  { type: "item", to: "/suppliers", label: "Suppliers", icon: Truck },
-  { type: "item", to: "/bills", label: "Bills", icon: Receipt },
-  { type: "item", to: "/expenses", label: "Expenses", icon: Wallet },
-  { type: "item", to: "/expense-categories", label: "Expense Categories", icon: Tags },
-  { type: "item", to: "/loans", label: "Loans Given", icon: Landmark },
-
-  { type: "section", label: "Work" },
-  { type: "item", to: "/tasks", label: "Tasks", icon: CheckSquare },
-  { type: "item", to: "/scheduler", label: "Scheduler", icon: Calendar },
-  { type: "item", to: "/automation", label: "Automation", icon: Zap },
-
-  { type: "section", label: "Banking" },
-  { type: "item", to: "/bank-accounts", label: "Bank Accounts", icon: Building2 },
-  { type: "item", to: "/bank-reconciliation", label: "Bank Reconciliation", icon: Wallet },
-
-  { type: "section", label: "Accounting" },
-  { type: "item", to: "/chart-of-accounts", label: "Chart of Accounts", icon: BookOpen },
-  { type: "item", to: "/journal", label: "Journal", icon: BookMarked },
-  { type: "item", to: "/recurring-journal", label: "Recurring Journal", icon: Repeat },
-  { type: "item", to: "/accounting-periods", label: "Period Close", icon: Calendar },
-  { type: "item", to: "/currencies", label: "Currencies", icon: Wallet },
-  { type: "item", to: "/fixed-assets", label: "Fixed Assets", icon: Package },
-  { type: "item", to: "/payroll", label: "Payroll", icon: Users },
-
-  { type: "section", label: "Analytics" },
-  { type: "item", to: "/reports", label: "Reports", icon: BarChart3 },
+  { type: "section", label: "CRM" },
+  {
+    type: "group", label: "Customers", icon: Users,
+    children: [
+      { to: "/customers", label: "List" },
+      { to: "/invoices", label: "Invoices" },
+      { to: "/quotes", label: "Quotes" },
+      { to: "/recurring", label: "Recurring" },
+      { to: "/statements", label: "Statements" },
+    ],
+  },
+  {
+    type: "group", label: "Leads", icon: UserPlus,
+    children: [
+      { to: "/isp-customers", label: "ISP Leads & Customers" },
+    ],
+  },
+  {
+    type: "group", label: "Tickets", icon: Ticket,
+    children: [
+      { to: "/tasks", label: "Tasks" },
+      { to: "/scheduler", label: "Scheduler" },
+      { to: "/automation", label: "Automation" },
+    ],
+  },
+  {
+    type: "group", label: "Finance", icon: DollarSign,
+    children: [
+      { to: "/payments", label: "Payments" },
+      { to: "/suppliers", label: "Suppliers" },
+      { to: "/bills", label: "Bills" },
+      { to: "/expenses", label: "Expenses" },
+      { to: "/expense-categories", label: "Categories" },
+      { to: "/loans", label: "Loans Given" },
+      { to: "/items", label: "Products & Services" },
+    ],
+  },
 
   { type: "section", label: "ISP" },
-  { type: "item", to: "/network", label: "Network Monitor", icon: Wifi },
-  { type: "item", to: "/isp-customers", label: "Customers", icon: Users },
-  { type: "item", to: "/isp-billing", label: "Billing", icon: FileText },
-  { type: "item", to: "/isp-notifications", label: "Notifications", icon: Bell },
+  {
+    type: "group", label: "Networking", icon: Globe,
+    children: [
+      { to: "/network", label: "Network Monitor" },
+    ],
+  },
+  {
+    type: "group", label: "Billing", icon: Banknote,
+    children: [
+      { to: "/isp-billing", label: "Invoices & Payments" },
+      { to: "/isp-notifications", label: "Notifications" },
+    ],
+  },
 
-  { type: "section", label: "Administration" },
-  { type: "item", to: "/settings", label: "Settings", icon: Settings },
+  { type: "section", label: "Accounting" },
+  {
+    type: "group", label: "Bookkeeping", icon: BookOpen,
+    children: [
+      { to: "/chart-of-accounts", label: "Chart of Accounts" },
+      { to: "/journal", label: "Journal" },
+      { to: "/recurring-journal", label: "Recurring Journal" },
+      { to: "/accounting-periods", label: "Period Close" },
+      { to: "/currencies", label: "Currencies" },
+    ],
+  },
+  {
+    type: "group", label: "Banking", icon: Building2,
+    children: [
+      { to: "/bank-accounts", label: "Accounts" },
+      { to: "/bank-reconciliation", label: "Reconciliation" },
+    ],
+  },
+  {
+    type: "group", label: "Assets & Payroll", icon: Package,
+    children: [
+      { to: "/fixed-assets", label: "Fixed Assets" },
+      { to: "/payroll", label: "Payroll" },
+    ],
+  },
+  { type: "item", to: "/reports", label: "Reports", icon: BarChart3 },
+
+  { type: "section", label: "System" },
+  { type: "item", to: "/settings", label: "Administration", icon: Settings },
 ];
 
 export const SETTINGS_NAV = [
@@ -103,25 +149,36 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
   const location = useLocation();
   const isSettingsPage = location.pathname === "/settings" || location.pathname.startsWith("/settings/");
 
-  const sectionLabels = React.useMemo(
-    () =>
-      (isSettingsPage ? SETTINGS_NAV : SIDEBAR_NAV || [])
-        .filter((i) => i.type === "section")
-        .map((i) => i.label),
-    [isSettingsPage]
-  );
+  // Auto-expand group that contains the current path
+  const findActiveGroup = () => {
+    const navItems = isSettingsPage ? SETTINGS_NAV : SIDEBAR_NAV;
+    for (const item of navItems) {
+      if (item.type === "group" && item.children) {
+        for (const child of item.children) {
+          if (location.pathname === child.to || location.pathname.startsWith(child.to + "/")) {
+            return item.label;
+          }
+        }
+      }
+    }
+    return null;
+  };
 
-  const [expandedSections, setExpandedSections] = React.useState(() => {
-    const map = {};
-    for (const label of sectionLabels) map[label] = true;
-    return map;
+  const [expandedGroups, setExpandedGroups] = React.useState(() => {
+    const active = findActiveGroup();
+    return active ? { [active]: true } : {};
   });
 
-  const toggleSection = (label) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [label]: !(prev?.[label] ?? true),
-    }));
+  // Keep active group expanded when navigating
+  React.useEffect(() => {
+    const active = findActiveGroup();
+    if (active && !expandedGroups[active]) {
+      setExpandedGroups((prev) => ({ ...prev, [active]: true }));
+    }
+  }, [location.pathname]);
+
+  const toggleGroup = (label) => {
+    setExpandedGroups((prev) => ({ ...prev, [label]: !prev[label] }));
   };
 
   const navItems = isSettingsPage ? SETTINGS_NAV : SIDEBAR_NAV;
@@ -135,9 +192,7 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
   };
 
   const isSettingsItemActive = (item) => {
-    if (item.to === "/dashboard") {
-      return location.pathname === "/dashboard";
-    }
+    if (item.to === "/dashboard") return location.pathname === "/dashboard";
     if (item.section) {
       const sp = new URLSearchParams(location.search);
       const currentSection = sp.get("section") || "general";
@@ -146,6 +201,125 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
       return false;
     }
     return false;
+  };
+
+  const isGroupActive = (group) => {
+    return group.children?.some(
+      (child) => location.pathname === child.to || location.pathname.startsWith(child.to + "/")
+    );
+  };
+
+  const renderItem = (item, indent = false) => {
+    if (!item.icon && !indent) return null;
+    const Icon = item.icon;
+    const to = useSettingsNav
+      ? getSettingsItemTo(item)
+      : item.to;
+
+    return (
+      <NavLink
+        key={item.to + (item.section || "")}
+        to={to}
+        className={({ isActive }) => {
+          const active = useSettingsNav ? isSettingsItemActive(item) : isActive;
+          return cn(
+            "flex items-center font-medium transition-all duration-150",
+            collapsed
+              ? "justify-center rounded-lg h-9 w-9 mx-auto text-[0px]"
+              : indent
+                ? "rounded-lg pl-10 pr-2.5 py-[6px] text-[12.5px] gap-2"
+                : "rounded-lg px-2.5 py-[7px] text-[13px] gap-2.5",
+            active
+              ? "bg-violet-50 text-violet-700 font-semibold"
+              : indent
+                ? "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/60"
+          );
+        }}
+        end={item.to === "/" || item.to === "/dashboard"}
+        onClick={onNavigate}
+        title={collapsed ? item.label : undefined}
+      >
+        {Icon && (
+          <Icon
+            className={cn("shrink-0", collapsed ? "h-[17px] w-[17px]" : "h-[15px] w-[15px]")}
+            strokeWidth={collapsed ? 1.6 : 1.7}
+          />
+        )}
+        {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+      </NavLink>
+    );
+  };
+
+  const renderGroup = (group) => {
+    const Icon = group.icon;
+    const isExpanded = expandedGroups[group.label] || false;
+    const active = isGroupActive(group);
+
+    if (collapsed) {
+      // In collapsed mode, show only the icon, link to first child
+      return (
+        <NavLink
+          key={group.label}
+          to={group.children[0]?.to || "/"}
+          className={cn(
+            "flex items-center justify-center rounded-lg h-9 w-9 mx-auto transition-all duration-150",
+            active
+              ? "bg-violet-100/80 text-violet-700"
+              : "text-slate-400 hover:text-slate-600 hover:bg-slate-200/40"
+          )}
+          title={group.label}
+          onClick={onNavigate}
+        >
+          <Icon className="h-[17px] w-[17px]" strokeWidth={1.6} />
+        </NavLink>
+      );
+    }
+
+    return (
+      <div key={group.label}>
+        <button
+          onClick={() => toggleGroup(group.label)}
+          className={cn(
+            "w-full flex items-center rounded-lg px-2.5 py-[7px] text-[13px] font-medium gap-2.5 transition-all duration-150",
+            active
+              ? "bg-violet-50 text-violet-700 font-semibold"
+              : "text-slate-600 hover:text-slate-800 hover:bg-slate-100/60"
+          )}
+        >
+          <Icon className="h-[15px] w-[15px] shrink-0" strokeWidth={1.7} />
+          <span className="flex-1 truncate text-left">{group.label}</span>
+          <ChevronDown
+            className={cn(
+              "h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform duration-200",
+              isExpanded ? "" : "-rotate-90"
+            )}
+            strokeWidth={2}
+          />
+        </button>
+        {isExpanded && (
+          <div className="mt-0.5 space-y-0.5">
+            {group.children.map((child) => (
+              <NavLink
+                key={child.to}
+                to={child.to}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center rounded-lg pl-10 pr-2.5 py-[5px] text-[12.5px] font-medium transition-all duration-150",
+                    isActive
+                      ? "text-violet-700 font-semibold"
+                      : "text-slate-400 hover:text-slate-600"
+                  )
+                }
+                onClick={onNavigate}
+              >
+                <span className="truncate">{child.label}</span>
+              </NavLink>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -213,70 +387,31 @@ export default function Sidebar({ onNavigate, showBrand = true, collapsed = fals
         aria-label={isSettingsPage ? "Settings navigation" : "Primary navigation"}
       >
         <div className={cn("space-y-0.5", collapsed && "space-y-1")}>
-          {(() => {
-            let currentSection = null;
-            return navItems.flatMap((item, idx) => {
-              if (item.type === "section") {
-                currentSection = item.label;
-                if (collapsed) return [];
-                const isExpanded = expandedSections?.[item.label] === true;
-                return [
-                  <div
-                    key={`section-${item.label}-${idx}`}
-                    className="px-2.5 pt-5 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400/70"
-                  >
-                    {item.label}
-                  </div>,
-                ];
-              }
-
-              if (!item.icon) return [];
-              const Icon = item.icon;
-              const to = useSettingsNav
-                ? getSettingsItemTo(item)
-                : (item.hash ? { pathname: item.to, search: `?section=${item.hash}` } : item.to);
-
-              if (!collapsed && currentSection) {
-                const isExpanded = expandedSections?.[currentSection] === true;
-                if (!isExpanded) return [];
-              }
-
-              return [
-                <NavLink
-                  key={(item.to || item.label) + (item.hash || item.section || "")}
-                  to={to}
-                  className={({ isActive }) => {
-                    const active = useSettingsNav ? isSettingsItemActive(item) : isActive;
-                    return cn(
-                      "group flex items-center font-medium transition-all duration-150",
-                      collapsed
-                        ? "justify-center rounded-lg h-9 w-9 mx-auto text-[0px]"
-                        : "rounded-lg px-2.5 py-[7px] text-[13px] gap-2.5",
-                      active
-                        ? collapsed
-                          ? "bg-violet-100/80 text-violet-700"
-                          : "bg-violet-50/80 text-violet-700 font-semibold"
-                        : collapsed
-                          ? "text-slate-400 hover:text-slate-600 hover:bg-slate-200/40"
-                          : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/60"
-                    );
-                  }}
-                  end={item.to === "/" || item.to === "/dashboard"}
-                  onClick={onNavigate}
-                  title={collapsed ? item.label : undefined}
+          {navItems.map((item, idx) => {
+            if (item.type === "section") {
+              if (collapsed) return null;
+              return (
+                <div
+                  key={`section-${item.label}-${idx}`}
+                  className="px-2.5 pt-5 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-violet-500/70"
                 >
-                  <Icon className={cn(
-                    "shrink-0 transition-colors",
-                    collapsed ? "h-[17px] w-[17px]" : "h-[15px] w-[15px]"
-                  )} strokeWidth={collapsed ? 1.6 : 1.7} />
-                  {!collapsed ? <span className="flex-1 truncate">{item.label}</span> : null}
-                </NavLink>,
-              ];
-            });
-          })()}
+                  {item.label}
+                </div>
+              );
+            }
+
+            if (item.type === "group") {
+              return renderGroup(item);
+            }
+
+            if (item.type === "item") {
+              return renderItem(item);
+            }
+
+            return null;
+          })}
         </div>
       </nav>
-
     </div>
   );
 }
