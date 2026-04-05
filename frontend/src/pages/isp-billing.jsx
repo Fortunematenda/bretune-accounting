@@ -645,7 +645,7 @@ export default function IspBillingPage() {
     try {
       const [dashRes, invRes, custRes] = await Promise.allSettled([
         api.billingDashboard(),
-        api.billingInvoices({ status: statusFilter || undefined, search: search || undefined }),
+        api.billingInvoices({ ...(statusFilter ? { status: statusFilter } : {}), ...(search ? { search } : {}) }),
         api.ispCustomers({ limit: 500 }),
       ]);
       if (dashRes.status === "fulfilled") setStats(dashRes.value);

@@ -463,10 +463,10 @@ class MikroTikService {
         interfaces: interfaces.filter((i) => i.running || i.type === 'pppoe-in'),
       };
     } catch (err) {
-      this.logger.error(`Router dashboard failed: ${err.message}`);
+      this.logger.warn(`Router dashboard failed: ${err?.message || err}`);
       return {
         connected: false,
-        error: err.message,
+        error: err?.message || 'Connection failed',
         activeConnections: 0,
         totalSecrets: 0,
         onlineClients: 0,
