@@ -38,13 +38,25 @@ class MikroTikService {
 
   async execute(command, params = []) {
     const conn = await this.getConnection();
-    try {
-      return await conn.write(command, params);
-    } catch (err) {
-      this.logger.error(`MikroTik command failed: ${command} - ${err.message}`);
-      this.conn = null;
-      throw err;
-    }
+    return new Promise((resolve, reject) => {
+      const onConnError = (err) => {
+        this.conn = null;
+        reject(err);
+      };
+      // Catch error events emitted by internal Connector/Channel objects
+      conn.once('error', onConnError);
+      conn.write(command, params)
+        .then((result) => {
+          conn.removeListener('error', onConnError);
+          resolve(result);
+        })
+        .catch((err) => {
+          conn.removeListener('error', onConnError);
+          this.conn = null;
+          this.logger.error(`MikroTik command failed: ${command} - ${err.message}`);
+          reject(err);
+        });
+    });
   }
 
   // ──────────────────────────────────────────────
