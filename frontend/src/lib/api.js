@@ -729,6 +729,13 @@ export const api = {
   billingSuspendClient: (customerId) => request(`/isp/billing/suspend/${customerId}`, { method: "POST" }),
   billingUnsuspendClient: (customerId) => request(`/isp/billing/unsuspend/${customerId}`, { method: "POST" }),
 
+  // RADIUS Management
+  radiusChangePlan: (username, newGroup) => request(`/isp/radius/change-plan/${encodeURIComponent(username)}`, { method: "POST", body: { newGroup } }),
+  radiusChangePassword: (username, newPassword) => request(`/isp/radius/change-password/${encodeURIComponent(username)}`, { method: "POST", body: { newPassword } }),
+  radiusSuspend: (username) => request(`/isp/radius/suspend/${encodeURIComponent(username)}`, { method: "POST" }),
+  radiusReactivate: (username) => request(`/isp/radius/reactivate/${encodeURIComponent(username)}`, { method: "POST" }),
+  radiusSessions: (username) => request(`/isp/radius/sessions/${encodeURIComponent(username)}`),
+
   // ISP Notifications
   notificationLog: (params) => request(`/isp/notifications/log${params ? "?" + new URLSearchParams(params) : ""}`),
   notificationStats: () => request("/isp/notifications/stats"),

@@ -483,15 +483,16 @@ function ServicesTab({ client, session, profileData, profiles, username, onRefre
   const [saved, setSaved] = useState(false);
   const [editForm, setEditForm] = useState({ profile: client.profile, password: "" });
 
-  // Fetch secret with password
+  // Fetch secret with password — skip for RADIUS-managed users (no local secret)
   useEffect(() => {
+    if (client.radiusManaged) return;
     (async () => {
       try {
         const s = await api.routerSecret(username);
         if (s) setSecret(s);
       } catch {}
     })();
-  }, [username]);
+  }, [username, client.radiusManaged]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -500,10 +501,15 @@ function ServicesTab({ client, session, profileData, profiles, username, onRefre
       if (editForm.profile && editForm.profile !== client.profile) updates.profile = editForm.profile;
       if (editForm.password) updates.password = editForm.password;
       if (Object.keys(updates).length > 0) {
-        await api.routerUpdateSecret(client.id, updates);
-        // Refresh secret data
-        const s = await api.routerSecret(username);
-        if (s) setSecret(s);
+        if (client.radiusManaged) {
+          // RADIUS-managed: update via RADIUS API
+          if (updates.profile) await api.radiusChangePlan(username, updates.profile);
+          if (updates.password) await api.radiusChangePassword(username, updates.password);
+        } else {
+          await api.routerUpdateSecret(client.id, updates);
+          const s = await api.routerSecret(username);
+          if (s) setSecret(s);
+        }
         if (onRefresh) onRefresh();
       }
       setEditing(false);
@@ -979,22 +985,26 @@ export default function NetworkClientPage() {
       setProfiles(dashData.profiles || []);
 
       if (!found) {
-        // Not in MikroTik secrets (removed for RADIUS auth) — build from ISP customer + RADIUS session
+        // Not in MikroTik secrets (removed for RADIUS auth) — build from ISP customer + active connections
         try {
-          const cust = await api.ispCustomerByUsername(username);
+          const [cust, activeConns] = await Promise.all([
+            api.ispCustomerByUsername(username).catch(() => null),
+            api.routerActiveConnections().catch(() => []),
+          ]);
           if (cust) {
             setCustProfile(cust);
-            // Try to find active RADIUS session in the dashboard's RADIUS fallback clients
-            const radiusClient = dashData.clients?.find((c) => c.name === username);
+            const activeSession = Array.isArray(activeConns)
+              ? activeConns.find((c) => c.name === username)
+              : null;
             found = {
               id: `radius-${cust.id}`,
               name: username,
-              profile: cust.pppoeProfile || 'default',
+              profile: activeSession?.profile || cust.pppoeProfile || 'default',
               service: 'pppoe',
               disabled: cust.status === 'BLOCKED',
-              isOnline: !!radiusClient?.isOnline,
+              isOnline: !!activeSession,
               comment: `${cust.firstName || ''} ${cust.lastName || ''}`.trim(),
-              activeSession: radiusClient?.activeSession || null,
+              activeSession: activeSession || null,
               bandwidth: null,
               radiusManaged: true,
             };
