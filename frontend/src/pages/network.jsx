@@ -529,14 +529,22 @@ export default function NetworkPage() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  // Fast bandwidth poll every 5 seconds
+  // Fast bandwidth poll every 5 seconds with circuit breaker
   useEffect(() => {
     let active = true;
+    let failCount = 0;
     const poll = async () => {
+      if (!active) return;
+      if (failCount >= 3) {
+        // Back off 60s after 3 consecutive failures
+        setTimeout(() => { failCount = 0; }, 60000);
+        return;
+      }
       try {
         const bw = await api.routerBandwidth();
-        if (active && bw) setLiveBw(bw);
-      } catch { /* silent */ }
+        if (active && bw && !bw.offline) { setLiveBw(bw); failCount = 0; }
+        else if (bw?.offline) failCount++;
+      } catch { failCount++; }
     };
     poll();
     bwPollRef.current = setInterval(poll, 5000);
