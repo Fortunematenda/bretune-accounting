@@ -21,6 +21,11 @@ class MikroTikService {
         return this.conn;
       }
       this.conn = new RouterOSAPI(this.config);
+      // Absorb EventEmitter 'error' events so they don't become uncaughtExceptions
+      this.conn.on('error', (err) => {
+        this.logger.warn(`MikroTik connection error event: ${err?.message || err}`);
+        this.conn = null;
+      });
       await this.conn.connect();
       this.logger.log(`Connected to MikroTik at ${this.config.host}:${this.config.port}`);
       return this.conn;
