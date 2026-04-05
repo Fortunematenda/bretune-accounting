@@ -286,101 +286,126 @@ class ISPController {
   }
 
   // ── MikroTik Router Live Data ──────────────────
+  // All router endpoints wrapped with try-catch so the app
+  // returns a graceful { offline: true } instead of 500 errors.
+
+  _routerOffline(err) {
+    return { offline: true, error: 'Router unreachable', message: err?.message || 'Connection failed' };
+  }
 
   @Get('router/dashboard')
   async routerDashboard() {
-    return this.mikroTik.getRouterDashboard();
+    try { return await this.mikroTik.getRouterDashboard(); }
+    catch (err) { return this._routerOffline(err); }
   }
 
   @Get('router/system')
   async routerSystem() {
-    return this.mikroTik.getSystemResource();
+    try { return await this.mikroTik.getSystemResource(); }
+    catch (err) { return this._routerOffline(err); }
   }
 
   @Get('router/active')
   async routerActiveConnections() {
-    return this.mikroTik.getActiveConnections();
+    try { return await this.mikroTik.getActiveConnections(); }
+    catch (err) { return { offline: true, error: 'Router unreachable', items: [] }; }
   }
 
   @Get('router/secrets')
   async routerSecrets() {
-    return this.mikroTik.getSecrets();
+    try { return await this.mikroTik.getSecrets(); }
+    catch (err) { return { offline: true, error: 'Router unreachable', items: [] }; }
   }
 
   @Get('router/secrets/:username')
   async routerSecret(@Param('username') username) {
-    return this.mikroTik.getSecret(username);
+    try { return await this.mikroTik.getSecret(username); }
+    catch (err) { return this._routerOffline(err); }
   }
 
   @Post('router/secrets')
   async routerCreateSecret(@Body() body) {
-    return this.mikroTik.createSecret({
-      name: body.name,
-      password: body.password,
-      profile: body.profile,
-      service: body.service || 'pppoe',
-      comment: body.comment || '',
-    });
+    try {
+      return await this.mikroTik.createSecret({
+        name: body.name,
+        password: body.password,
+        profile: body.profile,
+        service: body.service || 'pppoe',
+        comment: body.comment || '',
+      });
+    } catch (err) { return this._routerOffline(err); }
   }
 
   @Put('router/secrets/:id')
   async routerUpdateSecret(@Param('id') id, @Body() body) {
-    return this.mikroTik.updateSecret(id, body);
+    try { return await this.mikroTik.updateSecret(id, body); }
+    catch (err) { return this._routerOffline(err); }
   }
 
   @Delete('router/secrets/:id')
   async routerDeleteSecret(@Param('id') id) {
-    return this.mikroTik.deleteSecret(id);
+    try { return await this.mikroTik.deleteSecret(id); }
+    catch (err) { return this._routerOffline(err); }
   }
 
   @Get('router/profiles')
   async routerProfiles() {
-    return this.mikroTik.getProfiles();
+    try { return await this.mikroTik.getProfiles(); }
+    catch (err) { return { offline: true, error: 'Router unreachable', items: [] }; }
   }
 
   @Get('router/interfaces')
   async routerInterfaces() {
-    return this.mikroTik.getInterfaces();
+    try { return await this.mikroTik.getInterfaces(); }
+    catch (err) { return { offline: true, error: 'Router unreachable', items: [] }; }
   }
 
   @Get('router/interfaces/:name/traffic')
   async routerInterfaceTraffic(@Param('name') name) {
-    return this.mikroTik.getInterfaceTraffic(name);
+    try { return await this.mikroTik.getInterfaceTraffic(name); }
+    catch (err) { return this._routerOffline(err); }
   }
 
   @Get('router/queues')
   async routerQueues() {
-    return this.mikroTik.getQueues();
+    try { return await this.mikroTik.getQueues(); }
+    catch (err) { return { offline: true, error: 'Router unreachable', items: [] }; }
   }
 
   @Get('router/logs')
   async routerLogs(@Query() query) {
-    return this.mikroTik.getLogs(query.limit ? Number(query.limit) : 50);
+    try { return await this.mikroTik.getLogs(query.limit ? Number(query.limit) : 50); }
+    catch (err) { return { offline: true, error: 'Router unreachable', items: [] }; }
   }
 
   @Get('router/bandwidth')
   async routerBandwidth() {
-    return this.mikroTik.getAllBandwidth();
+    try { return await this.mikroTik.getAllBandwidth(); }
+    catch (err) { return this._routerOffline(err); }
   }
 
   @Get('router/traffic/:username')
   async routerUserTraffic(@Param('username') username) {
-    return this.mikroTik.getLiveTrafficForUser(username);
+    try { return await this.mikroTik.getLiveTrafficForUser(username); }
+    catch (err) { return this._routerOffline(err); }
   }
 
   @Post('router/disconnect/:username')
   async routerDisconnect(@Param('username') username) {
-    return this.mikroTik.disconnectByUsername(username);
+    try { return await this.mikroTik.disconnectByUsername(username); }
+    catch (err) { return this._routerOffline(err); }
   }
 
   @Post('router/disable/:username')
   async routerDisable(@Param('username') username) {
-    return this.mikroTik.disableSecret(username);
+    try { return await this.mikroTik.disableSecret(username); }
+    catch (err) { return this._routerOffline(err); }
   }
 
   @Post('router/enable/:username')
   async routerEnable(@Param('username') username) {
-    return this.mikroTik.enableSecret(username);
+    try { return await this.mikroTik.enableSecret(username); }
+    catch (err) { return this._routerOffline(err); }
   }
 
   // ── Billing Settings ──────────────────────────

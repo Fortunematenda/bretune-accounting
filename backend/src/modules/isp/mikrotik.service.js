@@ -11,7 +11,7 @@ class MikroTikService {
       user: process.env.MIKROTIK_USER || 'admin',
       password: process.env.MIKROTIK_PASSWORD || 'Rachfort24',
       port: Number(process.env.MIKROTIK_PORT || 8728),
-      timeout: 10,
+      timeout: 5,
     };
   }
 
